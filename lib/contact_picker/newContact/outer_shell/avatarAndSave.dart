@@ -6,16 +6,14 @@ import 'imagePicker.dart';
 
 class NewContactAvatarAndSave extends StatelessWidget {
   NewContactAvatarAndSave({
-    @required this.returnContact,
-    @required this.canSaveContact,
+    @required this.createContact,
     @required this.imageLocation,
     @required this.fields,
     //determines how large the contact image is
     @required this.isPortrait,
   });
 
-  final Function returnContact;
-  final ValueNotifier<bool> canSaveContact;
+  final Function createContact;
   final ValueNotifier<String> imageLocation;
   final Widget fields;
 
@@ -129,11 +127,21 @@ class NewContactAvatarAndSave extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColorDark,
+        backgroundColor: Colors.black,
         actions: <Widget>[
-          //TODO: add elevated button that does a little happy dance when you are allowed to save
+          ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(
+                Colors.blue,
+              ),
+            ),
+            onPressed: () => createContact(),
+            child: Text(
+              "Save & Select",
+            ),
+          ),
         ],
       ),
       body: bodyWidget,

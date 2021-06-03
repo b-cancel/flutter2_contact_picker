@@ -1,8 +1,8 @@
-import '../helper.dart';
-import 'newContactHelper.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+import '../newContactPage.dart';
 
 List<String> nameToNames(String name) {
-  List<String> resultNames = new List<String>();
+  List<String> resultNames = [];
 
   //field defaults
   for (int i = 0; i < 5; i++) {
@@ -141,7 +141,7 @@ List<String> nameToNames(String name) {
 String namesToName(List<FieldData> nameFields) {
   //combine all the names into a single name
   //NOTE: before suffix we add a ', '
-  List<String> names = new List<String>();
+  List<String> names = [];
   bool prefixPresent = false;
   for (int i = 0; i < nameFields.length; i++) {
     FieldData thisField = nameFields[i];
@@ -164,4 +164,50 @@ String namesToName(List<FieldData> nameFields) {
     name += names[i];
   }
   return name;
+}
+
+//-------------------------Preffix Related-------------------------
+
+bool firstWordIsPrefix(String string) {
+  string = string.split(" ")[0]; //get first word
+  string = onlyCharacters(string); //get only characters
+  string = string.toLowerCase(); //to lower case
+  return prefixes.contains(string); //return
+}
+
+Set<String> prefixes = new Set<String>();
+getPrefixes() {
+  prefixes = new Set<String>();
+  prefixes.add("master");
+  prefixes.add("mr");
+  prefixes.add("mister");
+  prefixes.add("miss");
+  prefixes.add("mrs");
+  prefixes.add("mx");
+  prefixes.add("m");
+  prefixes.add("sir");
+  prefixes.add("gentleman");
+  prefixes.add("sire");
+  prefixes.add("mistress");
+  prefixes.add("madam");
+  prefixes.add("maam");
+  prefixes.add("dame");
+  prefixes.add("lord");
+  prefixes.add("lady");
+  prefixes.add("esq");
+  prefixes.add("esquire");
+  prefixes.add("excellency");
+  prefixes.add("doctor");
+  prefixes.add("dr");
+  prefixes.add("prof");
+  prefixes.add("prof");
+  prefixes.add("professor");
+}
+
+bool isPrefix(String test) {
+  if (prefixes.isEmpty) {
+    getPrefixes();
+  }
+
+  return prefixes.contains(test);
 }
