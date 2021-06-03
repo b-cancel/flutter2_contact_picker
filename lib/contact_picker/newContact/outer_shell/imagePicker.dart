@@ -68,6 +68,8 @@ class ImageGraberButton extends StatelessWidget {
       padding: EdgeInsets.all(4),
       child: IconButton(
         onPressed: () async {
+          //! according to https://pub.dev/packages/image_picker Android doesn't have to ask for permissions for this
+          //! TEST THE ABOVE
           bool permissionGranted = await requestPermission(
             context,
             requestedAutomatically: false,

@@ -45,16 +45,16 @@
 	<!-- Permission options for the `camera` group -->
 	<!-- for taking a new contact photo -->
 	<key>NSCameraUsageDescription</key>
-	<string>camera</string>
+	<string>to take a photo for a new contact</string>
 
 	<!-- Permission options for the `photos` group -->
 	<!-- For searching the gallery for a contact photo -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>photos</string>
+	<string>to select a photo for a new contact</string>
 
 	<!-- Permission options for the `contacts` group -->
 	<!-- For the contact picker -->
 	<key>NSContactsUsageDescription</key>
-	<string>contacts</string>
+	<string>to select an existing contact, or creating a new one</string>
 </dict>
 </plist>
