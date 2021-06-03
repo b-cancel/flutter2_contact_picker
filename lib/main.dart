@@ -1,99 +1,176 @@
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'request.dart';
-import 'selectContact/selectContactLogic.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-import 'helper.dart';
-import 'theme.dart';
+import 'contact_picker/contact_picker.dart';
 
-//IF true -> first forces you to select a contact and then lets you change it
-//ELSE -> takes you directly into testing the toolkit in all other cases
-bool testFirstPage = true;
-
-//-----Start App
 void main() => runApp(MyApp());
 
-//-----Entry Point
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ThemeChanger>(
-      //by default start off in dark mode
-      create: (_) => ThemeChanger(ourLight), //ourDark), //START THEME
-      child: StatelessLink(),
+//this is by no means a thorough solution for handling permission request
+//! It never explains WHY the app needs a permission
+//but the contact picker assumes that you KNOW you have access to contacts
+//before you attempt to select a contact
+//so I needed to make this
+Future tryToGoToContactPicker(
+  BuildContext context, {
+  @required bool allowPop,
+}) async {
+  //ask for permission, or confirm that we have it
+  PermissionStatus status = await Permission.contacts.request();
+
+  //if we have it, then open the contact picker
+  if (status.isGranted || status.isLimited) {
+    //select a contact, or decide to back out
+    return await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return ContactPicker(
+            //wether or not they are forced to select a contact before continuing
+            allowPop: allowPop,
+          );
+        },
+      ),
     );
+  } else {
+    //open app settings automatically if possible
+    bool couldOpenAppSettings = await openAppSettings();
+
+    //if I can't do that then explain what I need to do
+    //to enable the contact permission
+    if (couldOpenAppSettings == false) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Could not open App Settings Automatically' +
+                "\n" +
+                "Go into this App's Settings, and enable the Contacts Permission",
+          ),
+        ),
+      );
+    }
+
+    //a contact hasn't been selected this time around
+    //when they come back from app settings they may have enable the permission
+    //but they will simply have to call [tryToGoToContactPicker] again
+    return null;
   }
 }
 
-//-----Statless Link Required Between Entry Point And App
-class StatelessLink extends StatelessWidget {
+//--------------------------------------------------
+//Automatically ask for contacts permission
+//If rejected allow user to ask again
+//and provide explanations to how they can do that
+//upon approval force the user to select a contact
+//--------------------------------------------------
+class MyApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    final theme = Provider.of<ThemeChanger>(context);
-    getThemeColors(Theme.of(context));
-    return MaterialApp(
-      routes: {
-        ContactDisplayHelper.routeName: (context) => ContactDisplayHelper(),
-      },
-      title: 'Contact Picker',
-      theme: theme.getTheme(),
-      home: InitRouter(),
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  tryToDisplayContact() async {
+    //try to get a contact (ask permission first)
+    var result = await tryToGoToContactPicker(
+      context,
+      //force contact selection once we have permission
+      allowPop: false,
     );
+
+    //when we get a contact
+    //display it and allow the user to change it
+    if (result != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return ContactDisplay(
+              initialContactInfo: result,
+            );
+          },
+        ),
+      );
+    }
   }
-}
 
-//-----Router to select contact or the page that will select them for testing purposes
-//NOTE: if anyone reading this can find a cleaner way to do this that would be great
-//I did it this way because I need to be able to push the ContactDisplay page with its name
-//otherwise when I select a contact ill pop everything since the onSelect function in SelectContact
-//is also expecting the route name of the page requesting the contact
-class InitRouter extends StatefulWidget {
-  InitRouter({Key key}) : super(key: key);
-
-  _InitRouterState createState() => _InitRouterState();
-}
-
-class _InitRouterState extends State<InitRouter> {
   @override
   void initState() {
-    //after build completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (testFirstPage) {
-        //we start the app by making the user select a contact
-        Navigator.pushReplacement(
-          context,
-          PageTransition(
-            type: PageTransitionType.fade,
-            duration: Duration(seconds: 0),
-            //since this is how the app starts the user MUST select a contact
-            child: SelectContact(
-              userPrompt: ["Prompt The User", "For A Contact"],
-              selectContactBackUp: SelectContactBackUp.systemContactPicker,
-              routeName: ContactDisplayHelper.routeName,
-              forceSelection: true,
-            ),
-          ),
-        );
-      } else {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          ContactDisplayHelper.routeName,
-          (r) => false,
-          arguments: ContactDisplayArgs(
-            new Contact(),
-          ),
-        );
-      }
-    });
-
-    //super init state
     super.initState();
+    tryToDisplayContact();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            tryToDisplayContact();
+          },
+          child: Text("Try To Select A Contact"),
+        ),
+      ),
+    );
+  }
+}
+
+//--------------------------------------------------
+//Show the currently select contact
+//allow another contact to be selected
+//--------------------------------------------------
+class ContactDisplay extends StatefulWidget {
+  const ContactDisplay({
+    @required this.initialContactInfo,
+    Key key,
+  }) : super(key: key);
+
+  final initialContactInfo;
+
+  @override
+  _ContactDisplayState createState() => _ContactDisplayState();
+}
+
+class _ContactDisplayState extends State<ContactDisplay> {
+  ValueNotifier currentContactInfo;
+
+  @override
+  void initState() {
+    super.initState();
+    currentContactInfo = new ValueNotifier(widget.initialContactInfo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: AnimatedBuilder(
+          animation: currentContactInfo,
+          builder: (context, snapshot) {
+            return ElevatedButton(
+              onPressed: () {
+                //go to contact picker
+                var result = tryToGoToContactPicker(
+                  context,
+                  allowPop: true,
+                );
+
+                //grab result and make needed modifications
+                if (result != null) {
+                  currentContactInfo.value = result;
+                }
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Tap To Pick New Contact"),
+                  Text(
+                    currentContactInfo.value.toString(),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
