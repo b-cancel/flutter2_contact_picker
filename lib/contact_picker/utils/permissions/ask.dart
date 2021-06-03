@@ -129,7 +129,7 @@ Future<bool> requestPermission(
   @required Permission permission,
   bool requestedAutomatically: false,
   @required String permissionName,
-  @required Widget permissionJustification,
+  Widget permissionJustification,
 }) async {
   //if status isn't passed it must be retreived
   PermissionStatus status = passedStatus ?? await permission.status;
@@ -140,22 +140,30 @@ Future<bool> requestPermission(
   } else {
     //! We don't care about the status being restricted here becuase I don't trust it
     //I double check whether or not it's restricted by actually requesting the permission
-    //if they [probablyWillGrant]
-    bool probablyWillGrant = await Navigator.push(
-      context,
-      HeroDialogRoute(
-        //backing out is an implicit no
-        isBarrierDismissable: true,
-        //show the pop up
-        builder: (BuildContext context) {
-          return JustificationDialog(
-            requestedAutomatically: requestedAutomatically,
-            permissionName: permissionName,
-            permissionJustification: permissionJustification,
-          );
-        },
-      ),
-    );
+
+    //deduce whether the will probably grant us permission
+    bool probablyWillGrant;
+    if (permissionJustification == null) {
+      //if a justification isn't passed, we assume it IS NOT required
+      probablyWillGrant = true;
+    } else {
+      //if a justification is passed, then we assume a justification IS required
+      permissionJustification = await Navigator.push(
+        context,
+        HeroDialogRoute(
+          //backing out is an implicit no
+          isBarrierDismissable: true,
+          //show the pop up
+          builder: (BuildContext context) {
+            return JustificationDialog(
+              requestedAutomatically: requestedAutomatically,
+              permissionName: permissionName,
+              permissionJustification: permissionJustification,
+            );
+          },
+        ),
+      );
+    }
 
     //they don't want to approve
     if (probablyWillGrant == false) {
@@ -164,7 +172,6 @@ Future<bool> requestPermission(
       //they SAY they want to approve
       //so ask them to put their money with their mouth is
       NextAction nextAction = await tryToGetPermission(permission);
-      print("next action: " + nextAction.toString());
 
       //handle the simple reactions
       if (nextAction == NextAction.Error) {

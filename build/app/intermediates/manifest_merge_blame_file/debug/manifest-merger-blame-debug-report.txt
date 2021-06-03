@@ -65,11 +65,11 @@
 42    </queries>
 43
 44    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-44-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-80
-44-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:7:22-77
+44-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:7:5-80
+44-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:7:22-77
 45    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- For grabing a picture from the gallery??? -->
-45-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:8:5-81
-45-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:8:22-78
+45-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:8:5-81
+45-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:8:22-78
 46    <!-- For grabing a picture no permission is required according to https://pub.dev/packages/image_picker -->
 47    <application
 47-->/Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/android/app/src/main/AndroidManifest.xml:18:4-55:19
@@ -144,21 +144,21 @@
 92-->/Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/android/app/src/main/AndroidManifest.xml:54:13-30
 93
 94        <provider
-94-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:11:9-19:20
+94-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:8:9-16:20
 95            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
-95-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:12:13-82
+95-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:9:13-82
 96            android:authorities="com.example.flutter2_contact_picker.flutter.image_provider"
-96-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:13:13-74
+96-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:10:13-74
 97            android:exported="false"
-97-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:14:13-37
+97-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:11:13-37
 98            android:grantUriPermissions="true" >
-98-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:15:13-47
+98-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:12:13-47
 99            <meta-data
-99-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:16:13-18:75
+99-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:13:13-15:75
 100                android:name="android.support.FILE_PROVIDER_PATHS"
-100-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:17:17-67
+100-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:14:17-67
 101                android:resource="@xml/flutter_image_picker_file_paths" />
-101-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:18:17-72
+101-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:15:17-72
 102        </provider>
 103        <provider
 103-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:12:9-20:20
@@ -171,11 +171,11 @@
 107            android:grantUriPermissions="true" >
 107-->[:image_picker_saver] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker_saver/intermediates/library_manifest/debug/AndroidManifest.xml:16:13-47
 108            <meta-data
-108-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:16:13-18:75
+108-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:13:13-15:75
 109                android:name="android.support.FILE_PROVIDER_PATHS"
-109-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:17:17-67
+109-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:14:17-67
 110                android:resource="@xml/flutter_image_picker_file_paths" />
-110-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:18:17-72
+110-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:15:17-72
 111        </provider>
 112    </application>
 113

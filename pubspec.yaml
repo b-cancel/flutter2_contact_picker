@@ -37,7 +37,7 @@ dependencies:
   #IMAGE
   image: ^3.0.2
   provider: ^5.0.0 #Probably Not Required
-  image_picker: ^0.7.5+3 #Requires Extra Setup
+  image_picker: ^0.8.0+1 #Requires Extra Setup
   image_picker_saver: ^0.3.0 #Probably Not Required & Requires Extra Setup
   image_gallery_saver: ^1.6.9 #Probably Not Required & Requires Extra Setup
 

@@ -168,41 +168,62 @@ class AvatarEditor extends StatelessWidget {
       alignment: Alignment.center,
       child: GestureDetector(
         onTap: () async {
-          //request a new image location
-          String newImageLocation = await changeImage(
-            context,
-            imageExists: (imageLocation.value.length > 0),
-          );
+          if (Platform.isAndroid) {
+            //TODO: eventually remove this
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.red,
+                content: Text(
+                  "Android Related Error: Switch to iOS",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            );
+          } else {
+            //request a new image location
+            String newImageLocation = await changeImage(
+              context,
+              imageExists: (imageLocation.value.length > 0),
+            );
 
-          //update the image location
-          //if a new one was passed
-          if (newImageLocation != null) {
-            imageLocation.value = newImageLocation;
+            //update the image location
+            //if a new one was passed
+            if (newImageLocation != null) {
+              imageLocation.value = newImageLocation;
+            }
           }
         },
         child: Stack(
           children: <Widget>[
-            new Container(
-              width: imageDiameter,
-              height: imageDiameter,
-              decoration: new BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: (imageLocation.value == "")
-                  ? Icon(
-                      Icons.camera_alt,
-                      size: imageDiameter / 2,
-                      color: Colors.white,
-                    )
-                  : ClipOval(
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: Image.file(
-                          File(imageLocation.value),
+            AnimatedBuilder(
+              animation: imageLocation,
+              builder: (context, snapshot) {
+                return Container(
+                  width: imageDiameter,
+                  height: imageDiameter,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: (imageLocation.value == "")
+                      ? Icon(
+                          Icons.camera_alt,
+                          size: imageDiameter / 2,
+                          color: Colors.white,
+                        )
+                      : ClipOval(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: Image.file(
+                              File(imageLocation.value),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                );
+              },
             ),
             Positioned(
               right: 0,
