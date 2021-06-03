@@ -1,0 +1,4 @@
+io/flutter/plugins/GeneratedPluginRegistrant.java
+ io.flutter.plugins.GeneratedPluginRegistrant
+com/example/flutter2_contact_picker/BuildConfig.java
+ com.example.flutter2_contact_picker.BuildConfig

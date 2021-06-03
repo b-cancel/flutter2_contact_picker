@@ -1,5 +1,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.flutter2_contact_picker">
+    <!--for vibration motor-->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!-- Permissions options for the `contacts` group -->
+    <!-- For the contact picker that can also create contacts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+
+    <!-- Permissions options for the `camera` group -->
+    <!-- For taking a picture for a new contact -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- For grabing a picture from the gallery??? -->
+
    <application
         android:label="flutter2_contact_picker"
         android:icon="@mipmap/ic_launcher">

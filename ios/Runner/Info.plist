@@ -41,5 +41,20 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+
+	<!-- Permission options for the `camera` group -->
+	<!-- for taking a new contact photo -->
+	<key>NSCameraUsageDescription</key>
+	<string>camera</string>
+
+	<!-- Permission options for the `photos` group -->
+	<!-- For searching the gallery for a contact photo -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>photos</string>
+
+	<!-- Permission options for the `contacts` group -->
+	<!-- For the contact picker -->
+	<key>NSContactsUsageDescription</key>
+	<string>contacts</string>
 </dict>
 </plist>

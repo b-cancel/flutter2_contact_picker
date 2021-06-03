@@ -1,0 +1,26 @@
+io/flutter/plugins/imagepickersaver/BuildConfig.java
+ io.flutter.plugins.imagepickersaver.BuildConfig
+io/flutter/plugins/imagepickersaver/ImagePickerFileProvider.java
+ io.flutter.plugins.imagepickersaver.ImagePickerFileProvider
+io/flutter/plugins/imagepickersaver/ImagePickerSaverPlugin.java
+ io.flutter.plugins.imagepickersaver.ImagePickerSaverPlugin
+io/flutter/plugins/imagepickersaver/FileUtils.java
+ io.flutter.plugins.imagepickersaver.FileUtils
+io/flutter/plugins/imagepickersaver/ExifDataCopier.java
+ io.flutter.plugins.imagepickersaver.ExifDataCopier
+io/flutter/plugins/imagepickersaver/ImageResizer.java
+ io.flutter.plugins.imagepickersaver.ImageResizer
+io/flutter/plugins/imagepickersaver/ImagePickerDelegate.java
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$1
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$2
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$3
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$3$1
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$4
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$5
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$FileUriResolver
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$IntentResolver
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$OnPathReadyListener
+ io.flutter.plugins.imagepickersaver.ImagePickerDelegate$PermissionManager
+io/flutter/plugins/imagepickersaver/CapturePhotoUtils.java
+ io.flutter.plugins.imagepickersaver.CapturePhotoUtils

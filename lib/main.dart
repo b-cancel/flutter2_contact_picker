@@ -3,7 +3,13 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'contact_picker/contact_picker.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(
+      MaterialApp(
+        home: MyApp(),
+      ),
+    );
+
+const Duration normalHumanReactionTime = Duration(milliseconds: 250);
 
 //this is by no means a thorough solution for handling permission request
 //! It never explains WHY the app needs a permission
@@ -15,7 +21,13 @@ Future tryToGoToContactPicker(
   @required bool allowPop,
 }) async {
   //ask for permission, or confirm that we have it
+  DateTime timeBeforeRequest = DateTime.now();
   PermissionStatus status = await Permission.contacts.request();
+  DateTime timeAfterRequest = DateTime.now();
+  Duration durationBetweenRequestAndResult =
+      timeAfterRequest.difference(timeBeforeRequest);
+  bool weAssumeTheRequestWasMade =
+      durationBetweenRequestAndResult > normalHumanReactionTime;
 
   //if we have it, then open the contact picker
   if (status.isGranted || status.isLimited) {
@@ -32,6 +44,11 @@ Future tryToGoToContactPicker(
       ),
     );
   } else {
+    //handle the edge case
+    if (weAssumeTheRequestWasMade) {
+      return null;
+    }
+
     //open app settings automatically if possible
     bool couldOpenAppSettings = await openAppSettings();
 
@@ -146,9 +163,9 @@ class _ContactDisplayState extends State<ContactDisplay> {
           animation: currentContactInfo,
           builder: (context, snapshot) {
             return ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 //go to contact picker
-                var result = tryToGoToContactPicker(
+                var result = await tryToGoToContactPicker(
                   context,
                   allowPop: true,
                 );
