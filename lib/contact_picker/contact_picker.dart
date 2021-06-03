@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+
+import 'newContact/newContactPage.dart';
 
 ///poping this route is what returns, it may return null
 ///whenever we are accessing contact we make sure we have access to them first
@@ -43,6 +46,28 @@ class ContactPicker extends StatelessWidget {
                   Navigator.of(context).pop("book");
                 },
                 icon: Icon(Icons.book),
+              ),
+              IconButton(
+                onPressed: () async {
+                  //creat the new contact
+                  var newContact = await Navigator.push(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.bottomToTop,
+                      child: NewContactPage(),
+                    ),
+                  );
+
+                  //if the new contact is indeed created
+                  //save it
+                  if (newContact != null) {
+                    Navigator.of(context).pop(newContact);
+                  }
+                },
+                icon: Icon(
+                  Icons.add,
+                  color: Colors.blue,
+                ),
               ),
             ],
           ),
