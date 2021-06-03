@@ -4,27 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
-void showImagePicker(
-    BuildContext context, ValueNotifier<String> imageLocation) {
-  // flutter defined function
-  showDialog(
+Future<String> changeImage(
+  BuildContext context, {
+  bool imageExists,
+}) async {
+  return await showDialog(
     context: context,
     builder: (BuildContext context) {
-      bool showRemoveImage = (imageLocation.value != "");
-      Widget removeImage = Container();
-      if (showRemoveImage) {
-        removeImage = FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
-            imageLocation.value = "";
-          },
-          child: Text(
-            "Remove Image",
-          ),
-        );
-      }
-
-      // return object of type Dialog
       return Dialog(
         child: FittedBox(
           fit: BoxFit.contain,
@@ -35,14 +21,27 @@ void showImagePicker(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    bigIcon(
-                        context, imageLocation, false, FontAwesomeIcons.images),
-                    bigIcon(context, imageLocation, true, Icons.camera),
+                    ImageGraberButton(
+                      fromCamera: false,
+                    ),
+                    ImageGraberButton(
+                      fromCamera: true,
+                    ),
                   ],
                 ),
               ),
-              Container(
-                child: removeImage,
+              Visibility(
+                visible: imageExists,
+                child: Center(
+                    child: TextButton(
+                  onPressed: () {
+                    //remove the image they once had a reference to
+                    Navigator.of(context).pop("");
+                  },
+                  child: Text(
+                    "Remove Image",
+                  ),
+                )),
               ),
             ],
           ),
@@ -52,43 +51,47 @@ void showImagePicker(
   );
 }
 
-Widget bigIcon(
-  BuildContext context,
-  ValueNotifier<String> imageLocation,
-  bool fromCamera,
-  IconData icon,
-) {
-  return Container(
-    padding: EdgeInsets.all(4),
-    child: IconButton(
-      onPressed: () => changeImage(context, imageLocation, fromCamera),
-      icon: Icon(icon),
-    ),
-  );
-}
+class ImageGraberButton extends StatelessWidget {
+  const ImageGraberButton({
+    @required this.fromCamera,
+    Key key,
+  }) : super(key: key);
 
-//return whether or not you should set state
-changeImage(BuildContext context, ValueNotifier<String> imageLocation,
-    bool fromCamera) async {
-  if (fromCamera) {
-    askPermission(
-      context,
-      //from camera
-      () => actuallyChangeImage(context, imageLocation, true),
-      PermissionBeingRequested.camera,
-    );
-  } else {
-    askPermission(
-      context,
-      //not from camera
-      () => actuallyChangeImage(context, imageLocation, false),
-      PermissionBeingRequested.storage,
+  final bool fromCamera;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(4),
+      child: IconButton(
+        onPressed: () {
+          if (fromCamera) {
+            askPermission(
+              context,
+              //from camera
+              () => actuallyChangeImage(context, true),
+              PermissionBeingRequested.camera,
+            );
+          } else {
+            askPermission(
+              context,
+              //not from camera
+              () => actuallyChangeImage(context, false),
+              PermissionBeingRequested.storage,
+            );
+          }
+        },
+        icon: Icon(fromCamera ? Icons.camera : FontAwesomeIcons.images),
+      ),
     );
   }
 }
 
-actuallyChangeImage(BuildContext context, ValueNotifier<String> imageLocation,
-    bool fromCamera) async {
+actuallyChangeImage(
+  BuildContext context,
+  ValueNotifier<String> imageLocation,
+  bool fromCamera,
+) async {
   //NOTE: here we KNOW that we have already been given the permissions we need
   File tempImage = await ImagePicker.pickImage(
     source: (fromCamera) ? ImageSource.camera : ImageSource.gallery,

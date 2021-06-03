@@ -41,9 +41,6 @@ class NewContactEditFields extends StatelessWidget {
     @required this.addressRegionFields,
     @required this.addressCountryFields,
     @required this.addressLabels,
-    //note
-    @required this.noteField,
-    @required this.noteOpen,
   });
 
   final double bottomBarHeight;
@@ -75,9 +72,6 @@ class NewContactEditFields extends StatelessWidget {
   final List<FieldData> addressRegionFields;
   final List<FieldData> addressCountryFields;
   final List<ValueNotifier<String>> addressLabels;
-  //note
-  final FieldData noteField;
-  final ValueNotifier<bool> noteOpen;
 
   @override
   Widget build(BuildContext context) {

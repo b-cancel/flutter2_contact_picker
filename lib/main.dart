@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'contact_picker/contact_picker.dart';
+import 'contact_picker/utils/permissions/ask.dart';
 
 void main() => runApp(
       MaterialApp(
         home: MyApp(),
       ),
     );
-
-const Duration normalHumanReactionTime = Duration(milliseconds: 250);
 
 //this is by no means a thorough solution for handling permission request
 //! It never explains WHY the app needs a permission

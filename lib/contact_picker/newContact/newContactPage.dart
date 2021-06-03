@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'categorySelect.dart';
 import 'inner_shell/nameHandler.dart';
 import 'newContactUX.dart';
-import 'outer_shell/avatarAndSave.dart';
+import 'outer_shell/appBarAndHeader.dart';
 
 class FieldData {
   TextEditingController controller;
@@ -76,11 +76,6 @@ class _NewContactPageState extends State<NewContactPage> {
   List<FieldData> addressCountryFields = [];
   List<ValueNotifier<String>> addressLabelStrings = [];
 
-  //-------------------------Note
-  bool autoOpenNote = true;
-  FieldData noteField = FieldData(); //note
-  ValueNotifier<bool> noteOpen = new ValueNotifier<bool>(false);
-
   //--------------------------------------------------
   //--------------------------------------------------
   //-------------------------Next Function Helpers-------------------------
@@ -100,17 +95,6 @@ class _NewContactPageState extends State<NewContactPage> {
     }
   }
 
-  //start with note (only way to start :p)
-  //called from toNote
-  openNote() {
-    if (noteOpen.value == false) {
-      //open the note section
-      noteOpen.value = true;
-      //the value changing to true will trigger a listener
-      //that will set state and focus on the right field
-    }
-  }
-
   //--------------------------------------------------
   //--------------------------------------------------
   //-------------------------Next Function Helper's Helpers-------------------------
@@ -120,9 +104,9 @@ class _NewContactPageState extends State<NewContactPage> {
   toFirstItem(
     List<FieldData> fields,
     bool autoAddFirstField,
-    Function addFirst,
+    Function addFirst, {
     Function alternative,
-  ) {
+  }) {
     bool fieldsPresent = (fields.length > 0);
     bool canAddFirstField = fieldsPresent == false && autoAddFirstField;
     if (fieldsPresent || canAddFirstField) {
@@ -132,7 +116,9 @@ class _NewContactPageState extends State<NewContactPage> {
         FocusScope.of(context).requestFocus(fields[0].focusNode);
       }
     } else {
-      alternative();
+      if (alternative != null) {
+        alternative();
+      }
     }
   }
 
@@ -147,7 +133,7 @@ class _NewContactPageState extends State<NewContactPage> {
       phoneValueFields,
       autoAddFirstPhone,
       addPhone,
-      toFirstEmail,
+      alternative: toFirstEmail,
     );
   }
 
@@ -156,7 +142,7 @@ class _NewContactPageState extends State<NewContactPage> {
       emailValueFields,
       autoAddFirstEmail,
       addEmail,
-      toWork,
+      alternative: toWork,
     );
   }
 
@@ -176,17 +162,7 @@ class _NewContactPageState extends State<NewContactPage> {
       addressStreetFields,
       autoAddFirstAddress,
       addPostalAddress,
-      toNote,
     );
-  }
-
-  toNote() {
-    if (noteOpen.value)
-      FocusScope.of(context).requestFocus(noteField.focusNode);
-    else {
-      if (autoOpenNote) openNote();
-      //ELSE... there is nothing else to do
-    }
   }
 
   //--------------------------------------------------
@@ -373,16 +349,6 @@ class _NewContactPageState extends State<NewContactPage> {
     });
   }
 
-  noteOpenChanged() {
-    //set state to reflect that change
-    setState(() {});
-
-    //focus on the section AFTER build completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(noteField.focusNode);
-    });
-  }
-
   namesSpreadChanged() {
     //modify text editing controller value
     if (namesSpread.value) {
@@ -427,7 +393,6 @@ class _NewContactPageState extends State<NewContactPage> {
   @override
   void initState() {
     workOpen.addListener(workOpenChanged);
-    noteOpen.addListener(noteOpenChanged);
 
     //-------------------------Variable Prep-------------------------
 
@@ -465,7 +430,6 @@ class _NewContactPageState extends State<NewContactPage> {
   @override
   void dispose() {
     workOpen.removeListener(workOpenChanged);
-    noteOpen.removeListener(noteOpenChanged);
     namesSpread.removeListener(namesSpreadChanged);
     super.dispose();
   }
@@ -544,18 +508,12 @@ class _NewContactPageState extends State<NewContactPage> {
         FocusScope.of(context).requestFocus(addressCountryFields[i].focusNode);
       };
       addressCountryFields[i].nextFunction = () {
-        if (i == (addressCount - 1)) {
-          //last address
-          toNote();
-        } else {
+        if (i < (addressCount - 1)) {
           FocusScope.of(context)
               .requestFocus(addressStreetFields[i + 1].focusNode);
         }
       };
     }
-
-    //handle note section
-    noteField.nextFunction = null;
 
     return OrientationBuilder(builder: (context, orientation) {
       bool isPortrait = (orientation == Orientation.portrait);
@@ -564,7 +522,7 @@ class _NewContactPageState extends State<NewContactPage> {
       double bottomBarHeight = 32;
       if (isPortrait == false) bottomBarHeight = 0;
 
-      return NewContactAvatarAndSave(
+      return NewContactAppBarAndHeader(
         createContact: createContact,
         imageLocation: imageLocation,
         isPortrait: isPortrait,
@@ -602,10 +560,6 @@ class _NewContactPageState extends State<NewContactPage> {
           addressRegionFields: addressRegionFields,
           addressCountryFields: addressCountryFields,
           addressLabels: addressLabelStrings,
-
-          //note stuff
-          noteField: noteField,
-          noteOpen: noteOpen,
         ),
       );
     });
@@ -671,9 +625,22 @@ class _NewContactPageState extends State<NewContactPage> {
         company: companyField.controller.text,
         //addresses
         postalAddresses: fieldsToAddresses(),
-        //note
-        note: noteField.controller.text,
       );
+
+      /*
+      bool permissionGranted = await requestPermission(
+                  context,
+                  requestedAutomatically: false,
+                  permission: Permission.contacts,
+                  permissionName: "contacts",
+                  permissionJustification: JustifyContactsPermission(),
+                );
+
+                //go to the contact picker if the permission is granted
+                if (permissionGranted) {
+                  goToContactPicker();
+                }
+      */
 
       //handle permissions
       PermissionStatus permissionStatus =
@@ -689,20 +656,19 @@ class _NewContactPageState extends State<NewContactPage> {
       } else {}
     } else {
       //create the message
-      String message;
+      String requiredFields;
       if (hasNumber == false && hasName)
-        message = "The Number is";
+        requiredFields = "Number is";
       else if (hasName == false && hasNumber)
-        message = "The Name is";
+        requiredFields = "Name is";
       else
-        message = "The Name and Number are";
+        requiredFields = "Name and Number are";
 
       //inform the user of why their command didn't go through
-      Fluttertoast.showToast(
-        msg: message + " Required",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 3,
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("The " + requiredFields + " Required"),
+        ),
       );
 
       //act accordingly
