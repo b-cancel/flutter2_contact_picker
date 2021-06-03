@@ -5,21 +5,21 @@ import 'package:flutter/material.dart';
 
 import 'package:path_provider/path_provider.dart';
 
-enum LabelType {phone, email, address}
+enum LabelType { phone, email, address }
 enum Boolean { TRUE, FALSE }
 
-class CategoryData{
-  static List<String> phoneLabels = new List<String>();
-  static List<String> emailLabels = new List<String>();
-  static List<String> addressLabels = new List<String>();
+class CategoryData {
+  static List<String> phoneLabels = [];
+  static List<String> emailLabels = [];
+  static List<String> addressLabels = [];
 
-  static init(){
+  static init() {
     listInit(LabelType.phone);
     listInit(LabelType.email);
     listInit(LabelType.address);
   }
 
-  static listInit(LabelType labelType) async{
+  static listInit(LabelType labelType) async {
     //calculate all basic params
     String fileName = labelType.toString();
     String localPath = (await getApplicationDocumentsDirectory()).path;
@@ -27,7 +27,8 @@ class CategoryData{
     File fileReference = File(filePath);
 
     //If needed create the file
-    bool fileExists = (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
+    bool fileExists =
+        (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound);
     //if(fileExists == false) await createDefault(labelType, fileReference);
     await fileReference.delete();
     await createDefault(labelType, fileReference);
@@ -36,21 +37,22 @@ class CategoryData{
     readFile(labelType, fileReference);
   }
 
-  static createDefault(LabelType labelType, File reference) async{
+  static createDefault(LabelType labelType, File reference) async {
     //create the file
     reference.create();
 
     //fill it with defaults
     String defaultString;
-    switch(labelType){
+    switch (labelType) {
       case LabelType.phone:
-        defaultString = '["mobile", "home", "work", "main", "work fax", "home fax", "pager", "other"]';
+        defaultString =
+            '["mobile", "home", "work", "main", "work fax", "home fax", "pager", "other"]';
         break;
       case LabelType.email:
         defaultString = '["home", "work", "other"]';
         break;
       default:
-        defaultString = '["home", "work", "other"]'; 
+        defaultString = '["home", "work", "other"]';
         break;
     }
     defaultString = '{ "types": ' + defaultString + ' }';
@@ -59,23 +61,30 @@ class CategoryData{
     await reference.writeAsString(defaultString);
   }
 
-  static readFile(LabelType labelType, File reference) async{
+  static readFile(LabelType labelType, File reference) async {
     String fileString = await reference.readAsString();
     Map jsonMap = json.decode(fileString);
-    List<String> list = new List<String>.from(jsonMap[jsonMap.keys.toList()[0]]);
-    switch(labelType){
-      case LabelType.phone: phoneLabels = list; break;
-      case LabelType.email: emailLabels = list; break;
-      default: addressLabels = list; break;
+    List<String> list =
+        new List<String>.from(jsonMap[jsonMap.keys.toList()[0]]);
+    switch (labelType) {
+      case LabelType.phone:
+        phoneLabels = list;
+        break;
+      case LabelType.email:
+        emailLabels = list;
+        break;
+      default:
+        addressLabels = list;
+        break;
     }
   }
 }
 
 void customTypePopUp(
   BuildContext context,
-  bool create, 
+  bool create,
   ValueNotifier<String> labelString,
-  ){
+) {
   // flutter defined function
   showDialog(
     context: context,
@@ -83,8 +92,7 @@ void customTypePopUp(
       // return object of type Dialog
       return AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(32.0))
-        ),
+            borderRadius: BorderRadius.all(Radius.circular(32.0))),
         title: new Text(
           ((create) ? "Create" : "Rename") + " custom type",
           style: TextStyle(
@@ -92,10 +100,7 @@ void customTypePopUp(
             fontSize: 20,
           ),
         ),
-        contentPadding: EdgeInsets.only(
-          left: 24,
-          right: 24
-        ),
+        contentPadding: EdgeInsets.only(left: 24, right: 24),
         content: new AlertContent(
           labelString: labelString,
           //rename set labelString value on init
@@ -122,17 +127,17 @@ class CategorySelectionPage extends StatelessWidget {
     //create the title AND retreive the list
     String theType = "";
     List<String> items;
-    switch(labelType){
-      case LabelType.phone: 
-        theType = "phone number"; 
+    switch (labelType) {
+      case LabelType.phone:
+        theType = "phone number";
         items = CategoryData.phoneLabels;
         break;
-      case LabelType.email: 
-        theType = "email address"; 
+      case LabelType.email:
+        theType = "email address";
         items = CategoryData.emailLabels;
         break;
-      default: 
-        theType = "address"; 
+      default:
+        theType = "address";
         items = CategoryData.addressLabels;
         break;
     }
@@ -141,7 +146,7 @@ class CategorySelectionPage extends StatelessWidget {
     bool hadDefault = items.contains(labelString.value);
     int theIndexSelected = 0;
     Widget bottomContent;
-    if(hadDefault){
+    if (hadDefault) {
       bottomContent = AnItem(
         label: "Create custom type",
         labelString: labelString,
@@ -149,8 +154,7 @@ class CategorySelectionPage extends StatelessWidget {
 
       //determine which default is selected
       theIndexSelected = items.indexOf(labelString.value);
-    }
-    else{
+    } else {
       bottomContent = AnItem(
         label: labelString.value,
         labelString: labelString,
@@ -165,7 +169,7 @@ class CategorySelectionPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColorDark,
         title: Text(
-          "Select " + theType + " type", 
+          "Select " + theType + " type",
         ),
       ),
       body: ListView(
@@ -181,11 +185,12 @@ class CategorySelectionPage extends StatelessWidget {
             child: ListView.builder(
               physics: ClampingScrollPhysics(),
               shrinkWrap: true,
-              itemBuilder: (context, index){
+              itemBuilder: (context, index) {
                 //mark the selected index as selected
                 bool markSelected;
-                if(hadDefault == false) markSelected = false;
-                else{
+                if (hadDefault == false)
+                  markSelected = false;
+                else {
                   markSelected = (index == theIndexSelected) ? true : false;
                 }
 
@@ -235,16 +240,14 @@ class _AlertContentState extends State<AlertContent> {
 
   @override
   void initState() {
-    if(widget.create == false){
+    if (widget.create == false) {
       customType.text = widget.labelString.value;
     }
 
     //enable the create button when possible
-    customType.addListener((){
+    customType.addListener(() {
       canCreate = (customType.text.length != 0);
-      setState(() {
-        
-      });
+      setState(() {});
     });
 
     //super init
@@ -266,9 +269,9 @@ class _AlertContentState extends State<AlertContent> {
           Row(
             children: <Widget>[
               new PopUpButton(
-                onTapped: (){
+                onTapped: () {
                   Navigator.pop(context);
-                }, 
+                },
                 text: "Cancel",
               ),
               Center(
@@ -279,15 +282,16 @@ class _AlertContentState extends State<AlertContent> {
                 ),
               ),
               new PopUpButton(
-                onTapped: canCreate ? (){
-                  //save string
-                  widget.labelString.value = customType.text;
-                  //pop the pop up
-                  Navigator.pop(context);
-                  //pop the select type window
-                  Navigator.pop(context);
-                }
-                : null, 
+                onTapped: canCreate
+                    ? () {
+                        //save string
+                        widget.labelString.value = customType.text;
+                        //pop the pop up
+                        Navigator.pop(context);
+                        //pop the select type window
+                        Navigator.pop(context);
+                      }
+                    : null,
                 text: "Create",
               ),
             ],
@@ -323,8 +327,8 @@ class PopUpButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).primaryColorLight.withOpacity(
-                  (onTapped == null) ? 0.5 : 1,
-                ),
+                      (onTapped == null) ? 0.5 : 1,
+                    ),
               ),
             ),
           ),
@@ -342,7 +346,6 @@ class AnItem extends StatelessWidget {
     this.showEdit: false,
   });
 
-  
   final String label;
   final ValueNotifier<String> labelString;
   final bool selected;
@@ -351,18 +354,15 @@ class AnItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget leading;
-    if(selected != null){
+    if (selected != null) {
       leading = IgnorePointer(
         child: Radio(
           value: Boolean.TRUE,
           groupValue: selected ? Boolean.TRUE : Boolean.FALSE,
-          onChanged: (var value) {
-
-          },
+          onChanged: (var value) {},
         ),
       );
-    }
-    else{
+    } else {
       leading = Icon(
         Icons.add,
         color: Colors.green,
@@ -375,15 +375,16 @@ class AnItem extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: InkWell(
-              onTap: (){
-                if(selected == null){ //create pop up
+              onTap: () {
+                if (selected == null) {
+                  //create pop up
                   customTypePopUp(
                     context,
                     true,
                     labelString,
                   );
-                }
-                else{ //select item
+                } else {
+                  //select item
                   labelString.value = label;
                   Navigator.pop(context);
                 }
@@ -413,35 +414,36 @@ class AnItem extends StatelessWidget {
               ),
             ),
           ),
-          showEdit ? InkWell(
-            onTap: (){
-              customTypePopUp(
-                context,
-                false,
-                labelString,
-              );
-            },
-            child: Container(
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  "Edit",
-                  style: TextStyle(
-                    fontSize: 20,
+          showEdit
+              ? InkWell(
+                  onTap: () {
+                    customTypePopUp(
+                      context,
+                      false,
+                      labelString,
+                    );
+                  },
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        "Edit",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-          )
-          : Container(),
+                )
+              : Container(),
         ],
       ),
     );
   }
 
-  upperFirst(String s){
+  upperFirst(String s) {
     return '${s[0].toUpperCase()}${s.substring(1)}';
   }
 }

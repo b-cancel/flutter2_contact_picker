@@ -1,17 +1,45 @@
-import 'dart:io';
-import 'dart:typed_data';
-
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker_saver/image_picker_saver.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:permission_handler/permission_handler.dart';
-
 import 'categorySelect.dart';
 import 'nameHandler.dart';
-import 'newContactHelper.dart';
 import 'newContactUX.dart';
+import 'outer_shell/avatarAndSave.dart';
+
+/*
+ Contact({
+    //names
+    this.displayName,
+    this.givenName,
+    this.middleName,
+    this.prefix,
+    this.suffix,
+    this.familyName,
+    //other 
+    this.company,
+    this.jobTitle,
+    this.emails,
+    this.phones,
+    this.postalAddresses,
+    this.avatar,
+    this.birthday,
+    this.androidAccountType,
+    this.androidAccountTypeRaw,
+    this.androidAccountName,
+  })
+*/
+
+class FieldData {
+  TextEditingController controller;
+  FocusNode focusNode;
+  Function nextFunction;
+
+  FieldData() {
+    controller = new TextEditingController();
+    focusNode = new FocusNode();
+    nextFunction = () {
+      print("next field");
+    };
+  }
+}
 
 //this page does not care for access
 //it simply MIGHT return a contact it the form that it COULD be saved by the contact service
@@ -22,17 +50,10 @@ class NewContactPage extends StatefulWidget {
   _NewContactPageState createState() => _NewContactPageState();
 }
 
-class _NewContactPageState extends State<NewContactPage>
-    with WidgetsBindingObserver {
-  ValueNotifier<bool> isFromCamera = new ValueNotifier(false);
-
+class _NewContactPageState extends State<NewContactPage> {
   //-------------------------Logic Code-------------------------
   ValueNotifier<bool> namesSpread = new ValueNotifier<bool>(false);
-
   ValueNotifier<String> imageLocation = new ValueNotifier<String>("");
-
-  //keep track of whether or not we returned from the permissions page
-  ValueNotifier<bool> backFromPermissionPage = new ValueNotifier<bool>(false);
 
   //-------------------------Fields Options-------------------------
 
@@ -46,18 +67,18 @@ class _NewContactPageState extends State<NewContactPage>
 
   //-------------------------Names (split up)
   //prefix, first, middle, last, suffix
-  List<FieldData> nameFields = List<FieldData>();
-  List<String> nameLabels = List<String>();
+  List<FieldData> nameFields = [];
+  List<String> nameLabels = [];
 
   //-------------------------Phones
   bool autoAddFirstPhone = true;
-  List<FieldData> phoneValueFields = List<FieldData>();
-  List<ValueNotifier<String>> phoneLabelStrings = List<ValueNotifier<String>>();
+  List<FieldData> phoneValueFields = [];
+  List<ValueNotifier<String>> phoneLabelStrings = [];
 
   //-------------------------Emails
   bool autoAddFirstEmail = true;
-  List<FieldData> emailValueFields = List<FieldData>();
-  List<ValueNotifier<String>> emailLabelStrings = List<ValueNotifier<String>>();
+  List<FieldData> emailValueFields = [];
+  List<ValueNotifier<String>> emailLabelStrings = [];
 
   //-------------------------Work
   bool autoOpenWork = true;
@@ -67,13 +88,12 @@ class _NewContactPageState extends State<NewContactPage>
 
   //-------------------------Addresses
   bool autoAddFirstAddress = false;
-  List<FieldData> addressStreetFields = new List<FieldData>();
-  List<FieldData> addressCityFields = new List<FieldData>();
-  List<FieldData> addressPostcodeFields = new List<FieldData>();
-  List<FieldData> addressRegionFields = new List<FieldData>();
-  List<FieldData> addressCountryFields = new List<FieldData>();
-  List<ValueNotifier<String>> addressLabelStrings =
-      new List<ValueNotifier<String>>();
+  List<FieldData> addressStreetFields = [];
+  List<FieldData> addressCityFields = [];
+  List<FieldData> addressPostcodeFields = [];
+  List<FieldData> addressRegionFields = [];
+  List<FieldData> addressCountryFields = [];
+  List<ValueNotifier<String>> addressLabelStrings = [];
 
   //-------------------------Note
   bool autoOpenNote = true;
@@ -135,12 +155,14 @@ class _NewContactPageState extends State<NewContactPage>
     bool fieldsPresent = (fields.length > 0);
     bool canAddFirstField = fieldsPresent == false && autoAddFirstField;
     if (fieldsPresent || canAddFirstField) {
-      if (canAddFirstField)
+      if (canAddFirstField) {
         addFirst(); //will focus after build
-      else
+      } else {
         FocusScope.of(context).requestFocus(fields[0].focusNode);
-    } else
+      }
+    } else {
       alternative();
+    }
   }
 
   //-------------------------Next Function Helpers-------------------------
@@ -370,9 +392,6 @@ class _NewContactPageState extends State<NewContactPage>
 
     //-------------------------Other-------------------------
 
-    //observer for onResume
-    WidgetsBinding.instance.addObserver(this);
-
     //NOTE: we could keep everything in its position
     //IF after all the names are merged the merge name isn't updated
     //But that's too much work
@@ -415,44 +434,6 @@ class _NewContactPageState extends State<NewContactPage>
 
     //super init
     super.initState();
-  }
-
-  //-------------------------Dispose-------------------------
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  //-------------------------Change-------------------------
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    /*
-    IF we have access now we save the contact and run onselect
-    ELSE we wait for the user to decide what to do
-    */
-    if (state == AppLifecycleState.resumed) onResume();
-  }
-
-  //this run even if the image picker modal is above it
-  //which is why we need the 2 variables
-  onResume() async {
-    print("*************************NEW CONTACT RESUME");
-    if (backFromPermissionPage.value) {
-      backFromPermissionPage.value = false;
-      PermissionStatus permissionStatus =
-          (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0]
-              .permissionStatus;
-
-      //since the permissions page was brought up because the user wanted to save the contact
-      //we can imply the user wants to save the contact immediately after ther permissions page
-      //WITHOUT making any changes
-      if (isAuthorized(permissionStatus)) {
-        createContact();
-      }
-      //ELSE... we might let them just go back, edit the contact, or etc
-    }
-    //ELSE we are back from either picking an image or deciding not to pick an image, both of which do nothing
   }
 
   //-------------------------build-------------------------
@@ -545,16 +526,13 @@ class _NewContactPageState extends State<NewContactPage>
       double bottomBarHeight = 32;
       if (isPortrait == false) bottomBarHeight = 0;
 
-      return NewContactOuterShell(
-        cancelContact: cancelContact,
-        createContact: createContact,
-        imageLocation: imageLocation,
-        onImagePicked: () {
-          setState(() {});
+      return NewContactAvatarAndSave(
+        returnContact: () {
+          print("this used to be create contant");
         },
+        imageLocation: imageLocation,
         isPortrait: isPortrait,
-        bottomBarHeight: bottomBarHeight,
-        fields: NewContactUX(
+        fields: NewContactEditFields(
           //names stuff
           bottomBarHeight: bottomBarHeight,
           namesSpread: namesSpread,
@@ -595,204 +573,5 @@ class _NewContactPageState extends State<NewContactPage>
         ),
       );
     });
-  }
-
-  //-------------------------Save Contact Helper-------------------------
-  List<Item> itemFieldData2ItemList(
-      List<FieldData> values, List<ValueNotifier<String>> labels) {
-    List<Item> itemList = new List<Item>();
-    for (int i = 0; i < values.length; i++) {
-      itemList.add(Item(
-        value: values[i].controller.text,
-        label: labels[i].value,
-      ));
-    }
-    return itemList;
-  }
-
-  List<PostalAddress> fieldsToAddresses() {
-    List<PostalAddress> addresses = new List<PostalAddress>();
-    for (int i = 0; i < addressStreetFields.length; i++) {
-      addresses.add(PostalAddress(
-        street: addressStreetFields[i].controller.text,
-        city: addressCityFields[i].controller.text,
-        postcode: addressPostcodeFields[i].controller.text,
-        region: addressRegionFields[i].controller.text,
-        country: addressCountryFields[i].controller.text,
-        label: addressLabelStrings[i].value,
-      ));
-    }
-    return addresses;
-  }
-
-  //-------------------------Submit Action Functionality-------------------------
-  cancelContact() {
-    Navigator.of(context).pop();
-  }
-
-  createContact() async {
-    //make sure all the name fields are filled as expected
-    if (namesSpread.value) {
-      //merge the spread name -> name
-      nameField.controller.text = namesToName(nameFields);
-    } else {
-      //split the name -> names
-      List<String> names = nameToNames(nameField.controller.text);
-      for (int i = 0; i < names.length; i++) {
-        nameFields[i].controller.text = names[i];
-      }
-    }
-
-    //gen bools
-    bool hasFirstName = (nameFields[1].controller.text.length > 0);
-    bool hasLastName = (nameFields[3].controller.text.length > 0);
-    bool hasName = (hasFirstName || hasLastName);
-    bool hasNumber = (phoneValueFields.length > 0);
-
-    //we can create the contact ONLY IF we have a first name
-    if (hasName && hasNumber) {
-      //maybe get avatar
-      Uint8List maybeAvatar = await getAvatar();
-
-      //save the name(s)
-      String maybeFirstName = nameFields[1].controller.text;
-      String maybeLastName = nameFields[3].controller.text;
-
-      //NOTE: these are showing up exactly as expected on android
-      //create contact WITH name to avoid error
-      Contact newContact = new Contact(
-        //avatar
-        avatar: maybeAvatar,
-        //name
-        prefix: nameFields[0].controller.text,
-        givenName: (maybeFirstName == "") ? " " : maybeFirstName,
-        middleName: nameFields[2].controller.text,
-        familyName: (maybeLastName == "") ? " " : maybeLastName,
-        suffix: nameFields[4].controller.text,
-        //phones
-        phones: itemFieldData2ItemList(
-          phoneValueFields,
-          phoneLabelStrings,
-        ),
-        //emails
-        emails: itemFieldData2ItemList(
-          emailValueFields,
-          emailLabelStrings,
-        ),
-        //work
-        jobTitle: jobTitleField.controller.text,
-        company: companyField.controller.text,
-        //addresses
-        postalAddresses: fieldsToAddresses(),
-        //note
-        note: noteField.controller.text,
-      );
-
-      //handle permissions
-      PermissionStatus permissionStatus =
-          (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0]
-              .permissionStatus;
-      if (isAuthorized(permissionStatus)) {
-        //with permission we can both
-        //1. add the contact
-        //NOTE: The contact must have a firstName / lastName to be successfully added
-        await ContactsService.addContact(newContact);
-        //2. and update the contact
-        widget.onSelect(context, newContact);
-      } else {
-        //we know that we don't have permission so we know either the modal or page will pop up
-        backFromPermissionPage.value = true;
-
-        //without permission we give the user the option to ONLY
-        //1. update the contact
-        getContactPermission(
-            context,
-            //the user is never forced to create a contact, only to select one
-            false,
-            false, //we are creating a contact
-            () {
-          //on Select only updates the contact
-          //or the user can give us permission and come back and add it as well
-          widget.onSelect(context, newContact);
-        });
-      }
-    } else {
-      //create the message
-      String message;
-      if (hasNumber == false && hasName)
-        message = "The Number is";
-      else if (hasName == false && hasNumber)
-        message = "The Name is";
-      else
-        message = "The Name and Number are";
-
-      //inform the user of why their command didn't go through
-      Fluttertoast.showToast(
-        msg: message + " Required",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 3,
-      );
-
-      //act accordingly
-      if (hasName == false) {
-        //then focus on the name field
-        FocusScope.of(context).requestFocus(
-          (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
-        );
-      } else {
-        addPhone();
-      }
-    }
-  }
-
-  Future<Uint8List> getAvatar() async {
-    //save the image
-    if (imageLocation.value != "") {
-      List<int> dataList = await File(imageLocation.value).readAsBytes();
-      Uint8List eightList = Uint8List.fromList(dataList);
-
-      //take extra steps if needed
-      if (isFromCamera.value) {
-        var res = await ImageGallerySaver.save(eightList);
-        print("*******" + res.toString());
-        /*
-        new File(path).writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-        */
-        /*
-        var buffer = new Uint8List(8).buffer;
-        var bdata = new ByteData.view(buffer);
-        bdata.setFloat32(0, 3.04);
-        int huh = bdata.getInt32(0);
-        */
-        /*
-        ByteData bytes = 
-        await rootBundle.load('assets/flutter.png');
-        */
-        //save the file since right now its only in temp memory
-        imageLocation.value = await ImagePickerSaver.saveFile(
-          fileData: eightList,
-          title: "some title",
-          description: "some description",
-        );
-
-        //get a reference to the file and update values
-        File ref = File.fromUri(Uri.file(imageLocation.value));
-        dataList = await ref.readAsBytes();
-        eightList = Uint8List.fromList(dataList);
-      }
-
-      print("-----");
-      print(eightList.toString());
-      print("-----");
-
-      //save in new contact
-      return eightList;
-    }
-    return null;
-    /*
-    ByteData bytes = await rootBundle.load('assets/flutter.png');
-    final result = await ImageGallerySaver.save(byteData.buffer.asUint8List());
-    */
   }
 }

@@ -10,8 +10,8 @@ import 'newContactHelper.dart';
 double titleRightPadding = 16;
 double iconRightPadding = 32;
 
-class NewContactUX extends StatelessWidget {
-  NewContactUX({
+class NewContactEditFields extends StatelessWidget {
+  NewContactEditFields({
     @required this.bottomBarHeight,
     @required this.namesSpread,
     //handle names
