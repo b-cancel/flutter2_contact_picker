@@ -292,68 +292,68 @@ TextStyle bold = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
-class JustifyContactsPermission extends StatelessWidget {
-  const JustifyContactsPermission({Key key}) : super(key: key);
+class JustifyContactsPermissionToSaveContact extends StatelessWidget {
+  const JustifyContactsPermissionToSaveContact({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        LineItem(
-          item: Text(
-            "So you can",
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "So you can ",
             style: normal,
           ),
-        ),
-        Padding(
-          padding: EdgeInsets.only(
-            bottom: 8.0,
+          TextSpan(
+            text: "save the contact",
+            style: bold,
           ),
-          child: LineItem(
-            number: "1",
-            item: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: "Select or Add",
-                    style: bold,
-                  ),
-                  TextSpan(
-                    text: " the contact of ",
-                    style: normal,
-                  ),
-                  TextSpan(
-                    text: "Who's In Charge",
-                    style: bold,
-                  ),
-                  TextSpan(
-                    text: " of the territory",
-                    style: normal,
-                  ),
-                ],
-              ),
-            ),
+        ],
+      ),
+    );
+  }
+}
+
+class JustifyCameraPermissionForAvatar extends StatelessWidget {
+  const JustifyCameraPermissionForAvatar({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "So you can ",
+            style: normal,
           ),
-        ),
-        LineItem(
-          number: "2",
-          item: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: "Keep Track of who was in charge",
-                  style: bold,
-                ),
-                TextSpan(
-                  text: " before, for quick selection the next time around",
-                  style: normal,
-                ),
-              ],
-            ),
+          TextSpan(
+            text: "take a photo",
+            style: bold,
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+  }
+}
+
+class JustifyStoragePermissionForAvatar extends StatelessWidget {
+  const JustifyStoragePermissionForAvatar({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: "So you can ",
+            style: normal,
+          ),
+          TextSpan(
+            text: "select a photo",
+            style: bold,
+          ),
+        ],
+      ),
     );
   }
 }

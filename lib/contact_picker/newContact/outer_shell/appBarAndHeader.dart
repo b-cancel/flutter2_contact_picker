@@ -31,15 +31,18 @@ class NewContactAppBarAndHeader extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         actions: <Widget>[
-          ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(
-                Colors.blue,
+          Hero(
+            tag: 'contacts',
+            child: ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                  Colors.blue,
+                ),
               ),
-            ),
-            onPressed: () => createContact(),
-            child: Text(
-              "Save & Select",
+              onPressed: () => createContact(),
+              child: Text(
+                "Save & Select",
+              ),
             ),
           ),
         ],

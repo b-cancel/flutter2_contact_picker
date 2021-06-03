@@ -23,7 +23,10 @@ class FieldData {
 }
 
 //this page does not care for access
-//it simply MIGHT return a contact it the form that it COULD be saved by the contact service
+//until you attempt to save the contact
+//at which point it confirms that you have the access you need for everything you are doing
+//if you grant access to everything required AND save
+//then you are allowed return the Contact
 class NewContactPage extends StatefulWidget {
   NewContactPage();
 

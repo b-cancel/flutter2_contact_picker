@@ -13,7 +13,7 @@
     <!-- For taking a picture for a new contact -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- For grabing a picture from the gallery??? -->
+    <!-- For grabing a picture no permission is required according to https://pub.dev/packages/image_picker -->
 
    <application
         android:label="flutter2_contact_picker"

@@ -1,6 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/justifications.dart';
+
+//plugins
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -64,7 +67,20 @@ class ImageGraberButton extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(4),
       child: IconButton(
-        onPressed: () {
+        onPressed: () async {
+          bool permissionGranted = await requestPermission(
+            context,
+            requestedAutomatically: false,
+            permission: Permission.contacts,
+            permissionName: "contacts",
+            permissionJustification: JustifyContactsPermissionToSaveContact(),
+          );
+
+          //go to the contact picker if the permission is granted
+          if (permissionGranted) {
+            goToContactPicker();
+          }
+
           if (fromCamera) {
             askPermission(
               context,
