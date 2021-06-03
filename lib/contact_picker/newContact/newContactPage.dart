@@ -5,7 +5,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'categorySelect.dart';
 import 'inner_shell/nameHandler.dart';
-import 'newContactUX.dart';
+import 'inner_shell/fieldEditor.dart';
 import 'outer_shell/appBarAndHeader.dart';
 
 class FieldData {
@@ -646,6 +646,7 @@ class _NewContactPageState extends State<NewContactPage> {
       */
 
       //handle permissions
+      /*
       PermissionStatus permissionStatus =
           (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0]
               .permissionStatus;
@@ -657,6 +658,7 @@ class _NewContactPageState extends State<NewContactPage> {
         //2. and update the contact
         widget.onSelect(context, newContact);
       } else {}
+      */
     } else {
       //create the message
       String requiredFields;
@@ -670,7 +672,14 @@ class _NewContactPageState extends State<NewContactPage> {
       //inform the user of why their command didn't go through
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("The " + requiredFields + " Required"),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+          content: Text(
+            "The " + requiredFields + " Required",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
         ),
       );
 
@@ -693,9 +702,13 @@ class _NewContactPageState extends State<NewContactPage> {
       Uint8List eightList = Uint8List.fromList(dataList);
 
       //take extra steps if needed
-      if (isFromCamera.value) {
+      if (true) {
+        //isFromCamera.value
+        /*
+      UNCOMMENT THIS
         var res = await ImageGallerySaver.save(eightList);
         print("*******" + res.toString());
+        */
         /*
         new File(path).writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
         */
@@ -710,11 +723,15 @@ class _NewContactPageState extends State<NewContactPage> {
         await rootBundle.load('assets/flutter.png');
         */
         //save the file since right now its only in temp memory
+
+        /*
+        UNCOMMENT THIS
         imageLocation.value = await ImagePickerSaver.saveFile(
           fileData: eightList,
           title: "some title",
           description: "some description",
         );
+        */
 
         //get a reference to the file and update values
         File ref = File.fromUri(Uri.file(imageLocation.value));

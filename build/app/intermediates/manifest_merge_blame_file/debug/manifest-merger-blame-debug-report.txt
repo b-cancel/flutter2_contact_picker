@@ -70,7 +70,7 @@
 45    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- For grabing a picture from the gallery??? -->
 45-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:8:5-81
 45-->[:image_picker] /Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/image_picker/intermediates/library_manifest/debug/AndroidManifest.xml:8:22-78
-46    <!-- For grabing a picture from the gallery??? -->
+46    <!-- For grabing a picture no permission is required according to https://pub.dev/packages/image_picker -->
 47    <application
 47-->/Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/android/app/src/main/AndroidManifest.xml:18:4-55:19
 48        android:appComponentFactory="androidx.core.app.CoreComponentFactory"

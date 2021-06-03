@@ -56,10 +56,15 @@ Future tryToGoToContactPicker(
     if (couldOpenAppSettings == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
           content: Text(
             'Could not open App Settings Automatically' +
                 "\n" +
                 "Go into this App's Settings, and enable the Contacts Permission",
+            style: TextStyle(
+              color: Colors.white,
+            ),
           ),
         ),
       );

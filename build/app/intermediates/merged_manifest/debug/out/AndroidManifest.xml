@@ -43,7 +43,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- For grabing a picture from the gallery??? -->
-    <!-- For grabing a picture from the gallery??? -->
+    <!-- For grabing a picture no permission is required according to https://pub.dev/packages/image_picker -->
     <application
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:debuggable="true"

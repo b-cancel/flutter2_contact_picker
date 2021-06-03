@@ -11,6 +11,7 @@ Future<String> changeImage(
   BuildContext context, {
   bool imageExists,
 }) async {
+  final imagePicker = ImagePicker();
   return await showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -25,9 +26,11 @@ Future<String> changeImage(
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     ImageGraberButton(
+                      imagePicker: imagePicker,
                       fromCamera: false,
                     ),
                     ImageGraberButton(
+                      imagePicker: imagePicker,
                       fromCamera: true,
                     ),
                   ],
@@ -57,10 +60,12 @@ Future<String> changeImage(
 class ImageGraberButton extends StatelessWidget {
   const ImageGraberButton({
     @required this.fromCamera,
+    @required this.imagePicker,
     Key key,
   }) : super(key: key);
 
   final bool fromCamera;
+  final ImagePicker imagePicker;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +75,11 @@ class ImageGraberButton extends StatelessWidget {
         onPressed: () async {
           //! according to https://pub.dev/packages/image_picker Android doesn't have to ask for permissions for this
           //! TEST THE ABOVE
+          final pickedFile = await imagePicker.getImage(
+            source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+          );
+
+          /*
           bool permissionGranted = await requestPermission(
             context,
             requestedAutomatically: false,
@@ -98,6 +108,7 @@ class ImageGraberButton extends StatelessWidget {
               PermissionBeingRequested.storage,
             );
           }
+          */
         },
         icon: Icon(fromCamera ? Icons.camera : FontAwesomeIcons.images),
       ),
@@ -105,6 +116,7 @@ class ImageGraberButton extends StatelessWidget {
   }
 }
 
+/*
 actuallyChangeImage(
   BuildContext context,
   ValueNotifier<String> imageLocation,
@@ -127,3 +139,4 @@ actuallyChangeImage(
   }
   //ELSE... we back out of selecting it
 }
+*/

@@ -27,43 +27,66 @@ class NewContactAppBarAndHeader extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
+        title: Text('Cancel'),
         actions: <Widget>[
-          Hero(
-            tag: 'contacts',
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                  Colors.blue,
+          Center(
+            child: Hero(
+              tag: 'contacts',
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Colors.blue,
+                  ),
                 ),
-              ),
-              onPressed: () => createContact(),
-              child: Text(
-                "Save & Select",
+                onPressed: () => createContact(),
+                child: Text(
+                  "Save & Select",
+                ),
               ),
             ),
           ),
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          Stack(
-            children: <Widget>[
-              //shifted down so the picture can be slightly on top
-              FieldsEditor(
-                imageDiameter: imageDiameter,
-                fields: fields,
+      body: Theme(
+        data: ThemeData.light(),
+        child: CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
+              child: Stack(
+                children: <Widget>[
+                  //shifted down so the picture can be slightly on top
+                  FieldsEditor(
+                    imageDiameter: imageDiameter,
+                    fields: fields,
+                  ),
+                  //is slightly on top of fields editor
+                  AvatarEditor(
+                    imageLocation: imageLocation,
+                    imageDiameter: imageDiameter,
+                  ),
+                ],
               ),
-              //is slightly on top of fields editor
-              AvatarEditor(
-                imageLocation: imageLocation,
-                imageDiameter: imageDiameter,
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                height: 16,
+                width: MediaQuery.of(context).size.width,
+                color: ThemeData.dark().primaryColor,
               ),
-            ],
-          ),
-        ],
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: true,
+              child: Container(
+                color: ThemeData.dark().primaryColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -81,32 +104,46 @@ class FieldsEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double curvature = 24;
     return Container(
-      color: Theme.of(context).primaryColorDark,
+      color: Colors.transparent,
       padding: EdgeInsets.fromLTRB(
         0,
         //push CARD down to the ABOUT middle of the picture
         imageDiameter * (5 / 7),
         0,
-        16,
+        0,
       ),
       width: MediaQuery.of(context).size.width,
-      child: Card(
-        margin: EdgeInsets.all(0),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32.0),
-        ),
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.fromLTRB(
-            0,
-            //push CARD CONTENT down to past the picture
-            imageDiameter * (2 / 7) + 16 * 2,
-            0,
-            16,
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: ThemeData.dark().primaryColor,
+              height: curvature,
+            ),
           ),
-          child: fields,
-        ),
+          Card(
+            margin: EdgeInsets.all(0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(curvature),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(
+                0,
+                //push CARD CONTENT down to past the picture
+                imageDiameter * (2 / 7) + 16 * 2,
+                0,
+                16,
+              ),
+              child: fields,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -125,6 +162,7 @@ class AvatarEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Colors.transparent,
       padding: EdgeInsets.all(16),
       width: MediaQuery.of(context).size.width,
       alignment: Alignment.center,
@@ -148,14 +186,14 @@ class AvatarEditor extends StatelessWidget {
               width: imageDiameter,
               height: imageDiameter,
               decoration: new BoxDecoration(
-                color: Theme.of(context).indicatorColor,
+                color: Theme.of(context).primaryColor,
                 shape: BoxShape.circle,
               ),
               child: (imageLocation.value == "")
                   ? Icon(
                       Icons.camera_alt,
                       size: imageDiameter / 2,
-                      color: Theme.of(context).primaryColor,
+                      color: Colors.white,
                     )
                   : ClipOval(
                       child: FittedBox(
@@ -180,7 +218,7 @@ class AvatarEditor extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.edit,
-                  color: Theme.of(context).accentColor,
+                  color: Colors.white,
                 ),
               ),
             ),

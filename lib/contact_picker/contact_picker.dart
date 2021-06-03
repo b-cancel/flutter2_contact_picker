@@ -54,7 +54,10 @@ class ContactPicker extends StatelessWidget {
                     context,
                     PageTransition(
                       type: PageTransitionType.bottomToTop,
-                      child: NewContactPage(),
+                      child: Theme(
+                        data: ThemeData.dark(),
+                        child: NewContactPage(),
+                      ),
                     ),
                   );
 

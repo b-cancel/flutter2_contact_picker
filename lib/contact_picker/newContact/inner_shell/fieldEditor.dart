@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
-import 'categorySelect.dart';
-import 'newContactHelper.dart';
+import '../categorySelect.dart';
+import '../newContactPage.dart';
 
 //phones, emails, work (job title, company), addresses, note
 
@@ -306,22 +306,6 @@ class NewContactEditFields extends StatelessWidget {
         ),
         Column(
           children: addressRows,
-        ),
-        new Title(
-            icon: Icons.note,
-            name: "Note",
-            onTapped: () {
-              noteOpen.value = true;
-            }),
-        Visibility(
-          visible: noteOpen.value,
-          child: TheField(
-            focusNode: noteField.focusNode,
-            controller: noteField.controller,
-            bottomBarHeight: bottomBarHeight,
-            nextFunction: noteField.nextFunction,
-            label: "Note",
-          ),
         ),
       ],
     );
