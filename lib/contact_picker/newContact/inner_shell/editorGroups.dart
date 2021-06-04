@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/curvedCorner.dart';
+import 'package:sticky_headers/sticky_headers.dart';
 
 import '../newContactPage.dart';
 import 'fieldEditor.dart';
@@ -92,24 +93,25 @@ class PhoneNumbersEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Visibility(
-          visible: phoneRows.length > 0,
-          child: Title(
-            icon: Icons.phone,
-            name: "Phone Number" + (phoneRows.length > 1 ? "s" : ""),
+    return StickyHeader(
+      header: (phoneRows.length > 0)
+          ? Title(
+              icon: Icons.phone,
+              name: "Phone Number" + (phoneRows.length > 1 ? "s" : ""),
+            )
+          : Container(),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            children: phoneRows,
           ),
-        ),
-        Column(
-          children: phoneRows,
-        ),
-        FieldAdder(
-          add: addPhone,
-          fieldName: "phone number",
-        ),
-      ],
+          FieldAdder(
+            add: addPhone,
+            fieldName: "phone number",
+          ),
+        ],
+      ),
     );
   }
 }

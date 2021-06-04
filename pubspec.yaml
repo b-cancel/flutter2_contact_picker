@@ -46,7 +46,6 @@ dependencies:
 
   #STICKY HEADERS
   flutter_sticky_header: ^0.6.0 #Probably Not Required & With Sliver
-  sticky_headers: "^0.1.8" #Probably Not Required & Without Sliver
 
   #OTHER
   vibration: ^1.7.3

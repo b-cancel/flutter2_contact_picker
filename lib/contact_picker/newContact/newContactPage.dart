@@ -5,8 +5,9 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import '../categories/categoryData.dart';
 import 'inner_shell/nameHandler.dart';
-import 'inner_shell/fieldEditor.dart';
-import 'outer_shell/appBarAndHeader.dart';
+import 'package:flutter2_contact_picker/appBarButton.dart';
+
+import 'outer_shell/scrollableEditor.dart';
 
 class FieldData {
   TextEditingController controller;
@@ -272,7 +273,6 @@ class _NewContactPageState extends State<NewContactPage> {
 
       //focus on the NEXT field AFTER build completes (above)
       if (deleteFocusedField) {
-        print("length: " + allFields.length.toString());
         WidgetsBinding.instance.addPostFrameCallback((_) {
           FocusScope.of(context).requestFocus(new FocusNode());
           //NOTE: we could focus on the "nextFunction" of the deleted item
@@ -444,8 +444,6 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("-----building-----");
-
     //from our name field we move onto the first phone
     //or whatever else we can
     nameField.nextFunction = toFirstPhone;
@@ -519,54 +517,86 @@ class _NewContactPageState extends State<NewContactPage> {
       };
     }
 
-    return OrientationBuilder(builder: (context, orientation) {
-      bool isPortrait = (orientation == Orientation.portrait);
+    //build
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          AppBarButton(
+            onTapPassContext: (context) {
+              Navigator.of(context).pop();
+            },
+            toolTip: 'Cancel',
+            noBackButton: true,
+            title: Text(
+              'Cancel',
+              overflow: TextOverflow.visible,
+            ),
+            actions: <Widget>[
+              Center(
+                child: Hero(
+                  tag: 'contacts',
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        Colors.blue,
+                      ),
+                    ),
+                    onPressed: () => createContact(),
+                    child: Text(
+                      "Save & Select",
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: Theme(
+              data: ThemeData.light(),
+              child: ScrollableEditor(
+                //basics
+                imageLocation: imageLocation,
 
-      //calc bottom bar height
-      double bottomBarHeight = 32;
-      if (isPortrait == false) bottomBarHeight = 0;
+                //names stuff
+                namesSpread: namesSpread,
+                nameField: nameField,
+                nameFields: nameFields,
+                nameLabels: nameLabels,
 
-      return NewContactAppBarAndHeader(
-        createContact: createContact,
-        imageLocation: imageLocation,
-        isPortrait: isPortrait,
-        fields: NewContactEditFields(
-          //names stuff
-          bottomBarHeight: bottomBarHeight,
-          namesSpread: namesSpread,
-          nameField: nameField,
-          nameFields: nameFields,
-          nameLabels: nameLabels,
+                //phones
+                addPhone: addPhone,
+                removePhone: removePhone,
+                phoneFields: phoneValueFields,
+                phoneLabels: phoneLabelStrings,
 
-          //phones
-          addPhone: addPhone,
-          removePhone: removePhone,
-          phoneFields: phoneValueFields,
-          phoneLabels: phoneLabelStrings,
+                //emails
+                addEmail: addEmail,
+                removeEmail: removeEmail,
+                emailFields: emailValueFields,
+                emailLabels: emailLabelStrings,
 
-          //emails
-          addEmail: addEmail,
-          removeEmail: removeEmail,
-          emailFields: emailValueFields,
-          emailLabels: emailLabelStrings,
+                //work stuff
+                jobTitleField: jobTitleField,
+                companyField: companyField,
+                workOpen: workOpen,
 
-          //work stuff
-          jobTitleField: jobTitleField,
-          companyField: companyField,
-          workOpen: workOpen,
-
-          //address
-          addAddress: addPostalAddress,
-          removeAddress: removalPostalAddress,
-          addressStreetFields: addressStreetFields,
-          addressCityFields: addressCityFields,
-          addressPostcodeFields: addressPostcodeFields,
-          addressRegionFields: addressRegionFields,
-          addressCountryFields: addressCountryFields,
-          addressLabels: addressLabelStrings,
-        ),
-      );
-    });
+                //address
+                addAddress: addPostalAddress,
+                removeAddress: removalPostalAddress,
+                addressStreetFields: addressStreetFields,
+                addressCityFields: addressCityFields,
+                addressPostcodeFields: addressPostcodeFields,
+                addressRegionFields: addressRegionFields,
+                addressCountryFields: addressCountryFields,
+                addressLabels: addressLabelStrings,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   //--------------------------------------------------
