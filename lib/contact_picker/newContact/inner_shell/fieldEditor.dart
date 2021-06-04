@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../categories/categoryData.dart';
 import '../newContactPage.dart';
+import 'editorGroups.dart';
+import 'specialField.dart';
 
 //phones, emails, work (job title, company), addresses, note
 
@@ -80,10 +82,10 @@ class NewContactEditFields extends StatelessWidget {
     for (int i = 0; i < nameLabels.length; i++) {
       FieldData thisField = nameFields[i];
       nameRows.add(
-        new TheField(
+        TheField(
           bottomBarHeight: bottomBarHeight,
           focusNode: thisField.focusNode,
-          controller: thisField.controller,
+          textEditingController: thisField.controller,
           nextFunction: thisField.nextFunction,
           label: nameLabels[i],
           noPadding: true,
@@ -98,7 +100,7 @@ class NewContactEditFields extends StatelessWidget {
       phoneRows.add(
         TheField(
           focusNode: thisField.focusNode,
-          controller: thisField.controller,
+          textEditingController: thisField.controller,
           bottomBarHeight: bottomBarHeight,
           nextFunction: thisField.nextFunction,
           label: "Phone",
@@ -108,11 +110,9 @@ class NewContactEditFields extends StatelessWidget {
           ),
           rightIconButton: RightIconButton(
             onTapped: () => removePhone(i),
-            icon: Icon(
-              FontAwesomeIcons.minus,
-              color: Colors.red,
-              size: 16,
-            ),
+            iconData: FontAwesomeIcons.minus,
+            color: Colors.red,
+            size: 16,
           ),
           textInputType: TextInputType.phone,
         ),
@@ -126,7 +126,7 @@ class NewContactEditFields extends StatelessWidget {
       emailRows.add(
         TheField(
           focusNode: thisField.focusNode,
-          controller: thisField.controller,
+          textEditingController: thisField.controller,
           bottomBarHeight: bottomBarHeight,
           nextFunction: thisField.nextFunction,
           label: "Email",
@@ -136,11 +136,9 @@ class NewContactEditFields extends StatelessWidget {
           ),
           rightIconButton: RightIconButton(
             onTapped: () => removeEmail(i),
-            icon: Icon(
-              FontAwesomeIcons.minus,
-              color: Colors.red,
-              size: 16,
-            ),
+            iconData: FontAwesomeIcons.minus,
+            color: Colors.red,
+            size: 16,
           ),
           textInputType: TextInputType.emailAddress,
         ),
@@ -172,327 +170,49 @@ class NewContactEditFields extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
-        new Title(
-          icon: Icons.person,
-          name: "Name",
-          onTapped: null,
+        NamesEditor(
+          namesSpread: namesSpread,
+          bottomBarHeight: bottomBarHeight,
+          nameField: nameField,
+          nameRows: nameRows,
         ),
-        //displayName, givenName, middleName, prefix, suffix, familyName;
-        //Name prefix(prefix), Name suffix(suffix)
-        //First name (givenName), Middle name (middleName), Last name (familyName)
-        //display name = prefix, first name, middle name, last name, ',' suffix
-        //NAME START-------------------------
-        Visibility(
-          visible: (namesSpread.value == false),
-          child: TheField(
-            bottomBarHeight: bottomBarHeight,
-            label: "Name",
-            focusNode: nameField.focusNode,
-            controller: nameField.controller,
-            nextFunction: nameField.nextFunction,
-            rightIconButton: RightIconButton(
-              onTapped: () {
-                namesSpread.value = !namesSpread.value;
-              },
-              icon: Icon(Icons.keyboard_arrow_down),
-            ),
-          ),
+        PhoneNumbersEditor(
+          phoneRows: phoneRows,
+          addPhone: addPhone,
         ),
-        Visibility(
-          visible: namesSpread.value,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              Expanded(
-                child: Column(
-                  children: nameRows,
-                ),
-              ),
-              Container(
-                //color: Colors.orange,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    namesSpread.value = !namesSpread.value;
-                  },
-                  child: IgnorePointer(
-                    child: Container(
-                      height: 49.0 * 5,
-                      alignment: Alignment.topCenter,
-                      child: RightIconButton(
-                        icon: Icon(
-                          Icons.keyboard_arrow_up,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        EmailsEditor(
+          emailRows: emailRows,
+          addEmail: addEmail,
         ),
-        //NAME END-------------------------
-        new Title(
-          icon: Icons.phone,
-          name: "Phone",
-          onTapped: () => addPhone(),
-          rightIconButton: (phoneFields.length != 0)
-              ? RightIconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.green,
-                  ),
-                )
-              : Container(),
+        WorkEditor(
+          workOpen: workOpen,
+          jobTitleField: jobTitleField,
+          bottomBarHeight: bottomBarHeight,
+          companyField: companyField,
         ),
-        Column(
-          children: phoneRows,
-        ),
-        new Title(
-          icon: Icons.email,
-          name: "Email",
-          onTapped: () => addEmail(),
-          rightIconButton: (emailFields.length != 0)
-              ? RightIconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.green,
-                  ),
-                )
-              : Container(),
-        ),
-        Column(
-          children: emailRows,
-        ),
-        new Title(
-            icon: Icons.work,
-            name: "Work",
-            onTapped: () {
-              workOpen.value = true;
-            }),
-        Visibility(
-          visible: workOpen.value,
-          child: Column(
-            children: <Widget>[
-              TheField(
-                focusNode: jobTitleField.focusNode,
-                controller: jobTitleField.controller,
-                bottomBarHeight: bottomBarHeight,
-                nextFunction: jobTitleField.nextFunction,
-                label: "Job title",
-              ),
-              TheField(
-                focusNode: companyField.focusNode,
-                controller: companyField.controller,
-                bottomBarHeight: bottomBarHeight,
-                nextFunction: companyField.nextFunction,
-                label: "Company",
-              ),
-            ],
-          ),
-        ),
-        new Title(
-          icon: Icons.location_on,
-          name: "Address",
-          onTapped: () => addAddress(),
-          rightIconButton: (addressCityFields.length != 0)
-              ? RightIconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.green,
-                  ),
-                )
-              : Container(),
-        ),
-        Column(
-          children: addressRows,
+        AddressesEditor(
+          addressRows: addressRows,
+          addAddress: addAddress,
         ),
       ],
     );
   }
 }
 
-class Title extends StatelessWidget {
-  final IconData icon;
-  final String name;
-  final Function onTapped;
-  final Widget rightIconButton;
-
-  const Title({
-    @required this.icon,
-    @required this.name,
-    this.onTapped,
-    this.rightIconButton,
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    Widget theTitle = Container(
-      //color: Colors.red,
-      child: Row(
-        children: <Widget>[
-          LeftIcon(
-            icon: icon,
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: (rightIconButton == null) ? titleRightPadding : 0,
-                ),
-                child: Text(
-                  name,
-                  style: TextStyle(
-                    //TODO: change
-                    color: Theme.of(context).textTheme.subtitle.color,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          rightIconButton ?? Container(),
-        ],
-      ),
-    );
-
-    //whether or not the area is clickable
-    if (onTapped == null)
-      return theTitle;
-    else {
-      return GestureDetector(
-        onTap: onTapped,
-        child: theTitle,
-      );
-    }
-  }
-}
-
-class TheField extends StatelessWidget {
-  const TheField({
-    @required this.label,
-    @required this.focusNode,
-    @required this.controller,
-    @required this.nextFunction,
-    @required this.bottomBarHeight,
-    this.labelField,
-    this.rightIconButton,
-    this.noPadding: false,
-    this.textInputType: TextInputType.text,
-  });
-
-  final String label;
-  final FocusNode focusNode;
-  final TextEditingController controller;
-  final Function nextFunction;
-  final double bottomBarHeight;
-  final Widget labelField;
-  final Widget rightIconButton;
-  final bool noPadding;
-  final TextInputType textInputType;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      //color: Colors.purple,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          LeftIcon(),
-          Flexible(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: (rightIconButton == null)
-                      ? ((noPadding) ? 0 : iconRightPadding)
-                      : 0,
-                ),
-                child: TextFormField(
-                  focusNode: focusNode,
-                  controller: controller,
-                  scrollPadding:
-                      EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
-                  autofocus: true,
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                  onEditingComplete: (nextFunction == null)
-                      ? null
-                      : () {
-                          nextFunction();
-                        },
-                  textInputAction: (nextFunction == null)
-                      ? TextInputAction.done
-                      : TextInputAction.next,
-                  keyboardType: textInputType,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.only(bottom: 4),
-                    hintText: label,
-                    hintStyle: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          labelField ?? Container(),
-          rightIconButton ?? Container(),
-        ],
-      ),
-    );
-  }
-}
-
-//-------------------------CAN OPTIMIZE-------------------------
-
-class LeftIcon extends StatelessWidget {
-  final IconData icon;
-
-  LeftIcon({
-    this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Color iconColor;
-    if (icon == null) {
-      iconColor = Colors.transparent;
-    } else {
-      //TODO: change
-      iconColor = Theme.of(context).textTheme.subtitle.color;
-    }
-
-    //return widget
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 8,
-      ),
-      child: SizedBox(
-        width: 24,
-        child: Icon(
-          icon ?? Icons.lock,
-          color: iconColor,
-        ),
-      ),
-    );
-  }
-}
-
 class RightIconButton extends StatelessWidget {
   RightIconButton({
-    @required this.icon,
+    @required this.iconData,
+    @required this.color,
     this.onTapped,
-    this.height,
+    this.size,
+    this.onLeft: false,
   });
 
-  final Icon icon;
+  final IconData iconData;
+  final Color color;
   final Function onTapped;
-  final double height;
+  final double size;
+  final bool onLeft;
 
   @override
   Widget build(BuildContext context) {
@@ -500,16 +220,23 @@ class RightIconButton extends StatelessWidget {
       //color: Colors.grey,
       height: 8 + 8 + 32.0,
       padding: EdgeInsets.symmetric(
-        horizontal: iconRightPadding,
+        horizontal: onLeft ? titleRightPadding : iconRightPadding,
         vertical: 0,
       ),
       child: SizedBox(
+        width: 24,
+        height: 24,
         child: Container(
-          //color: Colors.blue,
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: icon,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Icon(
+              iconData,
+              color: Colors.white,
+              size: size,
+            ),
           ),
         ),
       ),
@@ -519,7 +246,7 @@ class RightIconButton extends StatelessWidget {
     if (onTapped == null) {
       return child;
     } else {
-      return GestureDetector(
+      return InkWell(
         onTap: onTapped,
         child: child,
       );
@@ -590,7 +317,6 @@ class AddressField extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          LeftIcon(),
           Flexible(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
@@ -605,11 +331,9 @@ class AddressField extends StatelessWidget {
           ),
           RightIconButton(
             onTapped: () => removeTheAddress(),
-            icon: Icon(
-              FontAwesomeIcons.minus,
-              color: Colors.red,
-              size: 16,
-            ),
+            iconData: FontAwesomeIcons.minus,
+            color: Colors.red,
+            size: 16,
           ),
         ],
       ),

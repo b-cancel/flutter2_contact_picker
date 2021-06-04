@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/customField.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/standardDialog.dart';
 import 'package:page_transition/page_transition.dart';
 import 'categoryData.dart';
@@ -18,57 +20,33 @@ class CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            PageTransition(
-              type: PageTransitionType.bottomToTop,
-              child: Theme(
-                data: ThemeData.dark(),
-                child: CategorySelectionPage(
-                  labelType: labelType,
-                  labelString: labelSelected,
-                ),
+    return TextButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          PageTransition(
+            type: PageTransitionType.bottomToTop,
+            child: Theme(
+              data: ThemeData.dark(),
+              child: CategorySelectionPage(
+                labelType: labelType,
+                labelString: labelSelected,
               ),
+            ),
+          ),
+        );
+      },
+      child: AnimatedBuilder(
+        animation: labelSelected,
+        builder: (BuildContext context, Widget child) {
+          return Text(
+            labelSelected.value,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 18,
             ),
           );
         },
-        child: Container(
-          width: 100,
-          height: 8 + 32.0 + 8,
-          alignment: Alignment.bottomCenter,
-          padding: EdgeInsets.only(
-            left: 16,
-            bottom: 11,
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(top: 12),
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).primaryColorLight,
-                ),
-              ),
-            ),
-            child: AnimatedBuilder(
-              animation: labelSelected,
-              builder: (BuildContext context, Widget child) {
-                return Text(
-                  labelSelected.value,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 18,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -312,7 +290,7 @@ void customTypePopUp(
                 top: 24,
               ),
               child: Text(
-                ((create) ? "Create" : "Rename") + " custom type",
+                ((create) ? "Create" : "Rename") + " Custom Type",
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -349,18 +327,18 @@ class AlertContent extends StatefulWidget {
 }
 
 class _AlertContentState extends State<AlertContent> {
-  TextEditingController customType = new TextEditingController();
+  TextEditingController textEditingController = new TextEditingController();
   bool canCreate = false;
 
   @override
   void initState() {
     if (widget.create == false) {
-      customType.text = widget.labelString.value;
+      textEditingController.text = widget.labelString.value;
     }
 
     //enable the create button when possible
-    customType.addListener(() {
-      canCreate = (customType.text.length != 0);
+    textEditingController.addListener(() {
+      canCreate = (textEditingController.text.length != 0);
       setState(() {});
     });
 
@@ -381,12 +359,18 @@ class _AlertContentState extends State<AlertContent> {
             ),
             child: Padding(
               padding: EdgeInsets.only(
+                top: 16,
                 bottom: 24,
               ),
-              child: TextField(
+              child: CustomField(
                 autofocus: true,
-                controller: customType,
-                textInputAction: TextInputAction.done,
+                notMultilineInputAction: TextInputAction.done,
+                focusNode: FocusNode(),
+                textEditingController: textEditingController,
+                label: "Custom Type",
+                errorOnEmptyField: true,
+                textInputType: TextInputType.text,
+                showClearRegardlessOfFocus: true,
               ),
             ),
           ),
@@ -401,7 +385,7 @@ class _AlertContentState extends State<AlertContent> {
             onAllow: canCreate
                 ? () {
                     //save string
-                    widget.labelString.value = customType.text;
+                    widget.labelString.value = textEditingController.text;
                     //pop the pop up
                     Navigator.pop(context);
                     //pop the select type window
@@ -410,42 +394,6 @@ class _AlertContentState extends State<AlertContent> {
                 : null,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class PopUpButton extends StatelessWidget {
-  const PopUpButton({
-    Key key,
-    @required this.onTapped,
-    @required this.text,
-  }) : super(key: key);
-
-  final Function onTapped;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTapped,
-          child: Container(
-            padding: EdgeInsets.all(24),
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).primaryColorLight.withOpacity(
-                      (onTapped == null) ? 0.5 : 1,
-                    ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

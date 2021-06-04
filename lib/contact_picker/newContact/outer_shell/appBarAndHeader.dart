@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/appBarButton.dart';
 import 'imagePicker.dart';
 
 class NewContactAppBarAndHeader extends StatelessWidget {
@@ -28,58 +29,72 @@ class NewContactAppBarAndHeader extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text('Cancel'),
-        actions: <Widget>[
-          Center(
-            child: Hero(
-              tag: 'contacts',
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
-                    Colors.blue,
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          AppBarButton(
+            onTapPassContext: (context) {
+              Navigator.of(context).pop();
+            },
+            toolTip: 'Cancel',
+            noBackButton: true,
+            title: Text(
+              'Cancel',
+              overflow: TextOverflow.visible,
+            ),
+            actions: <Widget>[
+              Center(
+                child: Hero(
+                  tag: 'contacts',
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                        Colors.blue,
+                      ),
+                    ),
+                    onPressed: () => createContact(),
+                    child: Text(
+                      "Save & Select",
+                    ),
                   ),
-                ),
-                onPressed: () => createContact(),
-                child: Text(
-                  "Save & Select",
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      body: Theme(
-        data: ThemeData.light(),
-        child: CustomScrollView(
-          physics: BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Stack(
-                children: <Widget>[
-                  //shifted down so the picture can be slightly on top
-                  FieldsEditor(
-                    imageDiameter: imageDiameter,
-                    fields: fields,
+          Expanded(
+            child: Theme(
+              data: ThemeData.light(),
+              child: CustomScrollView(
+                physics: BouncingScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Stack(
+                      children: <Widget>[
+                        //shifted down so the picture can be slightly on top
+                        FieldsEditor(
+                          imageDiameter: imageDiameter,
+                          fields: fields,
+                        ),
+                        //is slightly on top of fields editor
+                        AvatarEditor(
+                          imageLocation: imageLocation,
+                          imageDiameter: imageDiameter,
+                        ),
+                      ],
+                    ),
                   ),
-                  //is slightly on top of fields editor
-                  AvatarEditor(
-                    imageLocation: imageLocation,
-                    imageDiameter: imageDiameter,
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    fillOverscroll: true,
+                    child: Container(
+                      color: ThemeData.dark().primaryColor,
+                    ),
                   ),
                 ],
               ),
             ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: Container(
-                color: ThemeData.dark().primaryColor,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
