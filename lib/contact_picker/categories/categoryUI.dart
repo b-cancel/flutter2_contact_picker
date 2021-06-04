@@ -25,9 +25,12 @@ class CategorySelector extends StatelessWidget {
             context,
             PageTransition(
               type: PageTransitionType.bottomToTop,
-              child: CategorySelectionPage(
-                labelType: labelType,
-                labelString: labelSelected,
+              child: Theme(
+                data: ThemeData.dark(),
+                child: CategorySelectionPage(
+                  labelType: labelType,
+                  labelString: labelSelected,
+                ),
               ),
             ),
           );
@@ -70,6 +73,11 @@ class CategorySelector extends StatelessWidget {
   }
 }
 
+//lets you select between all the default categories
+//additionally...
+//if you are using a custom category already => it lets you edit it -OR- select from defaults
+//if you are not using a custom category => it lets you create it -OR- select from defaults
+//BUT this custom category does not save for use elsewhere
 class CategorySelectionPage extends StatelessWidget {
   CategorySelectionPage({
     @required this.labelType,
@@ -81,159 +89,194 @@ class CategorySelectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> labels = CategoryData.labelTypeToLabels[labelType];
-
-    //check if the label we passed is contained within the defaults
-    bool hadDefault = labels.contains(labelString.value);
-    int theIndexSelected = 0;
-    Widget bottomContent;
-    if (hadDefault) {
-      bottomContent = AnItem(
-        label: "Create custom type",
-        labelString: labelString,
-      );
-
-      //determine which default is selected
-      theIndexSelected = labels.indexOf(labelString.value);
-    } else {
-      bottomContent = AnItem(
-        label: labelString.value,
-        labelString: labelString,
-        selected: true,
-        showEdit: true,
-      );
-    }
-
-    //build the widgets
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColorDark,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColorDark,
+        backgroundColor: Colors.black,
         title: Text(
           "Select " + CategoryData.labelTypeToCategoryName[labelType] + " type",
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: ListView.builder(
-          physics: BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            if (index == labels.length + 1) {
-              return bottomContent;
-            } else {
-              //mark the selected index as selected
-              bool markSelected;
-              if (hadDefault == false)
-                markSelected = false;
-              else {
-                markSelected = (index == theIndexSelected) ? true : false;
-              }
-
-              //build
-              return AnItem(
-                selected: markSelected,
-                label: labels[index],
-                labelString: labelString,
-              );
-            }
-          },
-          itemCount: labels.length + 1,
+      body: Theme(
+        data: ThemeData.light(),
+        child: CategorySelectionPageBody(
+          labelType: labelType,
+          labelString: labelString,
         ),
       ),
     );
   }
 }
 
-class PopUpButton extends StatelessWidget {
-  const PopUpButton({
+class CategorySelectionPageBody extends StatelessWidget {
+  const CategorySelectionPageBody({
     Key key,
-    @required this.onTapped,
-    @required this.text,
+    @required this.labelType,
+    @required this.labelString,
   }) : super(key: key);
 
-  final Function onTapped;
-  final String text;
+  final LabelType labelType;
+  final ValueNotifier<String> labelString;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTapped,
-          child: Container(
-            padding: EdgeInsets.all(24),
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).primaryColorLight.withOpacity(
-                      (onTapped == null) ? 0.5 : 1,
+    List<String> defaultLabels =
+        CategoryData.labelTypeToDefaultLabels[labelType];
+    int selectedDefaultLabelIndex = defaultLabels.indexOf(labelString.value);
+    return CustomScrollView(
+      physics: BouncingScrollPhysics(),
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              if (index < defaultLabels.length) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(index == 0 ? 24 : 0),
+                  ),
+                  child: Container(
+                    color: Colors.white,
+                    child: AnItem(
+                      isSelected: (index == selectedDefaultLabelIndex),
+                      itemLabel: defaultLabels[index],
+                      selectedLabel: labelString,
                     ),
-              ),
-            ),
+                  ),
+                );
+              } else {
+                Widget lastTile;
+                if (selectedDefaultLabelIndex == -1) {
+                  lastTile = AnItem(
+                    itemLabel: labelString.value,
+                    selectedLabel: labelString,
+                    isSelected: true,
+                    showEdit: true,
+                  );
+                } else {
+                  lastTile = AnItem(
+                    itemLabel: "Create custom type",
+                    selectedLabel: labelString,
+                  );
+                }
+
+                //tile background
+                return Material(
+                  color: ThemeData.dark().primaryColor,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(24),
+                    ),
+                    child: Container(
+                      color: Colors.white,
+                      child: lastTile,
+                    ),
+                  ),
+                );
+              }
+            },
+            childCount: defaultLabels.length + 1,
           ),
         ),
-      ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          fillOverscroll: true,
+          child: Container(
+            color: ThemeData.dark().primaryColor,
+          ),
+        ),
+      ],
     );
   }
 }
 
 class AnItem extends StatelessWidget {
   const AnItem({
-    @required this.label,
-    @required this.labelString,
-    this.selected,
+    @required this.itemLabel,
+    @required this.selectedLabel,
+    this.isSelected,
     this.showEdit: false,
   });
 
-  final String label;
-  final ValueNotifier<String> labelString;
-  final bool selected;
+  final String itemLabel;
+  final ValueNotifier<String> selectedLabel;
+  final bool isSelected;
   final bool showEdit;
 
   @override
   Widget build(BuildContext context) {
     Widget leading;
-    if (selected != null) {
+    if (isSelected != null) {
       leading = IgnorePointer(
         child: Radio(
           value: Boolean.TRUE,
-          groupValue: selected ? Boolean.TRUE : Boolean.FALSE,
+          groupValue: isSelected ? Boolean.TRUE : Boolean.FALSE,
           onChanged: (var value) {},
         ),
       );
     } else {
-      leading = Icon(
-        Icons.add,
-        color: Colors.green,
+      leading = Container(
+        child: Icon(
+          Icons.add,
+          color: Colors.green,
+        ),
       );
     }
 
+    return ListTile(
+      onTap: () {
+        if (isSelected == null) {
+          //create pop up
+          customTypePopUp(
+            context,
+            create: true,
+            selectedLabel: selectedLabel,
+          );
+        } else {
+          //select item
+          selectedLabel.value = itemLabel;
+          Navigator.pop(context);
+        }
+      },
+      leading: leading,
+      title: Text(
+        upperFirst(itemLabel),
+        style: TextStyle(
+          fontSize: 20,
+        ),
+      ),
+      trailing: showEdit
+          ? InkWell(
+              onTap: () {
+                customTypePopUp(
+                  context,
+                  create: false,
+                  selectedLabel: selectedLabel,
+                );
+              },
+              child: Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    "Edit",
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
+    );
+/*
     return Material(
       color: Colors.transparent,
       child: Row(
         children: <Widget>[
           Expanded(
             child: InkWell(
-              onTap: () {
-                if (selected == null) {
-                  //create pop up
-                  customTypePopUp(
-                    context,
-                    true,
-                    labelString,
-                  );
-                } else {
-                  //select item
-                  labelString.value = label;
-                  Navigator.pop(context);
-                }
-              },
+              onTap: 
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 16),
                 child: Row(
@@ -249,7 +292,7 @@ class AnItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      upperFirst(label),
+                      upperFirst(itemLabel),
                       style: TextStyle(
                         fontSize: 20,
                       ),
@@ -259,33 +302,11 @@ class AnItem extends StatelessWidget {
               ),
             ),
           ),
-          showEdit
-              ? InkWell(
-                  onTap: () {
-                    customTypePopUp(
-                      context,
-                      false,
-                      labelString,
-                    );
-                  },
-                  child: Container(
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        "Edit",
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              : Container(),
+          
         ],
       ),
     );
+    */
   }
 
   upperFirst(String s) {
@@ -294,30 +315,33 @@ class AnItem extends StatelessWidget {
 }
 
 void customTypePopUp(
-  BuildContext context,
+  BuildContext context, {
   bool create,
-  ValueNotifier<String> labelString,
-) {
+  ValueNotifier<String> selectedLabel,
+}) {
   // flutter defined function
   showDialog(
     context: context,
     builder: (BuildContext context) {
       // return object of type Dialog
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(32.0))),
-        title: new Text(
-          ((create) ? "Create" : "Rename") + " custom type",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+      return Theme(
+        data: ThemeData.light(),
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(32.0))),
+          title: new Text(
+            ((create) ? "Create" : "Rename") + " custom type",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
           ),
-        ),
-        contentPadding: EdgeInsets.only(left: 24, right: 24),
-        content: AlertContent(
-          labelString: labelString,
-          //rename set labelString value on init
-          create: create,
+          contentPadding: EdgeInsets.only(left: 24, right: 24),
+          content: AlertContent(
+            labelString: selectedLabel,
+            //rename set labelString value on init
+            create: create,
+          ),
         ),
       );
     },
@@ -401,6 +425,42 @@ class _AlertContentState extends State<AlertContent> {
             ],
           )
         ],
+      ),
+    );
+  }
+}
+
+class PopUpButton extends StatelessWidget {
+  const PopUpButton({
+    Key key,
+    @required this.onTapped,
+    @required this.text,
+  }) : super(key: key);
+
+  final Function onTapped;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTapped,
+          child: Container(
+            padding: EdgeInsets.all(24),
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).primaryColorLight.withOpacity(
+                      (onTapped == null) ? 0.5 : 1,
+                    ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

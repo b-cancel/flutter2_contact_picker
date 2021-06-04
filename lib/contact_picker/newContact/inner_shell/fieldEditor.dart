@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/categories/categoryUI.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../categories/categoryData.dart';
 import '../newContactPage.dart';
@@ -77,7 +76,7 @@ class NewContactEditFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //create all the needed rows
-    List<Widget> nameRows = new List<Widget>();
+    List<Widget> nameRows = [];
     for (int i = 0; i < nameLabels.length; i++) {
       FieldData thisField = nameFields[i];
       nameRows.add(
@@ -93,7 +92,7 @@ class NewContactEditFields extends StatelessWidget {
     }
 
     //create all needed phone rows
-    List<Widget> phoneRows = new List<Widget>();
+    List<Widget> phoneRows = [];
     for (int i = 0; i < phoneFields.length; i++) {
       FieldData thisField = phoneFields[i];
       phoneRows.add(
@@ -121,7 +120,7 @@ class NewContactEditFields extends StatelessWidget {
     }
 
     //create all needed email rows
-    List<Widget> emailRows = new List<Widget>();
+    List<Widget> emailRows = [];
     for (int i = 0; i < emailFields.length; i++) {
       FieldData thisField = emailFields[i];
       emailRows.add(
@@ -148,7 +147,7 @@ class NewContactEditFields extends StatelessWidget {
       );
     }
 
-    List<Widget> addressRows = new List<Widget>();
+    List<Widget> addressRows = [];
     for (int i = 0; i < addressStreetFields.length; i++) {
       addressRows.add(
         AddressField(
@@ -346,6 +345,7 @@ class Title extends StatelessWidget {
                 child: Text(
                   name,
                   style: TextStyle(
+                    //TODO: change
                     color: Theme.of(context).textTheme.subtitle.color,
                     fontSize: 20,
                   ),
@@ -462,6 +462,7 @@ class LeftIcon extends StatelessWidget {
     if (icon == null) {
       iconColor = Colors.transparent;
     } else {
+      //TODO: change
       iconColor = Theme.of(context).textTheme.subtitle.color;
     }
 
@@ -552,7 +553,7 @@ class AddressField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> fields = new List<Widget>();
+    List<Widget> fields = [];
     for (int i = 0; i < 5; i++) {
       FieldData thisField = addressStuff[i];
       fields.add(

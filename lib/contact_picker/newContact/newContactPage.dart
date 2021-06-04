@@ -210,7 +210,7 @@ class _NewContactPageState extends State<NewContactPage> {
 
     //add default string
     phoneLabelStrings.add(
-      ValueNotifier<String>(CategoryData.phoneLabels[0]),
+      ValueNotifier<String>(CategoryData.defaultPhoneLabels[0]),
     );
   }
 
@@ -222,7 +222,7 @@ class _NewContactPageState extends State<NewContactPage> {
 
     //add default string
     emailLabelStrings.add(
-      ValueNotifier<String>(CategoryData.emailLabels[0]),
+      ValueNotifier<String>(CategoryData.defaultEmailLabels[0]),
     );
   }
 
@@ -238,7 +238,7 @@ class _NewContactPageState extends State<NewContactPage> {
 
     //add default string
     addressLabelStrings.add(
-      ValueNotifier<String>(CategoryData.addressLabels[0]),
+      ValueNotifier<String>(CategoryData.defaultAddressLabels[0]),
     );
   }
 
@@ -395,8 +395,6 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   void initState() {
-    CategoryData.init();
-
     //-------------------------Variable Prep-------------------------
 
     //prefix, first, middle, last, suffix
