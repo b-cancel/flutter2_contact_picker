@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/standardDialog.dart';
 import 'package:page_transition/page_transition.dart';
 import 'categoryData.dart';
 
@@ -206,18 +207,38 @@ class AnItem extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget leading;
     if (isSelected != null) {
-      leading = IgnorePointer(
-        child: Radio(
-          value: Boolean.TRUE,
-          groupValue: isSelected ? Boolean.TRUE : Boolean.FALSE,
-          onChanged: (var value) {},
+      leading = Container(
+        margin: EdgeInsets.only(
+          left: 3,
+        ),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? Colors.blue : Colors.transparent,
+          border: Border.all(
+            color: isSelected ? Colors.blue : Colors.grey,
+            width: 2,
+          ),
+        ),
+        child: Icon(
+          Icons.check,
+          color: Colors.white,
+          //24 is default, 16 looks right, 8 diff
+          size: 18,
         ),
       );
     } else {
       leading = Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.green,
+          border: Border.all(
+            color: Colors.green,
+            width: 2,
+          ),
+        ),
         child: Icon(
           Icons.add,
-          color: Colors.green,
+          color: Colors.white,
         ),
       );
     }
@@ -245,68 +266,23 @@ class AnItem extends StatelessWidget {
         ),
       ),
       trailing: showEdit
-          ? InkWell(
-              onTap: () {
+          ? TextButton(
+              onPressed: () {
                 customTypePopUp(
                   context,
                   create: false,
                   selectedLabel: selectedLabel,
                 );
               },
-              child: Container(
-                alignment: Alignment.centerRight,
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    "Edit",
-                    style: TextStyle(
-                      fontSize: 20,
-                    ),
-                  ),
+              child: Text(
+                "Edit",
+                style: TextStyle(
+                  fontSize: 20,
                 ),
               ),
             )
           : null,
     );
-/*
-    return Material(
-      color: Colors.transparent,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: InkWell(
-              onTap: 
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24),
-                      child: Container(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: leading,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      upperFirst(itemLabel),
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
-        ],
-      ),
-    );
-    */
   }
 
   upperFirst(String s) {
@@ -327,16 +303,26 @@ void customTypePopUp(
       return Theme(
         data: ThemeData.light(),
         child: AlertDialog(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(32.0))),
-          title: new Text(
-            ((create) ? "Create" : "Rename") + " custom type",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+          title: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 24,
+              ),
+              child: Text(
+                ((create) ? "Create" : "Rename") + " custom type",
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
             ),
           ),
-          contentPadding: EdgeInsets.only(left: 24, right: 24),
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
           content: AlertContent(
             labelString: selectedLabel,
             //rename set labelString value on init
@@ -389,41 +375,40 @@ class _AlertContentState extends State<AlertContent> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TextField(
-            autofocus: true,
-            controller: customType,
-            textInputAction: TextInputAction.done,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: 24,
+              ),
+              child: TextField(
+                autofocus: true,
+                controller: customType,
+                textInputAction: TextInputAction.done,
+              ),
+            ),
           ),
-          Row(
-            children: <Widget>[
-              new PopUpButton(
-                onTapped: () {
-                  Navigator.pop(context);
-                },
-                text: "Cancel",
-              ),
-              Center(
-                child: Container(
-                  width: 2,
-                  height: 26,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              new PopUpButton(
-                onTapped: canCreate
-                    ? () {
-                        //save string
-                        widget.labelString.value = customType.text;
-                        //pop the pop up
-                        Navigator.pop(context);
-                        //pop the select type window
-                        Navigator.pop(context);
-                      }
-                    : null,
-                text: "Create",
-              ),
-            ],
-          )
+          DenyOrAllow(
+            denyText: "Cancel",
+            denyTextColor: Colors.black,
+            onDeny: () {
+              Navigator.pop(context);
+            },
+            allowText: "Save",
+            allowButtonColor: Colors.blue,
+            onAllow: canCreate
+                ? () {
+                    //save string
+                    widget.labelString.value = customType.text;
+                    //pop the pop up
+                    Navigator.pop(context);
+                    //pop the select type window
+                    Navigator.pop(context);
+                  }
+                : null,
+          ),
         ],
       ),
     );
