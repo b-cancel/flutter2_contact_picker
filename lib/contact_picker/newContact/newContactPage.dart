@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'categorySelect.dart';
+import '../categories/categoryData.dart';
 import 'inner_shell/nameHandler.dart';
 import 'inner_shell/fieldEditor.dart';
 import 'outer_shell/appBarAndHeader.dart';
@@ -395,7 +395,7 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   void initState() {
-    workOpen.addListener(workOpenChanged);
+    CategoryData.init();
 
     //-------------------------Variable Prep-------------------------
 
@@ -417,8 +417,9 @@ class _NewContactPageState extends State<NewContactPage> {
     //IF after all the names are merged the merge name isn't updated
     //But that's too much work
 
-    //if we spread or unspread the name
+    //open and closers
     namesSpread.addListener(namesSpreadChanged);
+    workOpen.addListener(workOpenChanged);
 
     //super init
     super.initState();
@@ -445,6 +446,8 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("-----building-----");
+
     //from our name field we move onto the first phone
     //or whatever else we can
     nameField.nextFunction = toFirstPhone;

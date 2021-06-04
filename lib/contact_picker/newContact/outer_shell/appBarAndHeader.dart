@@ -71,13 +71,6 @@ class NewContactAppBarAndHeader extends StatelessWidget {
                 ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: Container(
-                height: 16,
-                width: MediaQuery.of(context).size.width,
-                color: ThemeData.dark().primaryColor,
-              ),
-            ),
             SliverFillRemaining(
               hasScrollBody: false,
               fillOverscroll: true,

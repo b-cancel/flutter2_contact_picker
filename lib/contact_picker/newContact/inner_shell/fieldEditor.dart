@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/categories/categoryUI.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:page_transition/page_transition.dart';
 
-import '../categorySelect.dart';
+import '../../categories/categoryData.dart';
 import '../newContactPage.dart';
 
 //phones, emails, work (job title, company), addresses, note
@@ -441,80 +442,6 @@ class TheField extends StatelessWidget {
           labelField ?? Container(),
           rightIconButton ?? Container(),
         ],
-      ),
-    );
-  }
-}
-
-class CategorySelector extends StatefulWidget {
-  CategorySelector({
-    @required this.labelType,
-    @required this.labelSelected,
-  });
-
-  final LabelType labelType;
-  final ValueNotifier<String> labelSelected;
-
-  @override
-  _CategorySelectorState createState() => _CategorySelectorState();
-}
-
-class _CategorySelectorState extends State<CategorySelector> {
-  @override
-  void initState() {
-    //when label Selected changes reload
-    widget.labelSelected.addListener(() {
-      setState(() {});
-    });
-
-    //super init
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            PageTransition(
-              type: PageTransitionType.bottomToTop,
-              child: CategorySelectionPage(
-                labelType: widget.labelType,
-                labelString: widget.labelSelected,
-                create: true,
-              ),
-            ),
-          );
-        },
-        child: Container(
-          width: 100,
-          height: 8 + 32.0 + 8,
-          alignment: Alignment.bottomCenter,
-          padding: EdgeInsets.only(
-            left: 16,
-            bottom: 11,
-          ),
-          child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(top: 12),
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-              color: Theme.of(context).primaryColorLight,
-            ))),
-            child: Text(
-              widget.labelSelected.value,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
