@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/addressEditor.dart';
+import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/otherEditors.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/curvedCorner.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../newContactPage.dart';
 import 'avatarEditor.dart';
+import 'editorHelpers.dart';
 
 class ScrollableEditor extends StatelessWidget {
   ScrollableEditor({
@@ -69,119 +74,151 @@ class ScrollableEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double curvature = 24;
-    return OrientationBuilder(builder: (context, orientation) {
-      bool isPortrait = (orientation == Orientation.portrait);
+    //prep vars
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    double smaller = screenHeight < screenWidth ? screenHeight : screenWidth;
+    double imageDiameter = smaller / 2;
 
-      //calc bottom bar height
-      double bottomBarHeight = 32;
-      if (isPortrait == false) bottomBarHeight = 0;
-
-      //calc imageDiameter
-      double imageDiameter = MediaQuery.of(context).size.width / 2;
-      if (isPortrait == false) {
-        imageDiameter = MediaQuery.of(context).size.height / 2;
-      }
-
-      return CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Stack(
-              children: <Widget>[
-                //shifted down so the picture can be slightly on top
-                Container(
-                  color: Colors.transparent,
-                  padding: EdgeInsets.fromLTRB(
-                    0,
-                    //push CARD down to the ABOUT middle of the picture
-                    imageDiameter * (5 / 7),
-                    0,
-                    0,
+    //build
+    return CustomScrollView(
+      physics: BouncingScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: Stack(
+            children: <Widget>[
+              //shifted down so the picture can be slightly on top
+              Container(
+                color: Colors.transparent,
+                padding: EdgeInsets.fromLTRB(
+                  0,
+                  //push CARD down to the ABOUT middle of the picture
+                  imageDiameter * (5 / 7),
+                  0,
+                  0,
+                ),
+                width: MediaQuery.of(context).size.width,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
                   ),
                   width: MediaQuery.of(context).size.width,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          color: ThemeData.dark().primaryColor,
-                          height: curvature,
-                        ),
-                      ),
-                      Card(
-                        margin: EdgeInsets.all(0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(curvature),
-                        ),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          padding: EdgeInsets.fromLTRB(
-                            0,
-                            //push CARD CONTENT down to past the picture
-                            imageDiameter * (2 / 7) + 16 * 2,
-                            0,
-                            16,
-                          ),
-                          child: NewContactEditFields(
-                            //names stuff
-                            bottomBarHeight: bottomBarHeight,
-                            namesSpread: namesSpread,
-                            nameField: nameField,
-                            nameFields: nameFields,
-                            nameLabels: nameLabels,
-
-                            //phones
-                            addPhone: addPhone,
-                            removePhone: removePhone,
-                            phoneFields: phoneValueFields,
-                            phoneLabels: phoneLabelStrings,
-
-                            //emails
-                            addEmail: addEmail,
-                            removeEmail: removeEmail,
-                            emailFields: emailValueFields,
-                            emailLabels: emailLabelStrings,
-
-                            //work stuff
-                            jobTitleField: jobTitleField,
-                            companyField: companyField,
-                            workOpen: workOpen,
-
-                            //address
-                            addAddress: addPostalAddress,
-                            removeAddress: removalPostalAddress,
-                            addressStreetFields: addressStreetFields,
-                            addressCityFields: addressCityFields,
-                            addressPostcodeFields: addressPostcodeFields,
-                            addressRegionFields: addressRegionFields,
-                            addressCountryFields: addressCountryFields,
-                            addressLabels: addressLabelStrings,
-                          ),
-                        ),
-                      ),
-                    ],
+                  padding: EdgeInsets.fromLTRB(
+                    0,
+                    //push CARD CONTENT down to past the picture
+                    imageDiameter * (2 / 7) + 16 * 2,
+                    0,
+                    16,
+                  ),
+                  child: NameEditor(
+                    namesSpread: namesSpread,
+                    nameField: nameField,
+                    nameFields: nameFields,
+                    nameLabels: nameLabels,
                   ),
                 ),
-                //is slightly on top of fields editor
-                AvatarEditor(
-                  imageLocation: imageLocation,
-                  imageDiameter: imageDiameter,
-                ),
-              ],
+              ),
+              //is slightly on top of fields editor
+              AvatarEditor(
+                imageLocation: imageLocation,
+                imageDiameter: imageDiameter,
+              ),
+            ],
+          ),
+        ),
+        SliverStickyHeader(
+          header: SectionTitle(
+            icon: Icons.phone,
+            name: "Phone Number" + (phoneFields.length == 1 ? "" : "s"),
+          ),
+          sliver: SliverToBoxAdapter(
+            child: PhoneNumbersEditor(
+              addPhone: addPhone,
+              removePhone: removePhone,
+              phoneFields: phoneFields,
+              phoneLabels: phoneLabels,
             ),
           ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            fillOverscroll: true,
-            child: Container(
-              color: ThemeData.dark().primaryColor,
+        ),
+        SliverStickyHeader(
+          header: SectionTitle(
+            icon: Icons.email,
+            name: "Email" + (emailFields.length == 1 ? "" : "s"),
+          ),
+          sliver: SliverToBoxAdapter(
+            child: EmailsEditor(
+              addEmail: addEmail,
+              removeEmail: removeEmail,
+              emailFields: emailFields,
+              emailLabels: emailLabels,
             ),
           ),
-        ],
-      );
-    });
+        ),
+        SliverStickyHeader(
+          header: SectionTitle(
+            icon: Icons.work,
+            name: "Work",
+          ),
+          sliver: SliverToBoxAdapter(
+            child: WorkEditor(
+              jobTitleField: jobTitleField,
+              companyField: companyField,
+            ),
+          ),
+        ),
+        SliverStickyHeader(
+          header: SectionTitle(
+            icon: Icons.location_on,
+            name: "Address" + (addressStreetFields.length == 1 ? "" : "es"),
+          ),
+          sliver: SliverToBoxAdapter(
+            child: AddressesEditor(
+              addAddress: addAddress,
+              removeAddress: removeAddress,
+              addressStreetFields: addressStreetFields,
+              addressCityFields: addressCityFields,
+              addressPostcodeFields: addressPostcodeFields,
+              addressRegionFields: addressRegionFields,
+              addressCountryFields: addressCountryFields,
+              addressLabels: addressLabels,
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            height: 24,
+            color: ThemeData.dark().primaryColor,
+            child: Transform.translate(
+              offset: Offset(0, -24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CurvedCorner(
+                    isTop: false,
+                    isLeft: true,
+                    cornerColor: ThemeData.dark().primaryColor,
+                    size: 24,
+                  ),
+                  CurvedCorner(
+                    isTop: false,
+                    isLeft: false,
+                    cornerColor: ThemeData.dark().primaryColor,
+                    size: 24,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          fillOverscroll: true,
+          child: Container(
+            color: ThemeData.dark().primaryColor,
+          ),
+        ),
+      ],
+    );
   }
 }

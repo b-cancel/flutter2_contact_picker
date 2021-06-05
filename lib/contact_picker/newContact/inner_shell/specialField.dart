@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/customField.dart';
 
-import 'fieldEditor.dart';
-
 class TheField extends StatelessWidget {
   const TheField({
     this.label,
     @required this.focusNode,
     @required this.textEditingController,
     @required this.nextFunction,
-    @required this.bottomBarHeight,
     this.labelField,
     this.rightIconButton,
     this.noPadding: false,
@@ -21,7 +18,6 @@ class TheField extends StatelessWidget {
   final FocusNode focusNode;
   final TextEditingController textEditingController;
   final Function nextFunction;
-  final double bottomBarHeight;
   final Widget labelField;
   final Widget rightIconButton;
   final bool noPadding;
@@ -41,9 +37,7 @@ class TheField extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(
                   left: 16,
-                  right: (rightIconButton == null)
-                      ? ((noPadding) ? 0 : iconRightPadding)
-                      : 0,
+                  right: (rightIconButton == null) ? ((noPadding) ? 0 : 32) : 0,
                 ),
                 child: CustomField(
                   focusNode: focusNode,
@@ -64,18 +58,6 @@ class TheField extends StatelessWidget {
                           nextFunction();
                         },
                 ),
-
-                /*TextFormField(
-                  scrollPadding:
-                      EdgeInsets.only(bottom: bottomBarHeight * 2 + 8),
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.only(bottom: 4),
-                    hintText: label,
-                    hintStyle: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                ),*/
               ),
             ),
           ),
