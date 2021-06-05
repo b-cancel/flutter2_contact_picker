@@ -101,7 +101,7 @@ class ScrollableEditor extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   width: MediaQuery.of(context).size.width,
                   padding: EdgeInsets.fromLTRB(
@@ -182,32 +182,6 @@ class ScrollableEditor extends StatelessWidget {
               addressRegionFields: addressRegionFields,
               addressCountryFields: addressCountryFields,
               addressLabels: addressLabels,
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Container(
-            height: 24,
-            color: ThemeData.dark().primaryColor,
-            child: Transform.translate(
-              offset: Offset(0, -24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CurvedCorner(
-                    isTop: false,
-                    isLeft: true,
-                    cornerColor: ThemeData.dark().primaryColor,
-                    size: 24,
-                  ),
-                  CurvedCorner(
-                    isTop: false,
-                    isLeft: false,
-                    cornerColor: ThemeData.dark().primaryColor,
-                    size: 24,
-                  ),
-                ],
-              ),
             ),
           ),
         ),

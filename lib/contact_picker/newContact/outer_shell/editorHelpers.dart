@@ -13,64 +13,40 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          height: 48,
-          width: MediaQuery.of(context).size.width,
-          color: Colors.black,
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: 8,
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: 16,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  Text(
-                    name,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Icon(
-                    icon,
-                    //hidden for now
-                    color: Colors.transparent,
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-          ),
+    return Container(
+      height: 48,
+      width: MediaQuery.of(context).size.width,
+      color: Colors.black,
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: 8,
         ),
-        Transform.translate(
-          offset: Offset(0, -24),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              CurvedCorner(
-                isTop: false,
-                isLeft: true,
-                cornerColor: Colors.black,
-                size: 24,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              Text(
+                name,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              CurvedCorner(
-                isTop: false,
-                isLeft: false,
-                cornerColor: Colors.black,
-                size: 24,
+              Icon(
+                icon,
+                //hidden for now
+                color: Colors.transparent,
+                size: 18,
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -93,7 +69,7 @@ class FieldAdder extends StatelessWidget {
         onTap: () => add(),
         child: Row(
           children: [
-            RightIconButton(
+            FieldIconButton(
               iconData: Icons.add,
               color: Colors.green,
             ),
@@ -112,18 +88,18 @@ class FieldAdder extends StatelessWidget {
   }
 }
 
-class RightIconButton extends StatelessWidget {
-  RightIconButton({
+class FieldIconButton extends StatelessWidget {
+  FieldIconButton({
     @required this.iconData,
     @required this.color,
     this.onTapped,
-    this.size,
+    this.iconSize,
   });
 
   final IconData iconData;
   final Color color;
   final Function onTapped;
-  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +122,7 @@ class RightIconButton extends StatelessWidget {
             child: Icon(
               iconData,
               color: Colors.white,
-              size: size,
+              size: iconSize,
             ),
           ),
         ),

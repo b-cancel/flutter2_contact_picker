@@ -33,40 +33,70 @@ class AddressesEditor extends StatelessWidget {
     List<Widget> addressRows = [];
     for (int i = 0; i < addressStreetFields.length; i++) {
       addressRows.add(
-        AddressField(
-          addressStuff: [
-            addressStreetFields[i],
-            addressCityFields[i],
-            addressPostcodeFields[i],
-            addressRegionFields[i],
-            addressCountryFields[i],
-          ],
-          //other
-          removeTheAddress: () {
-            removeAddress(i);
-          },
-          addressLabel: addressLabels[i],
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: 12,
+          ),
+          child: AddressField(
+            addressStuff: [
+              addressStreetFields[i],
+              addressCityFields[i],
+              addressPostcodeFields[i],
+              addressRegionFields[i],
+              addressCountryFields[i],
+            ],
+            //other
+            removeTheAddress: () {
+              removeAddress(i);
+            },
+            addressLabel: addressLabels[i],
+          ),
         ),
       );
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.white,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            children: addressRows,
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Colors.black,
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: ThemeData.dark().primaryColor,
+                ),
+              ),
+            ],
           ),
-          FieldAdder(
-            add: addAddress,
-            fieldName: "address",
+        ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Colors.white,
           ),
-        ],
-      ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: addressRows.length > 0 ? 16 : 0,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Column(
+                  children: addressRows,
+                ),
+                FieldAdder(
+                  add: addAddress,
+                  fieldName: "address",
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -142,11 +172,11 @@ class AddressField extends StatelessWidget {
             labelType: LabelType.address,
             labelSelected: addressLabel,
           ),
-          RightIconButton(
+          FieldIconButton(
             onTapped: () => removeTheAddress(),
             iconData: FontAwesomeIcons.minus,
             color: Colors.red,
-            size: 16,
+            iconSize: 16,
           ),
         ],
       ),

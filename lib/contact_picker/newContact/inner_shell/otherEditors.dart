@@ -28,12 +28,17 @@ class NameEditor extends StatelessWidget {
     for (int i = 0; i < nameLabels.length; i++) {
       FieldData thisField = nameFields[i];
       nameRows.add(
-        TheField(
-          focusNode: thisField.focusNode,
-          textEditingController: thisField.controller,
-          nextFunction: thisField.nextFunction,
-          label: nameLabels[i],
-          noPadding: true,
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: 12,
+            left: 16,
+          ),
+          child: TheField(
+            focusNode: thisField.focusNode,
+            textEditingController: thisField.controller,
+            nextFunction: thisField.nextFunction,
+            label: nameLabels[i],
+          ),
         ),
       );
     }
@@ -57,9 +62,9 @@ class NameEditor extends StatelessWidget {
                   alignment: Alignment.topCenter,
                   child: Padding(
                     padding: EdgeInsets.only(
-                      top: 16,
+                      top: 6,
                     ),
-                    child: RightIconButton(
+                    child: FieldIconButton(
                       iconData: Icons.keyboard_arrow_up,
                       color: Colors.black,
                     ),
@@ -71,17 +76,22 @@ class NameEditor extends StatelessWidget {
         ),
       );
     } else {
-      return TheField(
-        label: "Name",
-        focusNode: nameField.focusNode,
-        textEditingController: nameField.controller,
-        nextFunction: nameField.nextFunction,
-        rightIconButton: RightIconButton(
-          onTapped: () {
-            namesSpread.value = true;
-          },
-          iconData: Icons.keyboard_arrow_down,
-          color: Colors.black,
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+        ),
+        child: TheField(
+          label: "Name",
+          focusNode: nameField.focusNode,
+          textEditingController: nameField.controller,
+          nextFunction: nameField.nextFunction,
+          rightIconButton: FieldIconButton(
+            onTapped: () {
+              namesSpread.value = true;
+            },
+            iconData: Icons.keyboard_arrow_down,
+            color: Colors.black,
+          ),
         ),
       );
     }
@@ -109,42 +119,53 @@ class PhoneNumbersEditor extends StatelessWidget {
     for (int i = 0; i < phoneFields.length; i++) {
       FieldData thisField = phoneFields[i];
       phoneRows.add(
-        TheField(
-          focusNode: thisField.focusNode,
-          textEditingController: thisField.controller,
-          nextFunction: thisField.nextFunction,
-          label: "Phone",
-          labelField: CategorySelector(
-            labelType: LabelType.phone,
-            labelSelected: phoneLabels[i],
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: 12,
+            right: 16,
           ),
-          rightIconButton: RightIconButton(
-            onTapped: () => removePhone(i),
-            iconData: FontAwesomeIcons.minus,
-            color: Colors.red,
-            size: 16,
+          child: TheField(
+            focusNode: thisField.focusNode,
+            textEditingController: thisField.controller,
+            nextFunction: thisField.nextFunction,
+            label: "Phone Number",
+            labelField: CategorySelector(
+              labelType: LabelType.phone,
+              labelSelected: phoneLabels[i],
+            ),
+            leftIconButton: FieldIconButton(
+              onTapped: () => removePhone(i),
+              iconData: FontAwesomeIcons.minus,
+              color: Colors.red,
+              iconSize: 16,
+            ),
+            textInputType: TextInputType.phone,
           ),
-          textInputType: TextInputType.phone,
         ),
       );
     }
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            children: phoneRows,
-          ),
-          FieldAdder(
-            add: addPhone,
-            fieldName: "phone number",
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: phoneRows.length > 0 ? 16 : 0,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(
+              children: phoneRows,
+            ),
+            FieldAdder(
+              add: addPhone,
+              fieldName: "phone number",
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -171,42 +192,53 @@ class EmailsEditor extends StatelessWidget {
     for (int i = 0; i < emailFields.length; i++) {
       FieldData thisField = emailFields[i];
       emailRows.add(
-        TheField(
-          focusNode: thisField.focusNode,
-          textEditingController: thisField.controller,
-          nextFunction: thisField.nextFunction,
-          label: "Email",
-          labelField: CategorySelector(
-            labelType: LabelType.email,
-            labelSelected: emailLabels[i],
+        Padding(
+          padding: EdgeInsets.only(
+            bottom: 12,
+            right: 16,
           ),
-          rightIconButton: RightIconButton(
-            onTapped: () => removeEmail(i),
-            iconData: FontAwesomeIcons.minus,
-            color: Colors.red,
-            size: 16,
+          child: TheField(
+            focusNode: thisField.focusNode,
+            textEditingController: thisField.controller,
+            nextFunction: thisField.nextFunction,
+            label: "Email",
+            labelField: CategorySelector(
+              labelType: LabelType.email,
+              labelSelected: emailLabels[i],
+            ),
+            leftIconButton: FieldIconButton(
+              onTapped: () => removeEmail(i),
+              iconData: FontAwesomeIcons.minus,
+              color: Colors.red,
+              iconSize: 16,
+            ),
+            textInputType: TextInputType.emailAddress,
           ),
-          textInputType: TextInputType.emailAddress,
         ),
       );
     }
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            children: emailRows,
-          ),
-          FieldAdder(
-            add: addEmail,
-            fieldName: "email address",
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: emailRows.length > 0 ? 16 : 0,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Column(
+              children: emailRows,
+            ),
+            FieldAdder(
+              add: addEmail,
+              fieldName: "email address",
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -226,24 +258,35 @@ class WorkEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
-      child: Column(
-        children: <Widget>[
-          TheField(
-            focusNode: jobTitleField.focusNode,
-            textEditingController: jobTitleField.controller,
-            nextFunction: jobTitleField.nextFunction,
-            label: "Job title",
-          ),
-          TheField(
-            focusNode: companyField.focusNode,
-            textEditingController: companyField.controller,
-            nextFunction: companyField.nextFunction,
-            label: "Company",
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: 12,
+              ),
+              child: TheField(
+                focusNode: jobTitleField.focusNode,
+                textEditingController: jobTitleField.controller,
+                nextFunction: jobTitleField.nextFunction,
+                label: "Job title",
+              ),
+            ),
+            TheField(
+              focusNode: companyField.focusNode,
+              textEditingController: companyField.controller,
+              nextFunction: companyField.nextFunction,
+              label: "Company",
+            ),
+          ],
+        ),
       ),
     );
   }

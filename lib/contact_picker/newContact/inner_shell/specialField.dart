@@ -8,10 +8,9 @@ class TheField extends StatelessWidget {
     @required this.textEditingController,
     @required this.nextFunction,
     this.labelField,
+    this.leftIconButton,
     this.rightIconButton,
-    this.noPadding: false,
     this.textInputType: TextInputType.text,
-    this.isRequired: false,
   });
 
   final String label;
@@ -19,52 +18,39 @@ class TheField extends StatelessWidget {
   final TextEditingController textEditingController;
   final Function nextFunction;
   final Widget labelField;
+  final Widget leftIconButton;
   final Widget rightIconButton;
-  final bool noPadding;
   final TextInputType textInputType;
-  final bool isRequired;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      //color: Colors.purple,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Flexible(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 16,
-                  right: (rightIconButton == null) ? ((noPadding) ? 0 : 32) : 0,
-                ),
-                child: CustomField(
-                  focusNode: focusNode,
-                  textEditingController: textEditingController,
-                  textInputType: textInputType,
-                  notMultilineInputAction: (nextFunction == null)
-                      ? TextInputAction.done
-                      : TextInputAction.next,
+    return Row(
+      children: [
+        leftIconButton ?? Container(),
+        labelField ?? Container(),
+        Flexible(
+          child: CustomField(
+            focusNode: focusNode,
+            textEditingController: textEditingController,
+            textInputType: textInputType,
+            notMultilineInputAction: (nextFunction == null)
+                ? TextInputAction.done
+                : TextInputAction.next,
 
-                  label: label,
-                  errorOnEmptyField: isRequired,
-                  showClearRegardlessOfFocus: false,
-                  //TODO: might need to fix
-                  autofocus: true, //unknown how this was working
-                  onEditingComplete: (nextFunction == null)
-                      ? null
-                      : () {
-                          nextFunction();
-                        },
-                ),
-              ),
-            ),
+            label: label,
+            errorOnEmptyField: false,
+            showClearRegardlessOfFocus: false,
+            //TODO: might need to fix
+            autofocus: true, //unknown how this was working
+            onEditingComplete: (nextFunction == null)
+                ? null
+                : () {
+                    nextFunction();
+                  },
           ),
-          labelField ?? Container(),
-          rightIconButton ?? Container(),
-        ],
-      ),
+        ),
+        rightIconButton ?? Container(),
+      ],
     );
   }
 }

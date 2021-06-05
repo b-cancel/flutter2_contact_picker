@@ -36,17 +36,25 @@ class CategorySelector extends StatelessWidget {
           ),
         );
       },
-      child: AnimatedBuilder(
-        animation: labelSelected,
-        builder: (BuildContext context, Widget child) {
-          return Text(
-            labelSelected.value,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          );
-        },
+      child: Row(
+        children: [
+          AnimatedBuilder(
+            animation: labelSelected,
+            builder: (BuildContext context, Widget child) {
+              return Text(
+                labelSelected.value,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              );
+            },
+          ),
+          Icon(
+            Icons.chevron_right,
+            color: Colors.black,
+          ),
+        ],
       ),
     );
   }
