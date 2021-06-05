@@ -3,6 +3,9 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/justifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../categories/categoryData.dart';
 import 'inner_shell/nameHandler.dart';
 import 'package:flutter2_contact_picker/appBarButton.dart';
@@ -117,7 +120,9 @@ class _NewContactPageState extends State<NewContactPage> {
       if (canAddFirstField) {
         addFirst(); //will focus after build
       } else {
-        FocusScope.of(context).requestFocus(fields[0].focusNode);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(fields[0].focusNode);
+        });
       }
     } else {
       if (alternative != null) {
@@ -151,9 +156,11 @@ class _NewContactPageState extends State<NewContactPage> {
   }
 
   toWork() {
-    if (workOpen.value)
-      FocusScope.of(context).requestFocus(jobTitleField.focusNode);
-    else {
+    if (workOpen.value) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
+      });
+    } else {
       if (autoOpenWork)
         openWork();
       else
@@ -455,7 +462,9 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (nameFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          FocusScope.of(context).requestFocus(nameFields[i + 1].focusNode);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FocusScope.of(context).requestFocus(nameFields[i + 1].focusNode);
+          });
         };
       } else
         thisField.nextFunction = toFirstPhone;
@@ -467,8 +476,10 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (phoneValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          FocusScope.of(context)
-              .requestFocus(phoneValueFields[i + 1].focusNode);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FocusScope.of(context)
+                .requestFocus(phoneValueFields[i + 1].focusNode);
+          });
         };
       } else
         thisField.nextFunction = toFirstEmail;
@@ -480,8 +491,10 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (emailValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          FocusScope.of(context)
-              .requestFocus(emailValueFields[i + 1].focusNode);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FocusScope.of(context)
+                .requestFocus(emailValueFields[i + 1].focusNode);
+          });
         };
       } else
         thisField.nextFunction = toWork;
@@ -489,7 +502,9 @@ class _NewContactPageState extends State<NewContactPage> {
 
     //handle work section
     jobTitleField.nextFunction = () {
-      FocusScope.of(context).requestFocus(companyField.focusNode);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(companyField.focusNode);
+      });
     };
     companyField.nextFunction = toFirstAddress;
 
@@ -498,21 +513,33 @@ class _NewContactPageState extends State<NewContactPage> {
     for (int i = 0; i < addressCount; i++) {
       //street, city, postcode, region, country
       addressStreetFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
+        });
       };
       addressCityFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressPostcodeFields[i].focusNode);
-      };
-      addressPostcodeFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
+        });
       };
       addressRegionFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressCountryFields[i].focusNode);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context)
+              .requestFocus(addressPostcodeFields[i].focusNode);
+        });
+      };
+      addressPostcodeFields[i].nextFunction = () {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context)
+              .requestFocus(addressCountryFields[i].focusNode);
+        });
       };
       addressCountryFields[i].nextFunction = () {
         if (i < (addressCount - 1)) {
-          FocusScope.of(context)
-              .requestFocus(addressStreetFields[i + 1].focusNode);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            FocusScope.of(context)
+                .requestFocus(addressStreetFields[i + 1].focusNode);
+          });
         }
       };
     }
@@ -622,91 +649,16 @@ class _NewContactPageState extends State<NewContactPage> {
     bool hasFirstName = (nameFields[1].controller.text.length > 0);
     bool hasLastName = (nameFields[3].controller.text.length > 0);
     bool hasName = (hasFirstName || hasLastName);
-    bool hasNumber = (phoneValueFields.length > 0);
 
     //we can create the contact ONLY IF we have a first name
-    if (hasName && hasNumber) {
-      //maybe get avatar
-      Uint8List maybeAvatar = await getAvatar();
-
-      //save the name(s)
-      String maybeFirstName = nameFields[1].controller.text;
-      String maybeLastName = nameFields[3].controller.text;
-
-      //NOTE: these are showing up exactly as expected on android
-      //create contact WITH name to avoid error
-      Contact newContact = new Contact(
-        //avatar
-        avatar: maybeAvatar,
-        //name
-        prefix: nameFields[0].controller.text,
-        givenName: (maybeFirstName == "") ? " " : maybeFirstName,
-        middleName: nameFields[2].controller.text,
-        familyName: (maybeLastName == "") ? " " : maybeLastName,
-        suffix: nameFields[4].controller.text,
-        //phones
-        phones: itemFieldData2ItemList(
-          phoneValueFields,
-          phoneLabelStrings,
-        ),
-        //emails
-        emails: itemFieldData2ItemList(
-          emailValueFields,
-          emailLabelStrings,
-        ),
-        //work
-        jobTitle: jobTitleField.controller.text,
-        company: companyField.controller.text,
-        //addresses
-        postalAddresses: fieldsToAddresses(),
-      );
-
-      /*
-      bool permissionGranted = await requestPermission(
-                  context,
-                  requestedAutomatically: false,
-                  permission: Permission.contacts,
-                  permissionName: "contacts",
-                  permissionJustification: JustifyContactsPermission(),
-                );
-
-                //go to the contact picker if the permission is granted
-                if (permissionGranted) {
-                  goToContactPicker();
-                }
-      */
-
-      //handle permissions
-      /*
-      PermissionStatus permissionStatus =
-          (await Permission.getPermissionsStatus([PermissionName.Contacts]))[0]
-              .permissionStatus;
-      if (isAuthorized(permissionStatus)) {
-        //with permission we can both
-        //1. add the contact
-        //NOTE: The contact must have a firstName / lastName to be successfully added
-        await ContactsService.addContact(newContact);
-        //2. and update the contact
-        widget.onSelect(context, newContact);
-      } else {}
-      */
-    } else {
-      //create the message
-      String requiredFields;
-      if (hasNumber == false && hasName)
-        requiredFields = "Number is";
-      else if (hasName == false && hasNumber)
-        requiredFields = "Name is";
-      else
-        requiredFields = "Name and Number are";
-
+    if (hasName == false) {
       //inform the user of why their command didn't go through
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.red,
           content: Text(
-            "The " + requiredFields + " Required",
+            "A Name Is Required",
             style: TextStyle(
               color: Colors.white,
             ),
@@ -717,13 +669,79 @@ class _NewContactPageState extends State<NewContactPage> {
       //act accordingly
       if (hasName == false) {
         //then focus on the name field
-        FocusScope.of(context).requestFocus(
-          (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          FocusScope.of(context).requestFocus(
+            (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
+          );
+        });
       } else {
         addPhone();
       }
+    } else {
+      //we have what we need to make a contact
+      if (await havePermissionToCreateContact()) {
+        saveNewContactAndPop();
+      }
     }
+  }
+
+  havePermissionToCreateContact() async {
+    PermissionStatus status = await Permission.contacts.status;
+    if (status.isGranted || status.isLimited) {
+      return true;
+    } else {
+      return await requestPermission(
+        context,
+        requestedAutomatically: false,
+        permission: Permission.contacts,
+        permissionName: "contacts",
+        permissionJustification: JustifyContactsPermissionToSaveContact(),
+      );
+    }
+  }
+
+  saveNewContactAndPop() async {
+    //maybe get avatar
+    Uint8List maybeAvatar = await getAvatar();
+
+    //save the name(s)
+    String maybeFirstName = nameFields[1].controller.text;
+    String maybeLastName = nameFields[3].controller.text;
+
+    //NOTE: these are showing up exactly as expected on android
+    //create contact WITH name to avoid error
+    Contact newContact = new Contact(
+      //avatar
+      avatar: maybeAvatar,
+      //name
+      prefix: nameFields[0].controller.text,
+      givenName: (maybeFirstName == "") ? " " : maybeFirstName,
+      middleName: nameFields[2].controller.text,
+      familyName: (maybeLastName == "") ? " " : maybeLastName,
+      suffix: nameFields[4].controller.text,
+      //phones
+      phones: itemFieldData2ItemList(
+        phoneValueFields,
+        phoneLabelStrings,
+      ),
+      //emails
+      emails: itemFieldData2ItemList(
+        emailValueFields,
+        emailLabelStrings,
+      ),
+      //work
+      jobTitle: jobTitleField.controller.text,
+      company: companyField.controller.text,
+      //addresses
+      postalAddresses: fieldsToAddresses(),
+    );
+
+    //actually save the contact
+    await ContactsService.addContact(newContact);
+
+    //pop and pass true (to indivate we made a new contact)
+    //TODO: indicate exactly what contact we added so we can add it to the recents list from with the select a contact page
+    Navigator.of(context).pop();
   }
 
   Future<Uint8List> getAvatar() async {
@@ -732,47 +750,10 @@ class _NewContactPageState extends State<NewContactPage> {
       List<int> dataList = await File(imageLocation.value).readAsBytes();
       Uint8List eightList = Uint8List.fromList(dataList);
 
-      //take extra steps if needed
-      if (true) {
-        //isFromCamera.value
-        /*
-      UNCOMMENT THIS
-        var res = await ImageGallerySaver.save(eightList);
-        print("*******" + res.toString());
-        */
-        /*
-        new File(path).writeAsBytes(buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
-        */
-        /*
-        var buffer = new Uint8List(8).buffer;
-        var bdata = new ByteData.view(buffer);
-        bdata.setFloat32(0, 3.04);
-        int huh = bdata.getInt32(0);
-        */
-        /*
-        ByteData bytes = 
-        await rootBundle.load('assets/flutter.png');
-        */
-        //save the file since right now its only in temp memory
-
-        /*
-        UNCOMMENT THIS
-        imageLocation.value = await ImagePickerSaver.saveFile(
-          fileData: eightList,
-          title: "some title",
-          description: "some description",
-        );
-        */
-
-        //get a reference to the file and update values
-        File ref = File.fromUri(Uri.file(imageLocation.value));
-        dataList = await ref.readAsBytes();
-        eightList = Uint8List.fromList(dataList);
-      }
-
-      print("-----");
-      print(eightList.toString());
-      print("-----");
+      //TODO: check if we have to save images that we took from within the app
+      //in order to be able to use them within a contact
+      //the plugin below is the most highly rated for this action, if its deemed necesary
+      //https://pub.dev/packages/image_gallery_saver
 
       //save in new contact
       return eightList;

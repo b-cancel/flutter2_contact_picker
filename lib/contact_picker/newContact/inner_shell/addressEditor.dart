@@ -12,7 +12,7 @@ class AddressesEditor extends StatelessWidget {
     Key key,
     @required this.addAddress,
     @required this.removeAddress,
-    @required this.addressStreetFields,
+    @required this.addressStreetAddressFields,
     @required this.addressCityFields,
     @required this.addressPostcodeFields,
     @required this.addressRegionFields,
@@ -22,7 +22,7 @@ class AddressesEditor extends StatelessWidget {
 
   final Function addAddress;
   final Function removeAddress;
-  final List<FieldData> addressStreetFields;
+  final List<FieldData> addressStreetAddressFields;
   final List<FieldData> addressCityFields;
   final List<FieldData> addressPostcodeFields;
   final List<FieldData> addressRegionFields;
@@ -32,7 +32,7 @@ class AddressesEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> addressRows = [];
-    for (int i = 0; i < addressStreetFields.length; i++) {
+    for (int i = 0; i < addressStreetAddressFields.length; i++) {
       addressRows.add(
         Padding(
           padding: EdgeInsets.only(
@@ -40,10 +40,10 @@ class AddressesEditor extends StatelessWidget {
           ),
           child: AddressField(
             addressStuff: [
-              addressStreetFields[i],
+              addressStreetAddressFields[i],
               addressCityFields[i],
-              addressPostcodeFields[i],
               addressRegionFields[i],
+              addressPostcodeFields[i],
               addressCountryFields[i],
             ],
             //other
@@ -104,10 +104,10 @@ class AddressesEditor extends StatelessWidget {
 
 //-------------------------ADDRESS FIELDS-------------------------(extension of TheField class)
 List<String> addressLabels = [
-  "Street",
+  "Street Address",
   "City",
-  "Postal Code",
   "Region",
+  "Postal Code",
   "Country"
 ];
 

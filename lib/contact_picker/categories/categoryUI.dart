@@ -41,8 +41,12 @@ class CategorySelector extends StatelessWidget {
           AnimatedBuilder(
             animation: labelSelected,
             builder: (BuildContext context, Widget child) {
-              return Text(
-                labelSelected.value,
+              return SizedBox(
+                width: 45,
+                child: Text(
+                  labelSelected.value,
+                  overflow: TextOverflow.ellipsis,
+                ),
               );
             },
           ),

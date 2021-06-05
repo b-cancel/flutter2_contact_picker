@@ -38,8 +38,6 @@ dependencies:
   image: ^3.0.2
   provider: ^5.0.0 #Probably Not Required
   image_picker: ^0.8.0+1 #Requires Extra Setup
-  image_picker_saver: ^0.3.0 #Probably Not Required & Requires Extra Setup
-  image_gallery_saver: ^1.6.9 #Probably Not Required & Requires Extra Setup
 
   #PERMISSIONS
   permission_handler: ^8.0.0+2 #Requires Extra Setup
@@ -51,7 +49,6 @@ dependencies:
   vibration: ^1.7.3
   path_provider: ^2.0.2
   diacritic: ^0.1.3 #Probably Not Required
-  fluttertoast: ^8.0.7 #Probably Not Required
   
   #SCROLL RELATED
   scroll_to_index: ^2.0.0

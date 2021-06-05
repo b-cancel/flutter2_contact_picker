@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/addressEditor.dart';
 import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/otherEditors.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/curvedCorner.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../newContactPage.dart';
@@ -176,7 +175,7 @@ class ScrollableEditor extends StatelessWidget {
             child: AddressesEditor(
               addAddress: addAddress,
               removeAddress: removeAddress,
-              addressStreetFields: addressStreetFields,
+              addressStreetAddressFields: addressStreetFields,
               addressCityFields: addressCityFields,
               addressPostcodeFields: addressPostcodeFields,
               addressRegionFields: addressRegionFields,

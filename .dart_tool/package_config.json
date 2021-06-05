@@ -116,12 +116,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "fluttertoast",
-      "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/fluttertoast-8.0.7",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "font_awesome_flutter",
       "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/font_awesome_flutter-9.0.0",
       "packageUri": "lib/",
@@ -146,12 +140,6 @@
       "languageVersion": "2.12"
     },
     {
-      "name": "image_gallery_saver",
-      "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/image_gallery_saver-1.6.9",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    },
-    {
       "name": "image_picker",
       "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker-0.8.0+1",
       "packageUri": "lib/",
@@ -168,12 +156,6 @@
       "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_platform_interface-2.1.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
-    },
-    {
-      "name": "image_picker_saver",
-      "rootUri": "file:///Users/bryancancel/Documents/installs/flutter/.pub-cache/hosted/pub.dartlang.org/image_picker_saver-0.3.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.0"
     },
     {
       "name": "js",
@@ -398,7 +380,7 @@
       "languageVersion": "2.7"
     }
   ],
-  "generated": "2021-06-05T05:02:38.660790Z",
+  "generated": "2021-06-05T19:15:44.004802Z",
   "generator": "pub",
   "generatorVersion": "2.13.1"
 }
