@@ -60,14 +60,10 @@ class NameEditor extends StatelessWidget {
                 },
                 child: Container(
                   alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: 6,
-                    ),
-                    child: FieldIconButton(
-                      iconData: Icons.keyboard_arrow_up,
-                      color: Colors.black,
-                    ),
+                  child: FieldIconButton(
+                    lessRightPadding: false,
+                    iconData: Icons.keyboard_arrow_up,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -86,6 +82,7 @@ class NameEditor extends StatelessWidget {
           textEditingController: nameField.controller,
           nextFunction: nameField.nextFunction,
           rightIconButton: FieldIconButton(
+            lessRightPadding: false,
             onTapped: () {
               namesSpread.value = true;
             },

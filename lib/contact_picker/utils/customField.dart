@@ -372,6 +372,12 @@ class _CustomFieldState extends State<CustomField> {
                     widget.onEditingComplete();
                   },
             decoration: InputDecoration(
+              //tighten up padding
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 8,
+              ),
+
               //show "button" if the field is empty & we don't show an error when that happens
               filled: buttonMode,
               fillColor: Colors.blue,

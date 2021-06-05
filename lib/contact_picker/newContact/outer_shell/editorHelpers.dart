@@ -94,12 +94,14 @@ class FieldIconButton extends StatelessWidget {
     @required this.color,
     this.onTapped,
     this.iconSize,
+    this.lessRightPadding: true,
   });
 
   final IconData iconData;
   final Color color;
   final Function onTapped;
   final double iconSize;
+  final bool lessRightPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -107,22 +109,27 @@ class FieldIconButton extends StatelessWidget {
       //color: Colors.grey,
       height: 8 + 8 + 32.0,
       padding: EdgeInsets.symmetric(
-        horizontal: 16,
         vertical: 0,
       ),
-      child: SizedBox(
-        width: 24,
-        height: 24,
-        child: Container(
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Icon(
-              iconData,
-              color: Colors.white,
-              size: iconSize,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: (lessRightPadding ? 8 : 16),
+        ),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: Container(
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Icon(
+                iconData,
+                color: Colors.white,
+                size: iconSize,
+              ),
             ),
           ),
         ),

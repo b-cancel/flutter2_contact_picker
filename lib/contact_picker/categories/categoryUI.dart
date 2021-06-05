@@ -43,10 +43,6 @@ class CategorySelector extends StatelessWidget {
             builder: (BuildContext context, Widget child) {
               return Text(
                 labelSelected.value,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 18,
-                ),
               );
             },
           ),
@@ -119,7 +115,7 @@ class CategorySelectionPageBody extends StatelessWidget {
               if (index < defaultLabels.length) {
                 return ClipRRect(
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(index == 0 ? 24 : 0),
+                    top: Radius.circular(index == 0 ? 16 : 0),
                   ),
                   child: Container(
                     color: Colors.white,
@@ -151,7 +147,7 @@ class CategorySelectionPageBody extends StatelessWidget {
                   color: ThemeData.dark().primaryColor,
                   child: ClipRRect(
                     borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(24),
+                      bottom: Radius.circular(16),
                     ),
                     child: Container(
                       color: Colors.white,
@@ -289,19 +285,27 @@ void customTypePopUp(
       return Theme(
         data: ThemeData.light(),
         child: AlertDialog(
-          title: Padding(
+          title: Container(
+            decoration: BoxDecoration(
+              color: ThemeData.dark().primaryColor,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(4),
+              ),
+            ),
             padding: EdgeInsets.symmetric(
               horizontal: 16,
             ),
             child: Padding(
               padding: EdgeInsets.only(
                 top: 24,
+                bottom: 16,
               ),
               child: Text(
                 ((create) ? "Create" : "Rename") + " Custom Type",
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                   fontSize: 20,
                 ),
               ),

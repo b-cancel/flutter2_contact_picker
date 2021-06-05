@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/categories/categoryData.dart';
 import 'package:flutter2_contact_picker/contact_picker/categories/categoryUI.dart';
+import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/specialField.dart';
 import 'package:flutter2_contact_picker/contact_picker/newContact/outer_shell/editorHelpers.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -35,7 +36,7 @@ class AddressesEditor extends StatelessWidget {
       addressRows.add(
         Padding(
           padding: EdgeInsets.only(
-            bottom: 12,
+            bottom: 16, //on top of the 12 below every field
           ),
           child: AddressField(
             addressStuff: [
@@ -131,24 +132,13 @@ class AddressField extends StatelessWidget {
       fields.add(
         Padding(
           padding: EdgeInsets.only(
-            bottom: (i == 4) ? 0 : 12,
+            bottom: 12,
           ),
-          //TODO: replace this
-          child: TextFormField(
+          child: TheField(
             focusNode: thisField.focusNode,
-            controller: thisField.controller,
-            style: TextStyle(
-              fontSize: 18,
-            ),
-            onEditingComplete: () => thisField.nextFunction(),
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.only(bottom: 4),
-              hintText: addressLabels[i],
-              hintStyle: TextStyle(
-                fontSize: 18,
-              ),
-            ),
+            textEditingController: thisField.controller,
+            nextFunction: () => thisField.nextFunction(),
+            label: addressLabels[i],
           ),
         ),
       );
@@ -160,23 +150,25 @@ class AddressField extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Flexible(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Column(
-                children: fields,
-              ),
-            ),
-          ),
-          CategorySelector(
-            labelType: LabelType.address,
-            labelSelected: addressLabel,
-          ),
           FieldIconButton(
             onTapped: () => removeTheAddress(),
             iconData: FontAwesomeIcons.minus,
             color: Colors.red,
             iconSize: 16,
+          ),
+          CategorySelector(
+            labelType: LabelType.address,
+            labelSelected: addressLabel,
+          ),
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: 16,
+              ),
+              child: Column(
+                children: fields,
+              ),
+            ),
           ),
         ],
       ),
