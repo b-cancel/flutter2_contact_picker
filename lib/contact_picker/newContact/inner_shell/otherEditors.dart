@@ -25,51 +25,58 @@ class NameEditor extends StatelessWidget {
   Widget build(BuildContext context) {
     //create all the needed rows
     List<Widget> nameRows = [];
-    for (int i = 0; i < nameLabels.length; i++) {
-      FieldData thisField = nameFields[i];
+    for (int index = 0; index < nameLabels.length; index++) {
+      FieldData thisField = nameFields[index];
       nameRows.add(
-        Padding(
+        Container(
+          decoration: BoxDecoration(
+            border: index == 0
+                ? null
+                : Border(
+                    top: BorderSide(
+                      color: Colors.grey[300],
+                      width: 1,
+                    ),
+                  ),
+          ),
           padding: EdgeInsets.only(
-            bottom: 12,
             left: 16,
           ),
           child: TheField(
             focusNode: thisField.focusNode,
             textEditingController: thisField.controller,
             nextFunction: thisField.nextFunction,
-            label: nameLabels[i],
+            label: nameLabels[index],
           ),
         ),
       );
     }
 
     if (namesSpread.value) {
-      return IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Column(
-                children: nameRows,
-              ),
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              children: nameRows,
             ),
-            Container(
-              child: InkWell(
-                onTap: () {
-                  namesSpread.value = false;
-                },
-                child: Container(
-                  alignment: Alignment.topCenter,
-                  child: FieldIconButton(
-                    lessRightPadding: false,
-                    iconData: Icons.keyboard_arrow_up,
-                    color: Colors.black,
-                  ),
+          ),
+          Container(
+            child: InkWell(
+              onTap: () {
+                namesSpread.value = false;
+              },
+              child: Container(
+                alignment: Alignment.topCenter,
+                child: FieldIconButton(
+                  lessRightPadding: false,
+                  iconData: Icons.keyboard_arrow_up,
+                  color: Colors.black,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     } else {
       return Padding(
@@ -116,9 +123,16 @@ class PhoneNumbersEditor extends StatelessWidget {
     for (int i = 0; i < phoneFields.length; i++) {
       FieldData thisField = phoneFields[i];
       phoneRows.add(
-        Padding(
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey[300],
+                width: 1,
+              ),
+            ),
+          ),
           padding: EdgeInsets.only(
-            bottom: 12,
             right: 16,
           ),
           child: TheField(
@@ -149,7 +163,7 @@ class PhoneNumbersEditor extends StatelessWidget {
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          vertical: phoneRows.length > 0 ? 16 : 0,
+          vertical: 0,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -189,9 +203,16 @@ class EmailsEditor extends StatelessWidget {
     for (int i = 0; i < emailFields.length; i++) {
       FieldData thisField = emailFields[i];
       emailRows.add(
-        Padding(
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey[300],
+                width: 1,
+              ),
+            ),
+          ),
           padding: EdgeInsets.only(
-            bottom: 12,
             right: 16,
           ),
           child: TheField(
@@ -220,22 +241,17 @@ class EmailsEditor extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: emailRows.length > 0 ? 16 : 0,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              children: emailRows,
-            ),
-            FieldAdder(
-              add: addEmail,
-              fieldName: "email address",
-            ),
-          ],
-        ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Column(
+            children: emailRows,
+          ),
+          FieldAdder(
+            add: addEmail,
+            fieldName: "email address",
+          ),
+        ],
       ),
     );
   }
@@ -258,16 +274,20 @@ class WorkEditor extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         color: Colors.white,
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: 12,
+      child: Column(
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey[300],
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16,
               ),
               child: TheField(
                 focusNode: jobTitleField.focusNode,
@@ -276,14 +296,19 @@ class WorkEditor extends StatelessWidget {
                 label: "Job title",
               ),
             ),
-            TheField(
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: TheField(
               focusNode: companyField.focusNode,
               textEditingController: companyField.controller,
               nextFunction: companyField.nextFunction,
               label: "Company",
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

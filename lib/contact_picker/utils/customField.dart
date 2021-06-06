@@ -8,6 +8,8 @@ Color warningColor = Colors.orange;
 class CustomField extends StatefulWidget {
   const CustomField({
     Key key,
+    this.noBorder: false,
+    this.noButtonFillMode: false,
     this.extraScrollPadding: false,
     @required this.focusNode,
     this.onSubmitted,
@@ -36,6 +38,9 @@ class CustomField extends StatefulWidget {
     //false only for 2 main fields, building number and street name
     this.canSaveEmpty: true,
   }) : super(key: key);
+
+  final bool noBorder;
+  final bool noButtonFillMode;
 
   final bool extraScrollPadding;
   final FocusNode focusNode;
@@ -229,6 +234,14 @@ class _CustomFieldState extends State<CustomField> {
       }
     }
 
+    //so the spacing doesn't mess up
+    if (suffixIcon == null) {
+      suffixIcon = SizedBox(
+        height: 48,
+        width: 0,
+      );
+    }
+
     //add or don't add save icon
     bool actuallyShowSaveButton = false;
     if (widget.showSaveButton) {
@@ -372,21 +385,30 @@ class _CustomFieldState extends State<CustomField> {
                     widget.onEditingComplete();
                   },
             decoration: InputDecoration(
+              isDense: widget.noBorder ? true : false,
+
+              floatingLabelBehavior: widget.noBorder
+                  ? (buttonMode
+                      ? FloatingLabelBehavior.auto
+                      : FloatingLabelBehavior.never)
+                  : FloatingLabelBehavior.auto,
+
               //tighten up padding
               contentPadding: EdgeInsets.symmetric(
                 vertical: 0,
-                horizontal: 8,
+                horizontal: widget.noBorder ? 0 : 8,
               ),
 
               //show "button" if the field is empty & we don't show an error when that happens
-              filled: buttonMode,
+              filled: widget.noButtonFillMode ? null : buttonMode,
               fillColor: Colors.blue,
 
               //top of field
               labelText: labelText,
               labelStyle: TextStyle(
-                color: buttonMode ? Colors.white : null,
-                fontWeight: buttonMode ? FontWeight.bold : null,
+                color: buttonMode
+                    ? (widget.noButtonFillMode ? null : Colors.white)
+                    : null,
               ),
 
               //when can undo & clear
@@ -399,20 +421,24 @@ class _CustomFieldState extends State<CustomField> {
               //--------------------------------------------------
 
               //standard border
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: hintBorderColor,
-                  width: 1,
-                ),
-              ),
+              border: widget.noBorder
+                  ? InputBorder.none
+                  : OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: hintBorderColor,
+                        width: 1,
+                      ),
+                    ),
 
               //only show red if an error is showing up
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.red,
-                  width: 1,
-                ),
-              ),
+              errorBorder: widget.noBorder
+                  ? InputBorder.none
+                  : OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                        width: 1,
+                      ),
+                    ),
 
               //unknown
               //semanticCounterText: "sctext",

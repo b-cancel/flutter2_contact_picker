@@ -1,5 +1,6 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 
 Map<String, Contact> contactListToMap(Iterable<Contact> contactList) {
   return Map<String, Contact>.fromIterable(
@@ -52,35 +53,19 @@ String onlyCharacters(String string) {
   return _onlyCharactersS2E(string, 97, 122);
 }
 
-//-----Colors of Theme
-List<Color> themeColors;
-getThemeColors(ThemeData themeData) {
-  themeColors = [];
-  themeColors.add(themeData.accentColor);
-  themeColors.add(themeData.backgroundColor);
-  themeColors.add(themeData.canvasColor);
-  themeColors.add(themeData.cardColor);
-  //themeColors.add(themeData.cursorColor);
-  themeColors.add(themeData.bottomAppBarColor);
-  themeColors.add(themeData.buttonColor);
-  themeColors.add(themeData.dialogBackgroundColor);
-  themeColors.add(themeData.disabledColor);
-  themeColors.add(themeData.dividerColor);
-  themeColors.add(themeData.errorColor);
-  themeColors.add(themeData.focusColor);
-  themeColors.add(themeData.highlightColor);
-  themeColors.add(themeData.hintColor);
-  themeColors.add(themeData.hoverColor);
-  themeColors.add(themeData.indicatorColor);
-  themeColors.add(themeData.primaryColor);
-  themeColors.add(themeData.primaryColorDark);
-  themeColors.add(themeData.primaryColorLight);
-  themeColors.add(themeData.scaffoldBackgroundColor);
-  themeColors.add(themeData.secondaryHeaderColor);
-  themeColors.add(themeData.selectedRowColor);
-  themeColors.add(themeData.splashColor);
-  //themeColors.add(themeData.textSelectionColor);
-  //themeColors.add(themeData.textSelectionHandleColor);
-  themeColors.add(themeData.toggleableActiveColor);
-  themeColors.add(themeData.unselectedWidgetColor);
+getRandomDarkBlueOrGreyColor() {
+  //shade of color (stay darker)
+  //0,1,2,3,4 => 5,6,7,8,9
+  int specificColor = random.nextInt(5) + 4;
+  int colorInt = specificColor * 100;
+
+  //range of color
+  int vagueColor = random.nextInt(3);
+  if (vagueColor == 0) {
+    return Colors.grey[colorInt];
+  } else if (vagueColor == 1) {
+    return Colors.blueGrey[colorInt];
+  } else {
+    return Colors.blue[colorInt];
+  }
 }

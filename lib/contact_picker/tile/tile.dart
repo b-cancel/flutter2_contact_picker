@@ -11,6 +11,7 @@ class ContactTile extends StatelessWidget {
     this.isLast: false,
     this.highlightPhone: false,
     this.highlightEmail: false,
+    this.iconColor,
     Key key,
   }) : super(key: key);
 
@@ -19,6 +20,7 @@ class ContactTile extends StatelessWidget {
   final bool isLast;
   final bool highlightPhone;
   final bool highlightEmail;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class ContactTile extends StatelessWidget {
             child: ListTile(
               leading: TileImage(
                 contact: contact,
+                color: iconColor,
               ),
               title: Padding(
                 padding: EdgeInsets.only(
@@ -102,9 +105,11 @@ class ContactTile extends StatelessWidget {
 class TileImage extends StatelessWidget {
   TileImage({
     @required this.contact,
+    this.color,
   });
 
   final Contact contact;
+  final Color color;
 
   Widget build(BuildContext context) {
     Widget child;
@@ -124,7 +129,7 @@ class TileImage extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 22,
-            color: Colors.black,
+            color: Colors.white,
           ),
         );
       }
@@ -151,8 +156,8 @@ class TileImage extends StatelessWidget {
         //56 is max size for this kind of thing
         width: 48,
         height: 48,
-        decoration: new BoxDecoration(
-          color: Colors.blue,
+        decoration: BoxDecoration(
+          color: color ?? getRandomDarkBlueOrGreyColor(),
           shape: BoxShape.circle,
         ),
         child: child,
@@ -206,12 +211,14 @@ class ContactChip extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
+                              color: highlight ? Colors.white : null,
                             ),
                           ),
                         ),
                   Icon(
                     iconData,
                     size: 16,
+                    color: highlight ? Colors.white : null,
                   ),
                 ],
               ),

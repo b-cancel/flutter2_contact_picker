@@ -69,9 +69,14 @@ class FieldAdder extends StatelessWidget {
         onTap: () => add(),
         child: Row(
           children: [
-            FieldIconButton(
-              iconData: Icons.add,
-              color: Colors.green,
+            Padding(
+              padding: EdgeInsets.only(
+                right: 8.0,
+              ),
+              child: FieldIconButton(
+                iconData: Icons.add,
+                color: Colors.green,
+              ),
             ),
             Expanded(
               child: Text(

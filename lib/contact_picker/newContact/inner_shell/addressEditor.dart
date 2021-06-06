@@ -34,9 +34,14 @@ class AddressesEditor extends StatelessWidget {
     List<Widget> addressRows = [];
     for (int i = 0; i < addressStreetAddressFields.length; i++) {
       addressRows.add(
-        Padding(
-          padding: EdgeInsets.only(
-            bottom: 16, //on top of the 12 below every field
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.grey[300],
+                width: 1,
+              ),
+            ),
           ),
           child: AddressField(
             addressStuff: [
@@ -79,22 +84,17 @@ class AddressesEditor extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             color: Colors.white,
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: addressRows.length > 0 ? 16 : 0,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Column(
-                  children: addressRows,
-                ),
-                FieldAdder(
-                  add: addAddress,
-                  fieldName: "address",
-                ),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                children: addressRows,
+              ),
+              FieldAdder(
+                add: addAddress,
+                fieldName: "address",
+              ),
+            ],
           ),
         ),
       ],
@@ -127,18 +127,25 @@ class AddressField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> fields = [];
-    for (int i = 0; i < 5; i++) {
-      FieldData thisField = addressStuff[i];
+    for (int index = 0; index < 5; index++) {
+      FieldData thisField = addressStuff[index];
       fields.add(
-        Padding(
-          padding: EdgeInsets.only(
-            bottom: 12,
+        Container(
+          decoration: BoxDecoration(
+            border: index == 0
+                ? null
+                : Border(
+                    top: BorderSide(
+                      color: Colors.grey[300],
+                      width: 1,
+                    ),
+                  ),
           ),
           child: TheField(
             focusNode: thisField.focusNode,
             textEditingController: thisField.controller,
             nextFunction: () => thisField.nextFunction(),
-            label: addressLabels[i],
+            label: addressLabels[index],
           ),
         ),
       );

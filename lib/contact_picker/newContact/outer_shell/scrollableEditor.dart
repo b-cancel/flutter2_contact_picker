@@ -108,7 +108,7 @@ class ScrollableEditor extends StatelessWidget {
                     //push CARD CONTENT down to past the picture
                     imageDiameter * (2 / 7) + 16 * 2,
                     0,
-                    16,
+                    0,
                   ),
                   child: NameEditor(
                     namesSpread: namesSpread,

@@ -30,6 +30,8 @@ class TheField extends StatelessWidget {
         labelField ?? Container(),
         Flexible(
           child: CustomField(
+            noBorder: true,
+            noButtonFillMode: true,
             focusNode: focusNode,
             textEditingController: textEditingController,
             textInputType: textInputType,

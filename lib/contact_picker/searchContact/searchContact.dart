@@ -10,9 +10,11 @@ class SearchContactPage extends StatefulWidget {
   //use the passed contacts list, if its passed
   SearchContactPage({
     this.allContacts,
+    this.contactIDToColor,
   });
 
   final ValueNotifier<List<Contact>> allContacts;
+  final Map<String, Color> contactIDToColor;
 
   @override
   _SearchContactPageState createState() => _SearchContactPageState();
@@ -20,7 +22,9 @@ class SearchContactPage extends StatefulWidget {
 
 class _SearchContactPageState extends State<SearchContactPage> {
   ValueNotifier<Map<String, Contact>> allContactsLocal = new ValueNotifier({});
-  TextEditingController search = new TextEditingController();
+  Map<String, Color> contactIDToColorLocal = {};
+  TextEditingController searchString = new TextEditingController();
+  ValueNotifier<String> refinedSearchString = ValueNotifier("");
   ValueNotifier<List<String>> results = new ValueNotifier([]);
   List<String> contactIDsWithMatchingFirstNames = [];
   List<String> contactIDsWithMatchingOtherNames = [];
@@ -43,76 +47,71 @@ class _SearchContactPageState extends State<SearchContactPage> {
     return clean;
   }
 
-  query(String rawSearchString) async {
-    if (rawSearchString == "") {
-      results.value = [];
-    } else {
-      //optimize the search string
-      String searchString = cleanUp(rawSearchString);
+  newQuery() async {
+    String query = refinedSearchString.value;
 
-      //we try and find exact matches for all of these
-      //a single contact ID should only be in one of the 2 lists
-      contactIDsWithMatchingFirstNames = [];
-      contactIDsWithMatchingOtherNames = [];
-      contactIDsWithMatchingNames = [];
-      contactIDsWithMatchingNumber = [];
-      contactIDsWithMatchingEmail = [];
+    //we try and find exact matches for all of these
+    //a single contact ID should only be in one of the 2 lists
+    contactIDsWithMatchingFirstNames = [];
+    contactIDsWithMatchingOtherNames = [];
+    contactIDsWithMatchingNames = [];
+    contactIDsWithMatchingNumber = [];
+    contactIDsWithMatchingEmail = [];
 
-      //loop through all the contacts and query
-      for (String contactID in allContactsLocal.value.keys) {
-        Contact thisContact = allContactsLocal.value[contactID];
-        String cleanDisplayName = cleanUp(thisContact.displayName);
+    //loop through all the contacts and query
+    for (String contactID in allContactsLocal.value.keys) {
+      Contact thisContact = allContactsLocal.value[contactID];
+      String cleanDisplayName = cleanUp(thisContact.displayName);
 
-        if (cleanDisplayName.contains(searchString)) {
-          int indexOfMatch = cleanDisplayName.indexOf(searchString);
-          if (indexOfMatch == 0) {
-            contactIDsWithMatchingFirstNames.add(contactID);
-          } else if ((cleanDisplayName[indexOfMatch - 1]).trim().length == 0) {
-            contactIDsWithMatchingOtherNames.add(contactID);
-          } else {
-            contactIDsWithMatchingNames.add(contactID);
-          }
+      if (cleanDisplayName.contains(query)) {
+        int indexOfMatch = cleanDisplayName.indexOf(query);
+        if (indexOfMatch == 0) {
+          contactIDsWithMatchingFirstNames.add(contactID);
+        } else if ((cleanDisplayName[indexOfMatch - 1]).trim().length == 0) {
+          contactIDsWithMatchingOtherNames.add(contactID);
         } else {
-          //if the search query looks like ANY of the numbers this particular contact has
-          List<Item> numbers = thisContact.phones.toList();
-          bool addToNumbers = false;
-          for (Item number in numbers) {
-            String cleanNumber = cleanUp(number.value);
-            if (cleanNumber.contains(searchString)) {
-              addToNumbers = true;
+          contactIDsWithMatchingNames.add(contactID);
+        }
+      } else {
+        //if the search query looks like ANY of the numbers this particular contact has
+        List<Item> numbers = thisContact.phones.toList();
+        bool addToNumbers = false;
+        for (Item number in numbers) {
+          String cleanNumber = cleanUp(number.value);
+          if (cleanNumber.contains(query)) {
+            addToNumbers = true;
+            break;
+          }
+        }
+
+        //we found a matching number
+        if (addToNumbers) {
+          contactIDsWithMatchingNumber.add(contactID);
+        } else {
+          //if the search query looks like ANY of the emails this particular contact has
+          List<Item> emails = thisContact.emails.toList();
+          bool addToEmails = false;
+          for (Item email in emails) {
+            String cleanEmail = cleanUp(email.value);
+            if (cleanEmail.contains(query)) {
+              addToEmails = true;
               break;
             }
           }
 
-          //we found a matching number
-          if (addToNumbers) {
-            contactIDsWithMatchingNumber.add(contactID);
-          } else {
-            //if the search query looks like ANY of the emails this particular contact has
-            List<Item> emails = thisContact.emails.toList();
-            bool addToEmails = false;
-            for (Item email in emails) {
-              String cleanEmail = cleanUp(email.value);
-              if (cleanEmail.contains(searchString)) {
-                addToEmails = true;
-                break;
-              }
-            }
-
-            if (addToEmails) {
-              contactIDsWithMatchingEmail.add(contactID);
-            }
+          if (addToEmails) {
+            contactIDsWithMatchingEmail.add(contactID);
           }
         }
       }
-
-      //compile all the results
-      results.value = (contactIDsWithMatchingFirstNames +
-          contactIDsWithMatchingOtherNames +
-          contactIDsWithMatchingNames +
-          contactIDsWithMatchingNumber +
-          contactIDsWithMatchingEmail);
     }
+
+    //compile all the results
+    results.value = (contactIDsWithMatchingFirstNames +
+        contactIDsWithMatchingOtherNames +
+        contactIDsWithMatchingNames +
+        contactIDsWithMatchingNumber +
+        contactIDsWithMatchingEmail);
   }
 
   updateState() {
@@ -121,8 +120,12 @@ class _SearchContactPageState extends State<SearchContactPage> {
     }
   }
 
-  newSearch() {
-    query(search.text);
+  newRawSearchString() {
+    if (searchString.text == "") {
+      refinedSearchString.value = "";
+    } else {
+      refinedSearchString.value = cleanUp(searchString.text);
+    }
   }
 
   asyncInit() async {
@@ -133,6 +136,11 @@ class _SearchContactPageState extends State<SearchContactPage> {
         photoHighResolution: false,
       ),
     );
+
+    //generate the colors
+    for (String contactID in allContactsLocal.value.keys) {
+      contactIDToColorLocal[contactID] = getRandomDarkBlueOrGreyColor();
+    }
 
     //grab a little more than the basic info (thumbnails)
     allContactsLocal.value = contactListToMap(
@@ -157,6 +165,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
     //grab the data if it wasn't grabbed before
     if (widget.allContacts != null) {
       updateLocal();
+      contactIDToColorLocal = widget.contactIDToColor;
     } else {
       asyncInit();
     }
@@ -168,7 +177,8 @@ class _SearchContactPageState extends State<SearchContactPage> {
     //if our local contact list changes, update state
     allContactsLocal.addListener(updateState);
     //when the search query run, compile a new set of results
-    search.addListener(newSearch);
+    searchString.addListener(newRawSearchString);
+    refinedSearchString.addListener(newQuery);
     //when the results change, set state
     results.addListener(updateState);
   }
@@ -179,7 +189,8 @@ class _SearchContactPageState extends State<SearchContactPage> {
       widget.allContacts.removeListener(updateLocal);
     }
     allContactsLocal.removeListener(updateState);
-    search.removeListener(newSearch);
+    searchString.removeListener(newRawSearchString);
+    refinedSearchString.removeListener(newQuery);
     results.removeListener(updateState);
     super.dispose();
   }
@@ -203,13 +214,8 @@ class _SearchContactPageState extends State<SearchContactPage> {
             color: Colors.black,
             child: Column(
               children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: 8.0,
-                  ),
-                  child: SearchBox(
-                    search: search,
-                  ),
+                SearchBox(
+                  search: searchString,
                 ),
                 ResultsHeader(
                   results: results,
@@ -223,6 +229,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
                           (BuildContext context, int index) {
                             String contactID = results.value[index];
                             return ContactTile(
+                              iconColor: contactIDToColorLocal[contactID],
                               contact: allContactsLocal.value[contactID],
                               isFirst: index == 0,
                               isLast: index == (results.value.length - 1),
@@ -243,9 +250,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
                               ? Colors.black
                               : ThemeData.dark().primaryColor,
                           child: Center(
-                            child: Text(results.value.length == 0
-                                ? "Type To Search Your Contacts"
-                                : ""),
+                            child: Text(results.value.length == 0 ? "" : ""),
                           ),
                         ),
                       ),
@@ -300,7 +305,7 @@ class SearchBox extends StatelessWidget {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(0),
                   border: InputBorder.none,
-                  hintText: "Search",
+                  hintText: "Type To Search",
                 ),
               ),
             ),
