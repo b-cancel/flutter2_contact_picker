@@ -1,6 +1,14 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 
+Map<String, Contact> contactListToMap(Iterable<Contact> contactList) {
+  return Map<String, Contact>.fromIterable(
+    contactList,
+    key: (contact) => contact.identifier,
+    value: (contact) => contact,
+  );
+}
+
 String contactToName(Contact c) {
   String prefix = c?.prefix ?? "";
   String first = c?.givenName ?? "";

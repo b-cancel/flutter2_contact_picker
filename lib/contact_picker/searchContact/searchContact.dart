@@ -1,28 +1,117 @@
-import 'dart:ui';
-
 import 'package:contacts_service/contacts_service.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+
 class SearchContactPage extends StatefulWidget {
+  //use the passed contacts list, if its passed
+  SearchContactPage({
+    this.allContacts,
+  });
+
+  final ValueNotifier<List<Contact>> allContacts;
+
   @override
   _SearchContactPageState createState() => _SearchContactPageState();
 }
 
 class _SearchContactPageState extends State<SearchContactPage> {
+  ValueNotifier<Map<String, Contact>> allContactsLocal = new ValueNotifier({});
   TextEditingController search = new TextEditingController();
-  ValueNotifier<List<Contact>> results = new ValueNotifier([]);
+  ValueNotifier<List<String>> results = new ValueNotifier([]);
+  List<String> contactIDsWithMatchingFirstNames = [];
+  List<String> contactIDsWithMatchingOtherNames = [];
+  List<String> contactIDsWithMatchingNames = [];
+  List<String> contactIDsWithMatchingNumber = [];
+  List<String> contactIDsWithMatchingEmail = [];
 
-  query(String searchString) async {
-    if (searchString == "") {
+  cleanUp(String dirty) {
+    //to lower
+    String clean = dirty.toLowerCase();
+    //remove diacritics
+    clean = removeDiacritics(clean);
+    //remove white space
+    clean = clean.split(RegExp('\\s')).join('');
+    //remove special characters (for phone number searching)
+    clean = clean.split(RegExp('\\(')).join('');
+    clean = clean.split(RegExp('\\)')).join('');
+    clean = clean.split(RegExp('\\-')).join('');
+    //return
+    return clean;
+  }
+
+  query(String rawSearchString) async {
+    if (rawSearchString == "") {
       results.value = [];
     } else {
-      Iterable<Contact> allContacts = await ContactsService.getContacts(
-        withThumbnails: false,
-        photoHighResolution: false,
-        query: searchString,
-      );
-      results.value = allContacts.toList();
+      //optimize the search string
+      String searchString = cleanUp(rawSearchString);
+
+      //we try and find exact matches for all of these
+      //a single contact ID should only be in one of the 2 lists
+      contactIDsWithMatchingFirstNames = [];
+      contactIDsWithMatchingOtherNames = [];
+      contactIDsWithMatchingNames = [];
+      contactIDsWithMatchingNumber = [];
+      contactIDsWithMatchingEmail = [];
+
+      //loop through all the contacts and query
+      for (String contactID in allContactsLocal.value.keys) {
+        Contact thisContact = allContactsLocal.value[contactID];
+        String cleanDisplayName = cleanUp(thisContact.displayName);
+
+        if (cleanDisplayName.contains(searchString)) {
+          int indexOfMatch = cleanDisplayName.indexOf(searchString);
+          if (indexOfMatch == 0) {
+            contactIDsWithMatchingFirstNames.add(contactID);
+          } else if ((cleanDisplayName[indexOfMatch - 1]).trim().length == 0) {
+            contactIDsWithMatchingOtherNames.add(contactID);
+          } else {
+            contactIDsWithMatchingNames.add(contactID);
+          }
+        } else {
+          //if the search query looks like ANY of the numbers this particular contact has
+          List<Item> numbers = thisContact.phones.toList();
+          bool addToNumbers = false;
+          for (Item number in numbers) {
+            String cleanNumber = cleanUp(number.value);
+            if (cleanNumber.contains(searchString)) {
+              addToNumbers = true;
+              break;
+            }
+          }
+
+          //we found a matching number
+          if (addToNumbers) {
+            contactIDsWithMatchingNumber.add(contactID);
+          } else {
+            //if the search query looks like ANY of the emails this particular contact has
+            List<Item> emails = thisContact.emails.toList();
+            bool addToEmails = false;
+            for (Item email in emails) {
+              String cleanEmail = cleanUp(email.value);
+              if (cleanEmail.contains(searchString)) {
+                addToEmails = true;
+                break;
+              }
+            }
+
+            if (addToEmails) {
+              contactIDsWithMatchingEmail.add(contactID);
+            }
+          }
+        }
+      }
+
+      //compile all the results
+      results.value = (contactIDsWithMatchingFirstNames +
+          contactIDsWithMatchingOtherNames +
+          contactIDsWithMatchingNames +
+          contactIDsWithMatchingNumber +
+          contactIDsWithMatchingEmail);
     }
   }
 
@@ -36,15 +125,60 @@ class _SearchContactPageState extends State<SearchContactPage> {
     query(search.text);
   }
 
+  asyncInit() async {
+    //grab the basic info first
+    allContactsLocal.value = contactListToMap(
+      await ContactsService.getContacts(
+        withThumbnails: false,
+        photoHighResolution: false,
+      ),
+    );
+
+    //grab a little more than the basic info (thumbnails)
+    allContactsLocal.value = contactListToMap(
+      await ContactsService.getContacts(
+        withThumbnails: true,
+        photoHighResolution: false,
+      ),
+    );
+  }
+
+  updateLocal() {
+    allContactsLocal.value = contactListToMap(
+      widget.allContacts.value,
+    );
+  }
+
   @override
   void initState() {
-    search.addListener(newSearch);
-    results.addListener(updateState);
+    //super init
     super.initState();
+
+    //grab the data if it wasn't grabbed before
+    if (widget.allContacts != null) {
+      updateLocal();
+    } else {
+      asyncInit();
+    }
+
+    //listen to contact list changes if they occur
+    if (widget.allContacts != null) {
+      widget.allContacts.addListener(updateLocal);
+    }
+    //if our local contact list changes, update state
+    allContactsLocal.addListener(updateState);
+    //when the search query run, compile a new set of results
+    search.addListener(newSearch);
+    //when the results change, set state
+    results.addListener(updateState);
   }
 
   @override
   void dispose() {
+    if (widget.allContacts != null) {
+      widget.allContacts.removeListener(updateLocal);
+    }
+    allContactsLocal.removeListener(updateState);
     search.removeListener(newSearch);
     results.removeListener(updateState);
     super.dispose();
@@ -52,6 +186,14 @@ class _SearchContactPageState extends State<SearchContactPage> {
 
   @override
   Widget build(BuildContext context) {
+    //name matching is obvious, no need to highlight it
+    //but phone and email, not so much
+
+    //all the different
+    Set matchingNumberContactIDs = contactIDsWithMatchingNumber.toSet();
+    Set matchingEmailContactIDs = contactIDsWithMatchingEmail.toSet();
+
+    //build
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -79,10 +221,15 @@ class _SearchContactPageState extends State<SearchContactPage> {
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (BuildContext context, int index) {
+                            String contactID = results.value[index];
                             return ContactTile(
-                              contact: results.value[index],
+                              contact: allContactsLocal.value[contactID],
                               isFirst: index == 0,
                               isLast: index == (results.value.length - 1),
+                              highlightPhone:
+                                  matchingNumberContactIDs.contains(contactID),
+                              highlightEmail:
+                                  matchingEmailContactIDs.contains(contactID),
                             );
                           },
                           childCount: results.value.length,
@@ -185,7 +332,7 @@ class ResultsHeader extends StatelessWidget {
     @required this.results,
   }) : super(key: key);
 
-  final ValueNotifier<Iterable<Contact>> results;
+  final ValueNotifier<List<String>> results;
 
   @override
   Widget build(BuildContext context) {
@@ -226,146 +373,5 @@ class ResultsHeader extends StatelessWidget {
         ),
       );
     }
-  }
-}
-
-class ContactTile extends StatelessWidget {
-  const ContactTile({
-    this.contact,
-    this.isFirst: false,
-    this.isLast: false,
-    Key key,
-  }) : super(key: key);
-
-  final Contact contact;
-  final bool isFirst;
-  final bool isLast;
-
-  @override
-  Widget build(BuildContext context) {
-    //handle numbers
-    int numbers = contact.phones?.length ?? 0;
-
-    //handle emails
-    int emails = contact.emails?.length ?? 0;
-
-    //build
-    return Material(
-      color: isLast ? ThemeData.dark().primaryColor : Colors.transparent,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(isFirst ? 16 : 0),
-                bottom: Radius.circular(isLast ? 16 : 0),
-              ),
-            ),
-            child: ListTile(
-              title: Padding(
-                padding: EdgeInsets.only(
-                  top: 4,
-                  bottom: 4,
-                ),
-                child: Text(
-                  contact.displayName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              subtitle: Padding(
-                padding: EdgeInsets.only(
-                  bottom: 4,
-                ),
-                child: Row(
-                  children: [
-                    ContactChip(
-                      iconData: Icons.phone,
-                      dataCount: numbers,
-                      errorLabel: "No Phone Numbers",
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: 8.0,
-                      ),
-                      child: ContactChip(
-                        iconData: Icons.email,
-                        dataCount: emails,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              trailing: Icon(
-                Icons.chevron_right,
-              ),
-            ),
-          ),
-          Container(
-            color: Colors.grey,
-            height: isLast == false ? .5 : 0,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ContactChip extends StatelessWidget {
-  const ContactChip({
-    Key key,
-    @required this.iconData,
-    @required this.dataCount,
-    this.errorLabel,
-  }) : super(key: key);
-
-  final IconData iconData;
-  final int dataCount;
-  final String errorLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Visibility(
-      visible: dataCount > 0 || (dataCount == 0 && errorLabel != null),
-      child: Chip(
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor:
-            (dataCount == 0 && errorLabel != null) ? Colors.red : null,
-        padding: EdgeInsets.all(0),
-        label: dataCount == 0
-            ? Text(
-                errorLabel ?? "",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              )
-            : Row(
-                children: [
-                  (dataCount == 1)
-                      ? Container()
-                      : Padding(
-                          padding: EdgeInsets.only(
-                            right: 4,
-                          ),
-                          child: Text(
-                            dataCount.toString(),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                  Icon(
-                    iconData,
-                    size: 16,
-                  ),
-                ],
-              ),
-      ),
-    );
   }
 }

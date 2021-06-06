@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/justifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -759,14 +760,6 @@ class _NewContactPageState extends State<NewContactPage> {
 
     //pop and pass true (to indivate we made a new contact)
     Navigator.of(context).pop(newContactIdentifier);
-  }
-
-  Map<String, Contact> contactListToMap(Iterable<Contact> contactList) {
-    return Map<String, Contact>.fromIterable(
-      contactList,
-      key: (contact) => contact.identifier,
-      value: (contact) => contact,
-    );
   }
 
   Future<Uint8List> getAvatar() async {
