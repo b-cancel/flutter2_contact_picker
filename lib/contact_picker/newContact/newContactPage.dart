@@ -120,9 +120,8 @@ class _NewContactPageState extends State<NewContactPage> {
       if (canAddFirstField) {
         addFirst(); //will focus after build
       } else {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context).requestFocus(fields[0].focusNode);
-        });
+        //TODO: maybe edit?
+        FocusScope.of(context).requestFocus(fields[0].focusNode);
       }
     } else {
       if (alternative != null) {
@@ -157,14 +156,13 @@ class _NewContactPageState extends State<NewContactPage> {
 
   toWork() {
     if (workOpen.value) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(jobTitleField.focusNode);
-      });
+      FocusScope.of(context).requestFocus(jobTitleField.focusNode);
     } else {
-      if (autoOpenWork)
+      if (autoOpenWork) {
         openWork();
-      else
+      } else {
         toFirstAddress();
+      }
     }
   }
 
@@ -194,6 +192,7 @@ class _NewContactPageState extends State<NewContactPage> {
     setState(() {});
 
     //focus on the first field AFTER build completes (above)
+    //TODO: maybe edit
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(allFields[0][newIndex].focusNode);
     });
@@ -462,12 +461,11 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (nameFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            FocusScope.of(context).requestFocus(nameFields[i + 1].focusNode);
-          });
+          FocusScope.of(context).requestFocus(nameFields[i + 1].focusNode);
         };
-      } else
+      } else {
         thisField.nextFunction = toFirstPhone;
+      }
     }
 
     //phones section
@@ -476,13 +474,12 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (phoneValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            FocusScope.of(context)
-                .requestFocus(phoneValueFields[i + 1].focusNode);
-          });
+          FocusScope.of(context)
+              .requestFocus(phoneValueFields[i + 1].focusNode);
         };
-      } else
+      } else {
         thisField.nextFunction = toFirstEmail;
+      }
     }
 
     //emails section
@@ -491,20 +488,17 @@ class _NewContactPageState extends State<NewContactPage> {
       if (i != (emailValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            FocusScope.of(context)
-                .requestFocus(emailValueFields[i + 1].focusNode);
-          });
+          FocusScope.of(context)
+              .requestFocus(emailValueFields[i + 1].focusNode);
         };
-      } else
+      } else {
         thisField.nextFunction = toWork;
+      }
     }
 
     //handle work section
     jobTitleField.nextFunction = () {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(companyField.focusNode);
-      });
+      FocusScope.of(context).requestFocus(companyField.focusNode);
     };
     companyField.nextFunction = toFirstAddress;
 
@@ -513,33 +507,21 @@ class _NewContactPageState extends State<NewContactPage> {
     for (int i = 0; i < addressCount; i++) {
       //street, city, postcode, region, country
       addressStreetFields[i].nextFunction = () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
-        });
+        FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
       };
       addressCityFields[i].nextFunction = () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
-        });
+        FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
       };
       addressRegionFields[i].nextFunction = () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context)
-              .requestFocus(addressPostcodeFields[i].focusNode);
-        });
+        FocusScope.of(context).requestFocus(addressPostcodeFields[i].focusNode);
       };
       addressPostcodeFields[i].nextFunction = () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context)
-              .requestFocus(addressCountryFields[i].focusNode);
-        });
+        FocusScope.of(context).requestFocus(addressCountryFields[i].focusNode);
       };
       addressCountryFields[i].nextFunction = () {
         if (i < (addressCount - 1)) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            FocusScope.of(context)
-                .requestFocus(addressStreetFields[i + 1].focusNode);
-          });
+          FocusScope.of(context)
+              .requestFocus(addressStreetFields[i + 1].focusNode);
         }
       };
     }
@@ -669,11 +651,9 @@ class _NewContactPageState extends State<NewContactPage> {
       //act accordingly
       if (hasName == false) {
         //then focus on the name field
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          FocusScope.of(context).requestFocus(
-            (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
-          );
-        });
+        FocusScope.of(context).requestFocus(
+          (namesSpread.value) ? nameFields[1].focusNode : nameField.focusNode,
+        );
       } else {
         addPhone();
       }
