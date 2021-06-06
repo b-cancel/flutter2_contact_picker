@@ -730,12 +730,43 @@ class _NewContactPageState extends State<NewContactPage> {
       postalAddresses: fieldsToAddresses(),
     );
 
-    //actually save the contact
+    //what contacts exist before saving
+    Map<String, Contact> beforeAddMap = contactListToMap(
+      await ContactsService.getContacts(
+        withThumbnails: false,
+        photoHighResolution: false,
+      ),
+    );
+
+    //add the new contact (returns null... what a shame)
     await ContactsService.addContact(newContact);
 
+    //what contacts exist after saving
+    Iterable<Contact> afterAddList = await ContactsService.getContacts(
+      withThumbnails: false,
+      photoHighResolution: false,
+    );
+
+    //find the new contact
+    String newContactIdentifier = "";
+    for (Contact contact in afterAddList) {
+      String thisID = contact.identifier;
+      if (beforeAddMap.containsKey(thisID) == false) {
+        newContactIdentifier = thisID;
+        break;
+      }
+    }
+
     //pop and pass true (to indivate we made a new contact)
-    //TODO: indicate exactly what contact we added so we can add it to the recents list from with the select a contact page
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(newContactIdentifier);
+  }
+
+  Map<String, Contact> contactListToMap(Iterable<Contact> contactList) {
+    return Map<String, Contact>.fromIterable(
+      contactList,
+      key: (contact) => contact.identifier,
+      value: (contact) => contact,
+    );
   }
 
   Future<Uint8List> getAvatar() async {
