@@ -8,6 +8,7 @@ class AppBarButton extends StatelessWidget {
     this.actions,
     this.color,
     this.noBackButton: false,
+    this.centerTitle,
     Key key,
   }) : super(key: key);
 
@@ -17,6 +18,7 @@ class AppBarButton extends StatelessWidget {
   final List<Widget> actions;
   final Color color;
   final bool noBackButton;
+  final bool centerTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class AppBarButton extends StatelessWidget {
                       ),
                     ),
               title: title,
+              centerTitle: centerTitle,
               actions: actions,
             ),
           ),

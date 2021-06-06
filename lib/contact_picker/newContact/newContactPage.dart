@@ -108,6 +108,10 @@ class _NewContactPageState extends State<NewContactPage> {
   //--------------------------------------------------
   //--------------------------------------------------
 
+  //IF next on the last name field...
+  //IF no phone number... create one IF it's allowed
+  //ELSE focus on the first field IF it exists
+  //OTHERWISE do the alternative
   toFirstItem(
     List<FieldData> fields,
     bool autoAddFirstField,
@@ -115,14 +119,14 @@ class _NewContactPageState extends State<NewContactPage> {
     Function alternative,
   }) {
     bool fieldsPresent = (fields.length > 0);
-    bool canAddFirstField = fieldsPresent == false && autoAddFirstField;
-    if (fieldsPresent || canAddFirstField) {
-      if (canAddFirstField) {
-        addFirst(); //will focus after build
-      } else {
-        //TODO: maybe edit?
-        FocusScope.of(context).requestFocus(fields[0].focusNode);
-      }
+    bool addFirstField = fieldsPresent == false && autoAddFirstField;
+
+    //add the first field if possible
+    if (addFirstField) {
+      addFirst(); //will focus after build
+    } else if (fieldsPresent) {
+      //if the fields already exist autofocus on the first
+      FocusScope.of(context).requestFocus(fields[0].focusNode);
     } else {
       if (alternative != null) {
         alternative();
@@ -192,10 +196,19 @@ class _NewContactPageState extends State<NewContactPage> {
     setState(() {});
 
     //focus on the first field AFTER build completes (above)
-    //TODO: maybe edit
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(allFields[0][newIndex].focusNode);
-    });
+    Function autoFocusAfterBuild = () {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FocusScope.of(context).requestFocus(allFields[0][newIndex].focusNode);
+      });
+    };
+
+    //for the first time around wait another frame before autofocusing
+    if (newIndex == 0) {
+      //waited 3 frames without consistent behavior, leaving it here and moving on
+      autoFocusAfterBuild();
+    } else {
+      autoFocusAfterBuild();
+    }
   }
 
   //--------------------------------------------------
@@ -536,6 +549,7 @@ class _NewContactPageState extends State<NewContactPage> {
             onTapPassContext: (context) {
               Navigator.of(context).pop();
             },
+            centerTitle: false,
             toolTip: 'Cancel',
             noBackButton: true,
             title: Text(
