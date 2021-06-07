@@ -236,7 +236,9 @@ class _CategorySelectionPageBodyState extends State<CategorySelectionPageBody> {
         ),
         Container(
           color: ThemeData.dark().primaryColor,
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.symmetric(
+            vertical: 8,
+          ),
           child: Material(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -278,20 +280,25 @@ class _NewCustomLabelFieldState extends State<NewCustomLabelField> {
     return CustomField(
       noBorder: true,
       noButtonFillMode: true,
-      prefixIcon: Container(
-        height: 48,
-        width: 48,
-        child: Center(
-          child: Container(
-            height: 24,
-            width: 24,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.add,
-              color: Colors.white,
+      prefixIcon: Padding(
+        padding: EdgeInsets.only(
+          right: 20,
+        ),
+        child: Container(
+          height: 48,
+          width: 48,
+          child: Center(
+            child: Container(
+              height: 24,
+              width: 24,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
             ),
           ),
         ),

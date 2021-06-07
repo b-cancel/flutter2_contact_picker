@@ -6,6 +6,8 @@ import 'dart:math' as math;
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 
+//No Recent Searches -> IF no results & no recents
+//results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
 class SearchContactPage extends StatefulWidget {
   //use the passed contacts list, if its passed
   SearchContactPage({
