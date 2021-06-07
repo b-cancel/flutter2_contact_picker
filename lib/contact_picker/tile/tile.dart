@@ -6,9 +6,10 @@ import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 
 class ContactTile extends StatelessWidget {
   const ContactTile({
-    this.contact,
-    this.isFirst: false,
-    this.isLast: false,
+    @required this.contact,
+    @required this.onTap,
+    @required this.isFirst,
+    @required this.isLast,
     this.highlightPhone: false,
     this.highlightEmail: false,
     this.iconColor,
@@ -16,6 +17,7 @@ class ContactTile extends StatelessWidget {
   }) : super(key: key);
 
   final Contact contact;
+  final Function onTap;
   final bool isFirst;
   final bool isLast;
   final bool highlightPhone;
@@ -36,59 +38,60 @@ class ContactTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(isFirst ? 16 : 0),
-                bottom: Radius.circular(isLast ? 16 : 0),
-              ),
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(isFirst ? 16 : 0),
+              bottom: Radius.circular(isLast ? 16 : 0),
             ),
-            child: ListTile(
-              leading: TileImage(
-                contact: contact,
-                color: iconColor,
-              ),
-              title: Padding(
-                padding: EdgeInsets.only(
-                  bottom: 4,
+            child: Material(
+              color: Colors.white,
+              child: ListTile(
+                onTap: onTap,
+                leading: TileImage(
+                  contact: contact,
+                  color: iconColor,
                 ),
-                child: Container(
-                  child: Text(
-                    contact.displayName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                title: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: 4,
+                  ),
+                  child: Container(
+                    child: Text(
+                      contact.displayName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              subtitle: Padding(
-                padding: EdgeInsets.only(
-                  bottom: 0,
-                ),
-                child: Row(
-                  children: [
-                    ContactChip(
-                      iconData: Icons.phone,
-                      dataCount: numbers,
-                      errorLabel: "No Phone Numbers",
-                      highlight: highlightPhone,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: 8.0,
+                subtitle: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: 0,
+                  ),
+                  child: Row(
+                    children: [
+                      ContactChip(
+                        iconData: Icons.phone,
+                        dataCount: numbers,
+                        errorLabel: "No Phone Numbers",
+                        highlight: highlightPhone,
                       ),
-                      child: ContactChip(
-                        iconData: Icons.email,
-                        dataCount: emails,
-                        highlight: highlightEmail,
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 8.0,
+                        ),
+                        child: ContactChip(
+                          iconData: Icons.email,
+                          dataCount: emails,
+                          highlight: highlightEmail,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              trailing: Icon(
-                Icons.chevron_right,
+                trailing: Icon(
+                  Icons.chevron_right,
+                ),
               ),
             ),
           ),

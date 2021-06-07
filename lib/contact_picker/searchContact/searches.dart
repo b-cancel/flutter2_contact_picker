@@ -17,7 +17,7 @@ class SearchesData {
   }
 
   //true if something new was added
-  static addToCustomLabels(String newSearch) {
+  static addSearches(String newSearch) {
     //make sure this search isn't already in the list
     bool searchRemoved = removeSearch(newSearch);
     //add it back to the top

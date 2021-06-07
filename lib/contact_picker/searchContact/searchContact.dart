@@ -1,10 +1,12 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
 import 'dart:math' as math;
 
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
@@ -25,7 +27,7 @@ class SearchContactPage extends StatefulWidget {
 class _SearchContactPageState extends State<SearchContactPage> {
   ValueNotifier<Map<String, Contact>> allContactsLocal = new ValueNotifier({});
   Map<String, Color> contactIDToColorLocal = {};
-  TextEditingController searchString = new TextEditingController();
+  TextEditingController textEditingController = new TextEditingController();
   ValueNotifier<String> refinedSearchString = ValueNotifier("");
   ValueNotifier<List<String>> results = new ValueNotifier([]);
   List<String> contactIDsWithMatchingFirstNames = [];
@@ -51,69 +53,72 @@ class _SearchContactPageState extends State<SearchContactPage> {
 
   newQuery() async {
     String query = refinedSearchString.value;
+    if (query == "" || query.length == 0) {
+      results.value = [];
+    } else {
+      //we try and find exact matches for all of these
+      //a single contact ID should only be in one of the 2 lists
+      contactIDsWithMatchingFirstNames = [];
+      contactIDsWithMatchingOtherNames = [];
+      contactIDsWithMatchingNames = [];
+      contactIDsWithMatchingNumber = [];
+      contactIDsWithMatchingEmail = [];
 
-    //we try and find exact matches for all of these
-    //a single contact ID should only be in one of the 2 lists
-    contactIDsWithMatchingFirstNames = [];
-    contactIDsWithMatchingOtherNames = [];
-    contactIDsWithMatchingNames = [];
-    contactIDsWithMatchingNumber = [];
-    contactIDsWithMatchingEmail = [];
+      //loop through all the contacts and query
+      for (String contactID in allContactsLocal.value.keys) {
+        Contact thisContact = allContactsLocal.value[contactID];
+        String cleanDisplayName = cleanUp(thisContact.displayName);
 
-    //loop through all the contacts and query
-    for (String contactID in allContactsLocal.value.keys) {
-      Contact thisContact = allContactsLocal.value[contactID];
-      String cleanDisplayName = cleanUp(thisContact.displayName);
-
-      if (cleanDisplayName.contains(query)) {
-        int indexOfMatch = cleanDisplayName.indexOf(query);
-        if (indexOfMatch == 0) {
-          contactIDsWithMatchingFirstNames.add(contactID);
-        } else if ((cleanDisplayName[indexOfMatch - 1]).trim().length == 0) {
-          contactIDsWithMatchingOtherNames.add(contactID);
-        } else {
-          contactIDsWithMatchingNames.add(contactID);
-        }
-      } else {
-        //if the search query looks like ANY of the numbers this particular contact has
-        List<Item> numbers = thisContact.phones.toList();
-        bool addToNumbers = false;
-        for (Item number in numbers) {
-          String cleanNumber = cleanUp(number.value);
-          if (cleanNumber.contains(query)) {
-            addToNumbers = true;
-            break;
+        if (cleanDisplayName.contains(query)) {
+          int indexOfMatch = cleanDisplayName.indexOf(query);
+          if (indexOfMatch == 0) {
+            contactIDsWithMatchingFirstNames.add(contactID);
+          } else if ((cleanDisplayName[indexOfMatch - 1]).trim().length == 0) {
+            contactIDsWithMatchingOtherNames.add(contactID);
+          } else {
+            contactIDsWithMatchingNames.add(contactID);
           }
-        }
-
-        //we found a matching number
-        if (addToNumbers) {
-          contactIDsWithMatchingNumber.add(contactID);
         } else {
-          //if the search query looks like ANY of the emails this particular contact has
-          List<Item> emails = thisContact.emails.toList();
-          bool addToEmails = false;
-          for (Item email in emails) {
-            String cleanEmail = cleanUp(email.value);
-            if (cleanEmail.contains(query)) {
-              addToEmails = true;
+          //if the search query looks like ANY of the numbers this particular contact has
+          List<Item> numbers = thisContact.phones.toList();
+          bool addToNumbers = false;
+          for (Item number in numbers) {
+            String cleanNumber = cleanUp(number.value);
+            if (cleanNumber.contains(query)) {
+              addToNumbers = true;
               break;
             }
           }
 
-          if (addToEmails) {
-            contactIDsWithMatchingEmail.add(contactID);
+          //we found a matching number
+          if (addToNumbers) {
+            contactIDsWithMatchingNumber.add(contactID);
+          } else {
+            //if the search query looks like ANY of the emails this particular contact has
+            List<Item> emails = thisContact.emails.toList();
+            bool addToEmails = false;
+            for (Item email in emails) {
+              String cleanEmail = cleanUp(email.value);
+              if (cleanEmail.contains(query)) {
+                addToEmails = true;
+                break;
+              }
+            }
+
+            if (addToEmails) {
+              contactIDsWithMatchingEmail.add(contactID);
+            }
           }
         }
       }
-    }
 
-    //compile all the results
-    results.value = (contactIDsWithMatchingFirstNames +
-        contactIDsWithMatchingOtherNames +
-        contactIDsWithMatchingNames +
-        contactIDsWithMatchingNumber +
-        contactIDsWithMatchingEmail);
+      //compile all the results
+      results.value = (contactIDsWithMatchingFirstNames +
+          contactIDsWithMatchingOtherNames +
+          contactIDsWithMatchingNames +
+          contactIDsWithMatchingNumber +
+          contactIDsWithMatchingEmail);
+    }
   }
 
   updateState() {
@@ -123,37 +128,56 @@ class _SearchContactPageState extends State<SearchContactPage> {
   }
 
   newRawSearchString() {
-    if (searchString.text == "") {
+    if (textEditingController.text == "" ||
+        textEditingController.text.length == 0) {
       refinedSearchString.value = "";
     } else {
-      refinedSearchString.value = cleanUp(searchString.text);
+      refinedSearchString.value = cleanUp(textEditingController.text);
     }
   }
 
   asyncInit() async {
-    //grab the basic info first
-    allContactsLocal.value = contactListToMap(
-      await ContactsService.getContacts(
-        withThumbnails: false,
-        photoHighResolution: false,
-      ),
-    );
-
-    //generate the colors
-    for (String contactID in allContactsLocal.value.keys) {
-      contactIDToColorLocal[contactID] = getRandomDarkBlueOrGreyColor();
+    //contacts list
+    if (widget.allContacts == null) {
+      //grab the basic info first
+      allContactsLocal.value = contactListToMap(
+        await ContactsService.getContacts(
+          withThumbnails: false,
+          photoHighResolution: false,
+        ),
+      );
+    } else {
+      //reuse since passed
+      updateLocalContactsList();
     }
 
-    //grab a little more than the basic info (thumbnails)
-    allContactsLocal.value = contactListToMap(
-      await ContactsService.getContacts(
-        withThumbnails: true,
-        photoHighResolution: false,
-      ),
-    );
+    //contact ID to Color
+    if (widget.contactIDToColor == null) {
+      //generate the colors
+      for (String contactID in allContactsLocal.value.keys) {
+        contactIDToColorLocal[contactID] = getRandomDarkBlueOrGreyColor();
+      }
+    } else {
+      //reuse since passed
+      contactIDToColorLocal = widget.contactIDToColor;
+    }
+
+    //get all the recent searches
+    await SearchesData.initSearches();
+
+    //all contacts
+    if (widget.allContacts == null) {
+      //grab a little more than the basic info (thumbnails)
+      allContactsLocal.value = contactListToMap(
+        await ContactsService.getContacts(
+          withThumbnails: true,
+          photoHighResolution: false,
+        ),
+      );
+    }
   }
 
-  updateLocal() {
+  updateLocalContactsList() {
     allContactsLocal.value = contactListToMap(
       widget.allContacts.value,
     );
@@ -164,49 +188,40 @@ class _SearchContactPageState extends State<SearchContactPage> {
     //super init
     super.initState();
 
-    //grab the data if it wasn't grabbed before
-    if (widget.allContacts != null) {
-      updateLocal();
-      contactIDToColorLocal = widget.contactIDToColor;
-    } else {
-      asyncInit();
-    }
-
     //listen to contact list changes if they occur
     if (widget.allContacts != null) {
-      widget.allContacts.addListener(updateLocal);
+      widget.allContacts.addListener(updateLocalContactsList);
     }
     //if our local contact list changes, update state
     allContactsLocal.addListener(updateState);
     //when the search query run, compile a new set of results
-    searchString.addListener(newRawSearchString);
+    textEditingController.addListener(newRawSearchString);
     refinedSearchString.addListener(newQuery);
     //when the results change, set state
     results.addListener(updateState);
+    //track when a recent search is added or removed
+    SearchesData.searches.addListener(updateState);
+
+    //grab the data if it wasn't grabbed before
+    asyncInit();
   }
 
   @override
   void dispose() {
     if (widget.allContacts != null) {
-      widget.allContacts.removeListener(updateLocal);
+      widget.allContacts.removeListener(updateLocalContactsList);
     }
     allContactsLocal.removeListener(updateState);
-    searchString.removeListener(newRawSearchString);
+    textEditingController.removeListener(newRawSearchString);
     refinedSearchString.removeListener(newQuery);
     results.removeListener(updateState);
+    SearchesData.searches.removeListener(updateState);
+    //super dipose
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    //name matching is obvious, no need to highlight it
-    //but phone and email, not so much
-
-    //all the different
-    Set matchingNumberContactIDs = contactIDsWithMatchingNumber.toSet();
-    Set matchingEmailContactIDs = contactIDsWithMatchingEmail.toSet();
-
-    //build
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -217,46 +232,21 @@ class _SearchContactPageState extends State<SearchContactPage> {
             child: Column(
               children: <Widget>[
                 SearchBox(
-                  search: searchString,
-                ),
-                ResultsHeader(
-                  results: results,
+                  search: textEditingController,
                 ),
                 Expanded(
-                  child: CustomScrollView(
-                    physics: BouncingScrollPhysics(),
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                            String contactID = results.value[index];
-                            return ContactTile(
-                              iconColor: contactIDToColorLocal[contactID],
-                              contact: allContactsLocal.value[contactID],
-                              isFirst: index == 0,
-                              isLast: index == (results.value.length - 1),
-                              highlightPhone:
-                                  matchingNumberContactIDs.contains(contactID),
-                              highlightEmail:
-                                  matchingEmailContactIDs.contains(contactID),
-                            );
-                          },
-                          childCount: results.value.length,
-                        ),
-                      ),
-                      SliverFillRemaining(
-                        hasScrollBody: false,
-                        fillOverscroll: true,
-                        child: Container(
-                          color: (results.value.length == 0)
-                              ? Colors.black
-                              : ThemeData.dark().primaryColor,
-                          child: Center(
-                            child: Text(results.value.length == 0 ? "" : ""),
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: ResultsBody(
+                    textEditingController: textEditingController,
+                    allContactsLocal: allContactsLocal,
+                    contactIDToColorLocal: contactIDToColorLocal,
+                    //first > first names,
+                    //then > any name with a space in front of it
+                    //then > any match regardless of spaces
+                    matchingNameContactIDs: contactIDsWithMatchingFirstNames +
+                        contactIDsWithMatchingOtherNames +
+                        contactIDsWithMatchingNames,
+                    matchingNumberContactIDs: contactIDsWithMatchingNumber,
+                    matchingEmailContactIDs: contactIDsWithMatchingEmail,
                   ),
                 ),
               ],
@@ -265,6 +255,118 @@ class _SearchContactPageState extends State<SearchContactPage> {
         ),
       ),
     );
+  }
+}
+
+class ResultsBody extends StatelessWidget {
+  const ResultsBody({
+    Key key,
+    @required this.textEditingController,
+    @required this.allContactsLocal,
+    @required this.contactIDToColorLocal,
+    @required this.matchingNameContactIDs,
+    @required this.matchingNumberContactIDs,
+    @required this.matchingEmailContactIDs,
+  }) : super(key: key);
+
+  final TextEditingController textEditingController;
+  final ValueNotifier<Map<String, Contact>> allContactsLocal;
+  final Map<String, Color> contactIDToColorLocal;
+  final List<String> matchingNameContactIDs;
+  final List<String> matchingNumberContactIDs;
+  final List<String> matchingEmailContactIDs;
+
+  @override
+  Widget build(BuildContext context) {
+    List<String> allMatches = matchingNameContactIDs +
+        matchingNumberContactIDs +
+        matchingEmailContactIDs;
+
+    if (allMatches.length == 0) {
+      if (SearchesData.searches.value.length == 0) {
+        //show that a recent searches functionality exists
+        return Center(
+          child: Text("No Recent Searches"),
+        );
+      } else {
+        //show recents searches
+        return CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverStickyHeader(
+              header: ResultsHeader(
+                resultDescription: "Recent Searches",
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  String searchTerm = SearchesData.searches.value[index];
+                  int lastIndex = (SearchesData.searches.value.length - 1);
+                  return RecentSearch(
+                    recentSearch: searchTerm,
+                    textEditingController: textEditingController,
+                    isFirstIndex: index == 0,
+                    isLastIndex: index == lastIndex,
+                  );
+                },
+                childCount: SearchesData.searches.value.length,
+              ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: true,
+              child: Container(
+                color: ThemeData.dark().primaryColor,
+              ),
+            ),
+          ],
+        );
+      }
+    } else {
+      return CustomScrollView(
+        physics: BouncingScrollPhysics(),
+        slivers: [
+          SliverStickyHeader(
+            header: ResultsHeader(
+              resultCount: allMatches.length,
+              resultDescription: "Matching Name",
+            ),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  String contactID = allMatches[index];
+                  return ContactTile(
+                    onTap: () {
+                      //save as a successfull search term
+                      SearchesData.addSearches(textEditingController.text);
+
+                      //return contact ID
+                      Navigator.of(context).pop(contactID);
+                    },
+                    iconColor: contactIDToColorLocal[contactID],
+                    contact: allContactsLocal.value[contactID],
+                    isFirst: index == 0,
+                    isLast: index == (allMatches.length - 1),
+                    highlightPhone:
+                        matchingNumberContactIDs.contains(contactID),
+                    highlightEmail: matchingEmailContactIDs.contains(contactID),
+                  );
+                },
+                childCount: allMatches.length,
+              ),
+            ),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            fillOverscroll: true,
+            child: Container(
+              color: ThemeData.dark().primaryColor,
+            ),
+          ),
+        ],
+      );
+    }
   }
 }
 
@@ -307,25 +409,40 @@ class SearchBox extends StatelessWidget {
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.all(0),
                   border: InputBorder.none,
-                  hintText: "Type To Search",
+                  hintText: "Search",
                 ),
+                onEditingComplete: () {
+                  SearchesData.addSearches(search.text);
+                  FocusScope.of(context).unfocus();
+                },
               ),
             ),
-            IconButton(
-              onPressed: () {
-                if (search.text != "") {
-                  search.text = "";
-                } else {
-                  Navigator.of(context).pop();
-                }
-              },
-              icon: Transform.rotate(
-                angle: -math.pi / 4,
-                child: Icon(
-                  Icons.add,
-                ),
-              ),
-            ),
+            search != null
+                ? AnimatedBuilder(
+                    animation: search,
+                    builder: (context, snapshot) {
+                      if (search.text.length == 0) {
+                        return Container();
+                      } else {
+                        return IconButton(
+                          onPressed: () {
+                            if (search.text != "") {
+                              search.text = "";
+                            } else {
+                              Navigator.of(context).pop();
+                            }
+                          },
+                          icon: Transform.rotate(
+                            angle: -math.pi / 4,
+                            child: Icon(
+                              Icons.add,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  )
+                : Icon(Icons.search),
           ],
         ),
       ),
@@ -336,49 +453,112 @@ class SearchBox extends StatelessWidget {
 class ResultsHeader extends StatelessWidget {
   const ResultsHeader({
     Key key,
-    @required this.results,
+    this.resultCount,
+    @required this.resultDescription,
   }) : super(key: key);
 
-  final ValueNotifier<List<String>> results;
+  final int resultCount;
+  final String resultDescription;
 
   @override
   Widget build(BuildContext context) {
-    if (results.value.length == 0) {
-      return Container();
-    } else {
-      return Container(
-        height: 48,
-        width: MediaQuery.of(context).size.width,
-        color: Colors.black,
-        alignment: Alignment.bottomCenter,
+    String title = resultDescription;
+    if (resultCount != null) {
+      title = resultCount.toString() +
+          " " +
+          resultDescription +
+          (resultCount == 1 ? "" : "s");
+    }
+
+    return Container(
+      height: 48,
+      width: MediaQuery.of(context).size.width,
+      color: Colors.black,
+      alignment: Alignment.bottomLeft,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: 8,
+        ),
         child: Padding(
-          padding: EdgeInsets.only(
-            bottom: 8,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 16,
+          child: Text(title),
+        ),
+      ),
+    );
+  }
+}
+
+class RecentSearch extends StatelessWidget {
+  const RecentSearch({
+    @required this.recentSearch,
+    @required this.textEditingController,
+    @required this.isFirstIndex,
+    @required this.isLastIndex,
+    Key key,
+  }) : super(key: key);
+
+  final String recentSearch;
+  final TextEditingController textEditingController;
+  final bool isFirstIndex;
+  final bool isLastIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Colors.black,
+                ),
+              ),
+              Expanded(
+                child: Container(color: ThemeData.dark().primaryColor),
+              ),
+            ],
+          ),
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(isFirstIndex ? 16 : 0),
+            bottom: Radius.circular(isLastIndex ? 16 : 0),
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(
+                  width: 1,
+                  color: Colors.grey[300],
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Text(
-                  "Contacts",
+            child: ListTile(
+              visualDensity: VisualDensity.compact,
+              onTap: () {
+                textEditingController.text = recentSearch;
+              },
+              title: Text(recentSearch),
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 0,
+                horizontal: 16,
+              ),
+              trailing: IconButton(
+                onPressed: () {
+                  SearchesData.removeSearch(recentSearch);
+                },
+                icon: Icon(
+                  Icons.close,
                 ),
-                AnimatedBuilder(
-                  animation: results,
-                  builder: (context, snapshot) {
-                    return Text(
-                      results.value.length.toString() + " Found",
-                    );
-                  },
-                ),
-              ],
+              ),
             ),
           ),
         ),
-      );
-    }
+      ],
+    );
   }
 }
