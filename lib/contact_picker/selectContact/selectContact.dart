@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 
 class SelectContactPage extends StatelessWidget {
   const SelectContactPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    List<double> heightsBS =
+        measurementToGoldenRatioBS(MediaQuery.of(context).size.height);
+
     return Scaffold(
       body: CustomScrollView(
         physics: BouncingScrollPhysics(),
@@ -34,7 +39,7 @@ class SelectContactPage extends StatelessWidget {
             //might make it open in annoying times (so we turn it off)
             floating: true,
             //most of the screen
-            expandedHeight: 250,
+            expandedHeight: heightsBS[1] + MediaQuery.of(context).padding.top,
             //better illustrates the overscroll
             stretch: true,
             //the map
@@ -66,9 +71,12 @@ class SelectContactPage extends StatelessWidget {
                 48,
               ),
               child: Container(
-                color: Colors.white,
                 height: 48,
-                width: MediaQuery.of(context).size.width,
+                color: Colors.green,
+                child: Theme(
+                  data: ThemeData.light(),
+                  child: SearchBox(),
+                ),
               ),
             ),
           ),
@@ -76,7 +84,7 @@ class SelectContactPage extends StatelessWidget {
             child: Container(
               color: Colors.red,
               child: Center(
-                child: Text("help me"),
+                child: Text("hi"),
               ),
             ),
           ),

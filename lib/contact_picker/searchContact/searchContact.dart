@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:page_transition/page_transition.dart';
 
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
@@ -232,7 +233,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
             child: Column(
               children: <Widget>[
                 SearchBox(
-                  search: textEditingController,
+                  textEditingController: textEditingController,
                 ),
                 Expanded(
                   child: ResultsBody(
@@ -465,77 +466,118 @@ class ResultsBody extends StatelessWidget {
 class SearchBox extends StatelessWidget {
   const SearchBox({
     Key key,
-    @required this.search,
+    this.textEditingController,
   }) : super(key: key);
 
-  final TextEditingController search;
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              color: Colors.black,
-              icon: Icon(
-                Icons.keyboard_arrow_left,
-              ),
-            ),
-            Flexible(
-              child: TextField(
-                scrollPadding: EdgeInsets.all(0),
-                textInputAction: TextInputAction.search,
-                controller: search,
-                autofocus: true,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(0),
-                  border: InputBorder.none,
-                  hintText: "Search",
-                ),
-                onEditingComplete: () {
-                  SearchesData.addSearches(search.text);
-                  FocusScope.of(context).unfocus();
+    return Hero(
+      tag: 'search box',
+      child: SizedBox(
+        height: 48,
+        child: Material(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
                 },
+                color: Colors.black,
+                icon: Icon(
+                  Icons.keyboard_arrow_left,
+                ),
               ),
-            ),
-            search != null
-                ? AnimatedBuilder(
-                    animation: search,
-                    builder: (context, snapshot) {
-                      if (search.text.length == 0) {
-                        return Container();
-                      } else {
-                        return IconButton(
-                          onPressed: () {
-                            if (search.text != "") {
-                              search.text = "";
-                            } else {
-                              Navigator.of(context).pop();
-                            }
-                          },
-                          icon: Transform.rotate(
-                            angle: -math.pi / 4,
-                            child: Icon(
-                              Icons.add,
+              Flexible(
+                child: Stack(
+                  children: [
+                    TextField(
+                      scrollPadding: EdgeInsets.all(0),
+                      textInputAction: TextInputAction.search,
+                      controller: textEditingController,
+                      autofocus: textEditingController != null ? true : false,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(0),
+                        border: InputBorder.none,
+                        hintText: "Search",
+                      ),
+                      onEditingComplete: () {
+                        if (textEditingController.text != "") {
+                          SearchesData.addSearches(textEditingController.text);
+                        }
+                        FocusScope.of(context).unfocus();
+                      },
+                    ),
+                    textEditingController != null
+                        ? SizedBox.shrink()
+                        : Positioned.fill(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () async {
+                                //creat the new contact
+                                var newContact = await Navigator.push(
+                                  context,
+                                  PageTransition(
+                                    type: PageTransitionType.bottomToTop,
+                                    child: Theme(
+                                      data: ThemeData.dark(),
+                                      child: SearchContactPage(),
+                                    ),
+                                  ),
+                                );
+
+                                //if the new contact is indeed created
+                                //save it
+                                if (newContact != null) {
+                                  Navigator.of(context).pop(newContact);
+                                }
+                              },
+                              child: SizedBox.expand(
+                                child: Container(),
+                              ),
                             ),
                           ),
-                        );
-                      }
-                    },
-                  )
-                : Icon(Icons.search),
-          ],
+                  ],
+                ),
+              ),
+              textEditingController != null
+                  ? AnimatedBuilder(
+                      animation: textEditingController,
+                      builder: (context, snapshot) {
+                        if (textEditingController.text.length == 0) {
+                          return Container();
+                        } else {
+                          return IconButton(
+                            onPressed: () {
+                              if (textEditingController.text != "") {
+                                textEditingController.text = "";
+                              } else {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            icon: Transform.rotate(
+                              angle: -math.pi / 4,
+                              child: Icon(
+                                Icons.add,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : Padding(
+                      padding: EdgeInsets.only(
+                        right: 16,
+                      ),
+                      child: Icon(Icons.search),
+                    ),
+            ],
+          ),
         ),
       ),
     );

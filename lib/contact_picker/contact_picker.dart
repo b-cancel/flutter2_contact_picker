@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
+import 'package:flutter2_contact_picker/contact_picker/selectContact/selectContact.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'newContact/newContactPage.dart';
@@ -95,6 +96,31 @@ class ContactPicker extends StatelessWidget {
                 },
                 icon: Icon(
                   Icons.search,
+                  color: Colors.blue,
+                ),
+              ),
+              IconButton(
+                onPressed: () async {
+                  //creat the new contact
+                  var newContact = await Navigator.push(
+                    context,
+                    PageTransition(
+                      type: PageTransitionType.topToBottom,
+                      child: Theme(
+                        data: ThemeData.dark(),
+                        child: SelectContactPage(),
+                      ),
+                    ),
+                  );
+
+                  //if the new contact is indeed created
+                  //save it
+                  if (newContact != null) {
+                    Navigator.of(context).pop(newContact);
+                  }
+                },
+                icon: Icon(
+                  Icons.select_all,
                   color: Colors.blue,
                 ),
               ),
