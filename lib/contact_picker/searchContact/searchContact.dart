@@ -324,38 +324,130 @@ class ResultsBody extends StatelessWidget {
         );
       }
     } else {
+      //names (bottom grey IF phones OR emails exists)
+      //phones (bottom grey IF email exists)
+      //emails (bottom allways grey)
+      bool nameMatchesExist = matchingNameContactIDs.length > 0;
+      bool phoneMatchesExist = matchingNumberContactIDs.length > 0;
+      bool emailMatchesExist = matchingEmailContactIDs.length > 0;
+
+      bool namesBottomBlack = phoneMatchesExist || emailMatchesExist;
+      bool phonesBottomBlack = emailMatchesExist;
+
+      //show the results of the search
       return CustomScrollView(
         physics: BouncingScrollPhysics(),
         slivers: [
           SliverStickyHeader(
-            header: ResultsHeader(
-              resultCount: allMatches.length,
-              resultDescription: "Matching Name",
-            ),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  String contactID = allMatches[index];
-                  return ContactTile(
-                    onTap: () {
-                      //save as a successfull search term
-                      SearchesData.addSearches(textEditingController.text);
+            header: nameMatchesExist == false
+                ? Container()
+                : ResultsHeader(
+                    resultCount: matchingNameContactIDs.length,
+                    resultDescription: "Matching Name",
+                  ),
+            sliver: nameMatchesExist == false
+                ? SliverToBoxAdapter(
+                    child: Container(),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        String contactID = matchingNameContactIDs[index];
+                        return ContactTile(
+                          onTap: () {
+                            //save as a successfull search term
+                            SearchesData.addSearches(
+                                textEditingController.text);
 
-                      //return contact ID
-                      Navigator.of(context).pop(contactID);
-                    },
-                    iconColor: contactIDToColorLocal[contactID],
-                    contact: allContactsLocal.value[contactID],
-                    isFirst: index == 0,
-                    isLast: index == (allMatches.length - 1),
-                    highlightPhone:
-                        matchingNumberContactIDs.contains(contactID),
-                    highlightEmail: matchingEmailContactIDs.contains(contactID),
-                  );
-                },
-                childCount: allMatches.length,
-              ),
-            ),
+                            //return contact ID
+                            Navigator.of(context).pop(contactID);
+                          },
+                          iconColor: contactIDToColorLocal[contactID],
+                          contact: allContactsLocal.value[contactID],
+                          isFirst: index == 0,
+                          isLast: index == (matchingNameContactIDs.length - 1),
+                          highlightPhone: false,
+                          highlightEmail: false,
+                          bottomBlack: namesBottomBlack,
+                        );
+                      },
+                      childCount: matchingNameContactIDs.length,
+                    ),
+                  ),
+          ),
+          SliverStickyHeader(
+            header: phoneMatchesExist == false
+                ? Container()
+                : ResultsHeader(
+                    resultCount: matchingNumberContactIDs.length,
+                    resultDescription: "Matching Phone Number",
+                  ),
+            sliver: phoneMatchesExist == false
+                ? SliverToBoxAdapter(
+                    child: Container(),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        String contactID = matchingNumberContactIDs[index];
+                        return ContactTile(
+                          onTap: () {
+                            //save as a successfull search term
+                            SearchesData.addSearches(
+                                textEditingController.text);
+
+                            //return contact ID
+                            Navigator.of(context).pop(contactID);
+                          },
+                          iconColor: contactIDToColorLocal[contactID],
+                          contact: allContactsLocal.value[contactID],
+                          isFirst: index == 0,
+                          isLast:
+                              index == (matchingNumberContactIDs.length - 1),
+                          highlightPhone: true,
+                          highlightEmail: false,
+                          bottomBlack: phonesBottomBlack,
+                        );
+                      },
+                      childCount: matchingNumberContactIDs.length,
+                    ),
+                  ),
+          ),
+          SliverStickyHeader(
+            header: emailMatchesExist == false
+                ? Container()
+                : ResultsHeader(
+                    resultCount: matchingEmailContactIDs.length,
+                    resultDescription: "Matching Email",
+                  ),
+            sliver: emailMatchesExist == false
+                ? SliverToBoxAdapter(
+                    child: Container(),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) {
+                        String contactID = matchingEmailContactIDs[index];
+                        return ContactTile(
+                          onTap: () {
+                            //save as a successfull search term
+                            SearchesData.addSearches(
+                                textEditingController.text);
+
+                            //return contact ID
+                            Navigator.of(context).pop(contactID);
+                          },
+                          iconColor: contactIDToColorLocal[contactID],
+                          contact: allContactsLocal.value[contactID],
+                          isFirst: index == 0,
+                          isLast: index == (matchingEmailContactIDs.length - 1),
+                          highlightPhone: false,
+                          highlightEmail: true,
+                        );
+                      },
+                      childCount: matchingEmailContactIDs.length,
+                    ),
+                  ),
           ),
           SliverFillRemaining(
             hasScrollBody: false,

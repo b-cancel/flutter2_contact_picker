@@ -13,6 +13,7 @@ class ContactTile extends StatelessWidget {
     this.highlightPhone: false,
     this.highlightEmail: false,
     this.iconColor,
+    this.bottomBlack: false,
     Key key,
   }) : super(key: key);
 
@@ -23,6 +24,7 @@ class ContactTile extends StatelessWidget {
   final bool highlightPhone;
   final bool highlightEmail;
   final Color iconColor;
+  final bool bottomBlack;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,9 @@ class ContactTile extends StatelessWidget {
 
     //build
     return Material(
-      color: isLast ? ThemeData.dark().primaryColor : Colors.transparent,
+      color: isLast && bottomBlack == false
+          ? ThemeData.dark().primaryColor
+          : Colors.transparent,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
