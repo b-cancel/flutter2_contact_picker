@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/curvedCorner.dart';
 
 class SectionTitle extends StatelessWidget {
-  final IconData icon;
+  final IconData rightIcon;
   final String name;
 
   const SectionTitle({
-    @required this.icon,
+    this.rightIcon,
     @required this.name,
     Key key,
   }) : super(key: key);
@@ -37,12 +37,14 @@ class SectionTitle extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Icon(
-                icon,
-                //hidden for now
-                color: Colors.transparent,
-                size: 18,
-              ),
+              rightIcon == null
+                  ? Container()
+                  : Icon(
+                      rightIcon,
+                      //hidden for now
+                      color: Colors.transparent,
+                      size: 18,
+                    ),
             ],
           ),
         ),

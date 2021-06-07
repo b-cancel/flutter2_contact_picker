@@ -8,8 +8,10 @@ import 'helper.dart';
 //returns Map since all of our files will be json
 Future<Map> fileToMap(String fileName, {bool createIfNeeded: true}) async {
   File fileReference = await nameToFileReference(fileName);
-  if (createIfNeeded && await fileReference.exists() == false) {
-    await fileReference.create(); //create the file
+  if (await fileReference.exists() == false) {
+    if (createIfNeeded) {
+      await fileReference.create(); //create the file
+    }
     return Map(); //return an emtpy map
   } else {
     String fileString = await fileReference.readAsString();

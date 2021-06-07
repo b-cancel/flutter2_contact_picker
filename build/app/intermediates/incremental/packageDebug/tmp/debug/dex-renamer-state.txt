@@ -1,4 +1,4 @@
-#Sun Jun 06 22:31:47 EDT 2021
+#Mon Jun 07 17:13:49 EDT 2021
 base.0=/Users/bryancancel/Documents/sourceControl/flutter2_contact_picker/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
 path.0=classes.dex
 renamed.0=classes.dex

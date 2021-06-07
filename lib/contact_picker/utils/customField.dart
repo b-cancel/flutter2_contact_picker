@@ -10,6 +10,7 @@ class CustomField extends StatefulWidget {
     Key key,
     this.noBorder: false,
     this.noButtonFillMode: false,
+    this.prefixIcon,
     this.extraScrollPadding: false,
     @required this.focusNode,
     this.onSubmitted,
@@ -41,6 +42,8 @@ class CustomField extends StatefulWidget {
 
   final bool noBorder;
   final bool noButtonFillMode;
+
+  final Widget prefixIcon;
 
   final bool extraScrollPadding;
   final FocusNode focusNode;
@@ -386,6 +389,8 @@ class _CustomFieldState extends State<CustomField> {
                   },
             decoration: InputDecoration(
               isDense: widget.noBorder ? true : false,
+
+              prefixIcon: widget.prefixIcon,
 
               floatingLabelBehavior: widget.noBorder
                   ? (buttonMode

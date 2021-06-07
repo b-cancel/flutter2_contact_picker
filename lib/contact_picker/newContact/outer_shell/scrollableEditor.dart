@@ -128,7 +128,7 @@ class ScrollableEditor extends StatelessWidget {
         ),
         SliverStickyHeader(
           header: SectionTitle(
-            icon: Icons.phone,
+            rightIcon: Icons.phone,
             name: "Phone Number" + (phoneFields.length == 1 ? "" : "s"),
           ),
           sliver: SliverToBoxAdapter(
@@ -142,7 +142,7 @@ class ScrollableEditor extends StatelessWidget {
         ),
         SliverStickyHeader(
           header: SectionTitle(
-            icon: Icons.email,
+            rightIcon: Icons.email,
             name: "Email" + (emailFields.length == 1 ? "" : "s"),
           ),
           sliver: SliverToBoxAdapter(
@@ -156,7 +156,7 @@ class ScrollableEditor extends StatelessWidget {
         ),
         SliverStickyHeader(
           header: SectionTitle(
-            icon: Icons.work,
+            rightIcon: Icons.work,
             name: "Work",
           ),
           sliver: SliverToBoxAdapter(
@@ -168,7 +168,7 @@ class ScrollableEditor extends StatelessWidget {
         ),
         SliverStickyHeader(
           header: SectionTitle(
-            icon: Icons.location_on,
+            rightIcon: Icons.location_on,
             name: "Address" + (addressStreetFields.length == 1 ? "" : "es"),
           ),
           sliver: SliverToBoxAdapter(

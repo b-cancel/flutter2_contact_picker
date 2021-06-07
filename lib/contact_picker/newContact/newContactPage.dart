@@ -412,6 +412,9 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   void initState() {
+    //for label swapping
+    CategoryData.initCustomLabels();
+
     //-------------------------Variable Prep-------------------------
 
     //prefix, first, middle, last, suffix
