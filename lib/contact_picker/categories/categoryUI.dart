@@ -11,10 +11,14 @@ enum Boolean { TRUE, FALSE }
 //Tap To Edit Category
 class CategorySelector extends StatelessWidget {
   CategorySelector({
+    this.labelIsFor,
+    this.alternativeLabelIsFor,
     @required this.labelType,
     @required this.labelSelected,
   });
 
+  final TextEditingController labelIsFor;
+  final String alternativeLabelIsFor;
   final LabelType labelType;
   final ValueNotifier<String> labelSelected;
 
@@ -29,6 +33,8 @@ class CategorySelector extends StatelessWidget {
             child: Theme(
               data: ThemeData.dark(),
               child: CategorySelectionPage(
+                labelIsFor: labelIsFor,
+                alternativeLabelIsFor: alternativeLabelIsFor,
                 labelType: labelType,
                 labelString: labelSelected,
               ),
@@ -67,10 +73,14 @@ class CategorySelector extends StatelessWidget {
 //BUT this custom category does not save for use elsewhere
 class CategorySelectionPage extends StatelessWidget {
   CategorySelectionPage({
+    this.labelIsFor,
+    this.alternativeLabelIsFor,
     @required this.labelType,
     @required this.labelString,
   });
 
+  final TextEditingController labelIsFor;
+  final String alternativeLabelIsFor;
   final LabelType labelType;
   final ValueNotifier<String> labelString;
 

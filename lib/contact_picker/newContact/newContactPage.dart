@@ -3,13 +3,13 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/appBarButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/justifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../categories/categoryData.dart';
 import 'inner_shell/nameHandler.dart';
-import 'package:flutter2_contact_picker/appBarButton.dart';
 
 import 'outer_shell/scrollableEditor.dart';
 
@@ -21,9 +21,6 @@ class FieldData {
   FieldData() {
     controller = new TextEditingController();
     focusNode = new FocusNode();
-    nextFunction = () {
-      print("next field");
-    };
   }
 }
 
@@ -60,17 +57,17 @@ class _NewContactPageState extends State<NewContactPage> {
   List<String> nameLabels = [];
 
   //-------------------------Phones
-  bool autoAddFirstPhone = true;
+  bool autoAddFirstPhone = false;
   List<FieldData> phoneValueFields = [];
   List<ValueNotifier<String>> phoneLabelStrings = [];
 
   //-------------------------Emails
-  bool autoAddFirstEmail = true;
+  bool autoAddFirstEmail = false;
   List<FieldData> emailValueFields = [];
   List<ValueNotifier<String>> emailLabelStrings = [];
 
   //-------------------------Work
-  bool autoOpenWork = true;
+  bool autoOpenWork = false;
   FieldData jobTitleField = FieldData(); //jobTitle
   FieldData companyField = FieldData(); //company
   ValueNotifier<bool> workOpen = new ValueNotifier<bool>(false);
@@ -464,49 +461,39 @@ class _NewContactPageState extends State<NewContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    //from our name field we move onto the first phone
-    //or whatever else we can
-    nameField.nextFunction = toFirstPhone;
-
     //only if we are in our last name do we move onto our first phone
     //or whatever else we can
-    for (int i = 0; i < nameFields.length; i++) {
-      FieldData thisField = nameFields[i];
-      if (i != (nameFields.length - 1)) {
+    for (int index = 0; index < nameFields.length; index++) {
+      FieldData thisField = nameFields[index];
+      if (index < (nameFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
-          FocusScope.of(context).requestFocus(nameFields[i + 1].focusNode);
+          FocusScope.of(context).requestFocus(nameFields[index + 1].focusNode);
         };
-      } else {
-        thisField.nextFunction = toFirstPhone;
       }
     }
 
     //phones section
-    for (int i = 0; i < phoneValueFields.length; i++) {
-      FieldData thisField = phoneValueFields[i];
-      if (i != (phoneValueFields.length - 1)) {
+    for (int index = 0; index < phoneValueFields.length; index++) {
+      FieldData thisField = phoneValueFields[index];
+      if (index < (phoneValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
           FocusScope.of(context)
-              .requestFocus(phoneValueFields[i + 1].focusNode);
+              .requestFocus(phoneValueFields[index + 1].focusNode);
         };
-      } else {
-        thisField.nextFunction = toFirstEmail;
       }
     }
 
     //emails section
-    for (int i = 0; i < emailValueFields.length; i++) {
-      FieldData thisField = emailValueFields[i];
-      if (i != (emailValueFields.length - 1)) {
+    for (int index = 0; index < emailValueFields.length; index++) {
+      FieldData thisField = emailValueFields[index];
+      if (index < (emailValueFields.length - 1)) {
         //not last index
         thisField.nextFunction = () {
           FocusScope.of(context)
-              .requestFocus(emailValueFields[i + 1].focusNode);
+              .requestFocus(emailValueFields[index + 1].focusNode);
         };
-      } else {
-        thisField.nextFunction = toWork;
       }
     }
 
@@ -514,30 +501,32 @@ class _NewContactPageState extends State<NewContactPage> {
     jobTitleField.nextFunction = () {
       FocusScope.of(context).requestFocus(companyField.focusNode);
     };
-    companyField.nextFunction = toFirstAddress;
 
     //address section
     int addressCount = addressStreetFields.length;
-    for (int i = 0; i < addressCount; i++) {
+    for (int index = 0; index < addressCount; index++) {
       //street, city, postcode, region, country
-      addressStreetFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressCityFields[i].focusNode);
+      addressStreetFields[index].nextFunction = () {
+        FocusScope.of(context).requestFocus(addressCityFields[index].focusNode);
       };
-      addressCityFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressRegionFields[i].focusNode);
+      addressCityFields[index].nextFunction = () {
+        FocusScope.of(context)
+            .requestFocus(addressRegionFields[index].focusNode);
       };
-      addressRegionFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressPostcodeFields[i].focusNode);
+      addressRegionFields[index].nextFunction = () {
+        FocusScope.of(context)
+            .requestFocus(addressPostcodeFields[index].focusNode);
       };
-      addressPostcodeFields[i].nextFunction = () {
-        FocusScope.of(context).requestFocus(addressCountryFields[i].focusNode);
+      addressPostcodeFields[index].nextFunction = () {
+        FocusScope.of(context)
+            .requestFocus(addressCountryFields[index].focusNode);
       };
-      addressCountryFields[i].nextFunction = () {
-        if (i < (addressCount - 1)) {
+      if (index < (addressCount - 1)) {
+        addressCountryFields[index].nextFunction = () {
           FocusScope.of(context)
-              .requestFocus(addressStreetFields[i + 1].focusNode);
-        }
-      };
+              .requestFocus(addressStreetFields[index + 1].focusNode);
+        };
+      }
     }
 
     //build

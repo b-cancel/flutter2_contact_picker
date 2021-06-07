@@ -139,8 +139,10 @@ class PhoneNumbersEditor extends StatelessWidget {
             focusNode: thisField.focusNode,
             textEditingController: thisField.controller,
             nextFunction: thisField.nextFunction,
-            label: "Phone Number",
+            label: "Phone",
             labelField: CategorySelector(
+              alternativeLabelIsFor: "Phone Number",
+              labelIsFor: thisField.controller,
               labelType: LabelType.phone,
               labelSelected: phoneLabels[i],
             ),
@@ -221,6 +223,8 @@ class EmailsEditor extends StatelessWidget {
             nextFunction: thisField.nextFunction,
             label: "Email",
             labelField: CategorySelector(
+              alternativeLabelIsFor: "Email Address",
+              labelIsFor: thisField.controller,
               labelType: LabelType.email,
               labelSelected: emailLabels[i],
             ),

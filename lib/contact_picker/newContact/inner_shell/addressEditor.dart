@@ -81,7 +81,7 @@ class AddressesEditor extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(16),
             color: Colors.white,
           ),
           child: Column(
@@ -144,7 +144,7 @@ class AddressField extends StatelessWidget {
           child: TheField(
             focusNode: thisField.focusNode,
             textEditingController: thisField.controller,
-            nextFunction: () => thisField.nextFunction(),
+            nextFunction: thisField.nextFunction,
             label: addressLabels[index],
           ),
         ),
@@ -164,6 +164,7 @@ class AddressField extends StatelessWidget {
             iconSize: 16,
           ),
           CategorySelector(
+            alternativeLabelIsFor: "Address",
             labelType: LabelType.address,
             labelSelected: addressLabel,
           ),

@@ -65,7 +65,7 @@ class AvatarEditor extends StatelessWidget {
                   ),
                   child: (imageLocation.value == "")
                       ? Icon(
-                          Icons.camera_alt,
+                          Icons.person,
                           size: imageDiameter / 2,
                           color: Colors.white,
                         )
