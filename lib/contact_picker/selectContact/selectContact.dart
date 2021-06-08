@@ -1,8 +1,10 @@
 import 'package:contacts_service/contacts_service.dart';
+import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
+import 'package:flutter2_contact_picker/contact_picker/selectContact/recents.dart';
 import 'package:flutter2_contact_picker/contact_picker/selectContact/scrollToTop.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
@@ -33,7 +35,47 @@ class _SelectContactPageState extends State<SelectContactPage> {
   //this only changes if allContacts Changes first (DOES NOT trigger reload)
   ValueNotifier<Map<String, Color>> contactIDToColor = ValueNotifier({});
 
+  //since this also includes recents, whenever this changes we should also reload
+  ValueNotifier<Map<String, List<String>>> keyToContactIDs = ValueNotifier({});
+
   ScrollController scrollController = ScrollController();
+
+  generateSections() async {
+    //grab the recents from the file
+    await RecentsData.initRecents();
+
+    //assemble everything in one hit before moving forward
+    Map<String, List<String>> keyToContactIDsLocal = {};
+
+    //create a reference to recents
+    keyToContactIDsLocal["*"] = RecentsData.recents.value;
+
+    //go through all of our contacts and sort accordingly
+    for (String contactID in allContacts.value.keys) {
+      Contact thisContact = allContacts.value[contactID];
+      String firstLetter = removeDiacritics(
+        thisContact.displayName.toLowerCase()[0],
+      );
+      int firstLetterAsciiCode = firstLetter.codeUnitAt(0);
+      String contactIDKey;
+      if (97 <= firstLetterAsciiCode && firstLetterAsciiCode <= 122) {
+        //add to normal letter section
+        contactIDKey = firstLetter;
+      } else {
+        //add to special section
+        contactIDKey = "#";
+      }
+
+      //add this contact ID to it's expected section
+      if (keyToContactIDsLocal.containsKey(contactIDKey) == false) {
+        keyToContactIDsLocal[contactIDKey] = [];
+      }
+      keyToContactIDsLocal[contactIDKey].add(contactID);
+    }
+
+    //update things globally to trigger a reload
+    keyToContactIDs.value = keyToContactIDsLocal;
+  }
 
   readInContacts() async {
     //grab the basic info first
@@ -53,6 +95,8 @@ class _SelectContactPageState extends State<SelectContactPage> {
 
     //now that we have BOTH color and contact data, trigger a reload
     allContacts.value = allContactsMap;
+
+    await generateSections();
 
     //mark the contacts as read,
     //so that we can distinguish when there are no contacts
@@ -82,6 +126,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
     readInContacts();
     contactsRead.addListener(updateState);
     allContacts.addListener(updateState);
+    keyToContactIDs.addListener(updateState);
     super.initState();
   }
 
@@ -89,6 +134,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
   void dispose() {
     contactsRead.removeListener(updateState);
     allContacts.removeListener(updateState);
+    keyToContactIDs.removeListener(updateState);
     super.dispose();
   }
 
@@ -104,37 +150,53 @@ class _SelectContactPageState extends State<SelectContactPage> {
     //actually build
     return OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
+      double scrollToTopButtonPadding = 8;
+
+      //add first sliver
+      List<Widget> slivers = [];
+      slivers.add(
+        SliverPromptSearchHeader(
+          expandedBannerHeight: expandedBannerHeight,
+          bottomAppBarHeight: bottomAppBarHeight,
+          toolbarHeight: toolbarHeight,
+          prompt: orientation == Orientation.portrait
+              ? widget.verticalPrompt
+              : widget.horizontalPrompt,
+          allContacts: allContacts,
+          contactIDToColor: contactIDToColor,
+        ),
+      );
+
+      //compile all the slivers based on our section information
+      for (String sectionKey in keyToContactIDs.value.keys) {
+        //create the section
+        Widget section = createSectionForKey(sectionKey);
+
+        //add the section
+        slivers.add(
+          section,
+        );
+      }
+
+      //add last sliver
+      slivers.add(
+        SliverFillRemaining(
+          child: Container(
+            color: ThemeData.dark().primaryColor,
+            //48 for mini FAB
+            height: 48 + (scrollToTopButtonPadding * 2),
+          ),
+        ),
+      );
+
+      //build everything
       return Scaffold(
         body: Stack(
           children: [
             CustomScrollView(
               controller: scrollController,
               physics: BouncingScrollPhysics(),
-              slivers: [
-                SliverPromptSearchHeader(
-                  expandedBannerHeight: expandedBannerHeight,
-                  bottomAppBarHeight: bottomAppBarHeight,
-                  toolbarHeight: toolbarHeight,
-                  prompt: orientation == Orientation.portrait
-                      ? widget.verticalPrompt
-                      : widget.horizontalPrompt,
-                  allContacts: allContacts,
-                  contactIDToColor: contactIDToColor,
-                ),
-                SliverToBoxAdapter(
-                  child: Text(
-                    "fsfsdf\n\n\nn\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsdfdsf",
-                  ),
-                ),
-                SliverFillRemaining(
-                  child: Container(
-                    color: Colors.red,
-                    child: Center(
-                      child: Text("hi"),
-                    ),
-                  ),
-                ),
-              ],
+              slivers: slivers,
             ),
             ScrollBar(
               scrollController: scrollController,
@@ -145,11 +207,17 @@ class _SelectContactPageState extends State<SelectContactPage> {
             ),
             ScrollToTopButton(
               scrollController: scrollController,
+              padding: scrollToTopButtonPadding,
             ),
           ],
         ),
       );
     });
+  }
+
+  Widget createSectionForKey(String sectionKey) {
+    List<String> contactIDsInSection = keyToContactIDs.value[sectionKey];
+    return Container();
   }
 }
 

@@ -7,9 +7,11 @@ class ScrollToTopButton extends StatefulWidget {
   const ScrollToTopButton({
     Key key,
     @required this.scrollController,
+    @required this.padding,
   }) : super(key: key);
 
   final ScrollController scrollController;
+  final double padding;
 
   @override
   _ScrollToTopButtonState createState() => _ScrollToTopButtonState();
@@ -45,15 +47,14 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
 
   @override
   Widget build(BuildContext context) {
-    double bottomPadding = 8;
     return Positioned(
       bottom: 0,
       left: 0,
       right: 0,
       child: Container(
         alignment: Alignment.bottomCenter,
-        padding: EdgeInsets.only(
-          bottom: bottomPadding,
+        padding: EdgeInsets.symmetric(
+          vertical: widget.padding,
         ),
         child: AnimatedContainer(
           duration: kTabScrollDuration,
@@ -61,7 +62,7 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
           transform: Matrix4.translation(
             VECT.Vector3(
               0,
-              (onTop.value) ? (bottomPadding + 48.0) : 0.0,
+              (onTop.value) ? (widget.padding + 48.0) : 0.0,
               0,
             ),
           ),

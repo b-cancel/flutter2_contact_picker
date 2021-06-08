@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/read_write/list.dart';
 
+//literally a clone of recents with swapped names
 class SearchesData {
   static String searchesID = "searches";
   static ValueNotifier<List<String>> searches = ValueNotifier([]);
