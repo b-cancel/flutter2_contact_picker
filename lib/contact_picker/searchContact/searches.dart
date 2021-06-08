@@ -5,11 +5,14 @@ class SearchesData {
   static String searchesID = "searches";
   static ValueNotifier<List<String>> searches = ValueNotifier([]);
 
+  //won't allow double initializations
   static initSearches() async {
-    //grab everything that is stored
-    searches.value = await loadSearches();
-    //listen to changes and automatically update things
-    searches.addListener(saveSearches);
+    if (searches.value.length == 0) {
+      //grab everything that is stored
+      searches.value = await loadSearches();
+      //listen to changes and automatically update things
+      searches.addListener(saveSearches);
+    }
   }
 
   static containsSearch(String search) {

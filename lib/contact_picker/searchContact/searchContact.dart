@@ -1,14 +1,13 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
-import 'package:flutter2_contact_picker/contact_picker/selectContact/selectContact.dart';
 import 'dart:math' as math;
 
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:page_transition/page_transition.dart';
 
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
@@ -19,19 +18,22 @@ class SearchContactPage extends StatefulWidget {
     this.contactIDToColor,
   });
 
-  final ValueNotifier<List<Contact>> allContacts;
-  final Map<String, Color> contactIDToColor;
+  final ValueNotifier<Map<String, Contact>> allContacts;
+  final ValueNotifier<Map<String, Color>> contactIDToColor;
 
   @override
   _SearchContactPageState createState() => _SearchContactPageState();
 }
 
 class _SearchContactPageState extends State<SearchContactPage> {
-  ValueNotifier<Map<String, Contact>> allContactsLocal = new ValueNotifier({});
-  Map<String, Color> contactIDToColorLocal = {};
+  //might be reusable from the page that called this, but might not be
+  ValueNotifier<Map<String, Contact>> allContactsLocal = ValueNotifier({});
+  ValueNotifier<Map<String, Color>> contactIDToColorLocal = ValueNotifier({});
+
+  //specific to this page
   TextEditingController textEditingController = new TextEditingController();
   ValueNotifier<String> refinedSearchString = ValueNotifier("");
-  ValueNotifier<List<String>> results = new ValueNotifier([]);
+  ValueNotifier<List<String>> queryResults = new ValueNotifier([]);
   List<String> contactIDsWithMatchingFirstNames = [];
   List<String> contactIDsWithMatchingOtherNames = [];
   List<String> contactIDsWithMatchingNames = [];
@@ -56,7 +58,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
   newQuery() async {
     String query = refinedSearchString.value;
     if (query == "" || query.length == 0) {
-      results.value = [];
+      queryResults.value = [];
     } else {
       //we try and find exact matches for all of these
       //a single contact ID should only be in one of the 2 lists
@@ -115,7 +117,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
       }
 
       //compile all the results
-      results.value = (contactIDsWithMatchingFirstNames +
+      queryResults.value = (contactIDsWithMatchingFirstNames +
           contactIDsWithMatchingOtherNames +
           contactIDsWithMatchingNames +
           contactIDsWithMatchingNumber +
@@ -129,7 +131,7 @@ class _SearchContactPageState extends State<SearchContactPage> {
     }
   }
 
-  newRawSearchString() {
+  refineSearchString() {
     if (textEditingController.text == "" ||
         textEditingController.text.length == 0) {
       refinedSearchString.value = "";
@@ -139,50 +141,50 @@ class _SearchContactPageState extends State<SearchContactPage> {
   }
 
   asyncInit() async {
-    //contacts list
-    if (widget.allContacts == null) {
+    if (widget.allContacts != null && widget.contactIDToColor != null) {
+      //reuse the passed contact list
+      allContactsLocal.value = widget.allContacts.value;
+
+      //reuse the passed contact ID to Color List
+      contactIDToColorLocal.value = widget.contactIDToColor.value;
+    } else {
       //grab the basic info first
-      allContactsLocal.value = contactListToMap(
+      Map<String, Contact> allContactsMap = contactListToMap(
         await ContactsService.getContacts(
           withThumbnails: false,
           photoHighResolution: false,
         ),
       );
-    } else {
-      //reuse since passed
-      updateLocalContactsList();
-    }
 
-    //contact ID to Color
-    if (widget.contactIDToColor == null) {
       //generate the colors
-      for (String contactID in allContactsLocal.value.keys) {
-        contactIDToColorLocal[contactID] = getRandomDarkBlueOrGreyColor();
+      Map<String, Color> contactIDToColorMap = {};
+      for (String contactID in allContactsMap.keys) {
+        contactIDToColorMap[contactID] = getRandomDarkBlueOrGreyColor();
       }
-    } else {
-      //reuse since passed
-      contactIDToColorLocal = widget.contactIDToColor;
-    }
+      contactIDToColorLocal.value = contactIDToColorMap;
 
-    //get all the recent searches
-    await SearchesData.initSearches();
+      //now that we have BOTH color and contact data, trigger a reload
+      allContactsLocal.value = allContactsMap;
 
-    //all contacts
-    if (widget.allContacts == null) {
+      //get all the recent searches here (now that we have the essential contact info)
+      await SearchesData.initSearches();
+
       //grab a little more than the basic info (thumbnails)
       allContactsLocal.value = contactListToMap(
         await ContactsService.getContacts(
-          withThumbnails: true,
+          withThumbnails: true, //only thumbnails are required
           photoHighResolution: false,
         ),
       );
     }
   }
 
-  updateLocalContactsList() {
-    allContactsLocal.value = contactListToMap(
-      widget.allContacts.value,
-    );
+  updateLocalAllContacts() {
+    allContactsLocal.value = widget.allContacts.value;
+  }
+
+  updateLocalContactIDToColor() {
+    contactIDToColorLocal.value = widget.contactIDToColor.value;
   }
 
   @override
@@ -190,17 +192,23 @@ class _SearchContactPageState extends State<SearchContactPage> {
     //super init
     super.initState();
 
-    //listen to contact list changes if they occur
+    //try to reuse data when possible
     if (widget.allContacts != null) {
-      widget.allContacts.addListener(updateLocalContactsList);
+      widget.allContacts.addListener(updateLocalAllContacts);
     }
-    //if our local contact list changes, update state
+    if (widget.contactIDToColor != null) {
+      widget.contactIDToColor.addListener(updateLocalContactIDToColor);
+    }
+
+    //when the local lists change, trigger a reload
     allContactsLocal.addListener(updateState);
-    //when the search query run, compile a new set of results
-    textEditingController.addListener(newRawSearchString);
+    contactIDToColorLocal.addListener(updateState);
+
+    //when the text changes, cascade changes as required
+    textEditingController.addListener(refineSearchString);
     refinedSearchString.addListener(newQuery);
-    //when the results change, set state
-    results.addListener(updateState);
+    queryResults.addListener(updateState);
+
     //track when a recent search is added or removed
     SearchesData.searches.addListener(updateState);
 
@@ -211,13 +219,18 @@ class _SearchContactPageState extends State<SearchContactPage> {
   @override
   void dispose() {
     if (widget.allContacts != null) {
-      widget.allContacts.removeListener(updateLocalContactsList);
+      widget.allContacts.removeListener(updateLocalAllContacts);
+    }
+    if (widget.contactIDToColor != null) {
+      widget.contactIDToColor.removeListener(updateLocalContactIDToColor);
     }
     allContactsLocal.removeListener(updateState);
-    textEditingController.removeListener(newRawSearchString);
+    contactIDToColorLocal.removeListener(updateState);
+    textEditingController.removeListener(refineSearchString);
     refinedSearchString.removeListener(newQuery);
-    results.removeListener(updateState);
+    queryResults.removeListener(updateState);
     SearchesData.searches.removeListener(updateState);
+
     //super dipose
     super.dispose();
   }
@@ -239,8 +252,8 @@ class _SearchContactPageState extends State<SearchContactPage> {
                 Expanded(
                   child: ResultsBody(
                     textEditingController: textEditingController,
-                    allContactsLocal: allContactsLocal,
-                    contactIDToColorLocal: contactIDToColorLocal,
+                    allContacts: allContactsLocal.value,
+                    contactIDToColor: contactIDToColorLocal.value,
                     //first > first names,
                     //then > any name with a space in front of it
                     //then > any match regardless of spaces
@@ -264,16 +277,16 @@ class ResultsBody extends StatelessWidget {
   const ResultsBody({
     Key key,
     @required this.textEditingController,
-    @required this.allContactsLocal,
-    @required this.contactIDToColorLocal,
+    @required this.allContacts,
+    @required this.contactIDToColor,
     @required this.matchingNameContactIDs,
     @required this.matchingNumberContactIDs,
     @required this.matchingEmailContactIDs,
   }) : super(key: key);
 
   final TextEditingController textEditingController;
-  final ValueNotifier<Map<String, Contact>> allContactsLocal;
-  final Map<String, Color> contactIDToColorLocal;
+  final Map<String, Contact> allContacts;
+  final Map<String, Color> contactIDToColor;
   final List<String> matchingNameContactIDs;
   final List<String> matchingNumberContactIDs;
   final List<String> matchingEmailContactIDs;
@@ -366,13 +379,14 @@ class ResultsBody extends StatelessWidget {
                             onTap: () {
                               //save as a successfull search term
                               SearchesData.addSearches(
-                                  textEditingController.text);
+                                textEditingController.text,
+                              );
 
                               //return contact ID
                               Navigator.of(context).pop(contactID);
                             },
-                            iconColor: contactIDToColorLocal[contactID],
-                            contact: allContactsLocal.value[contactID],
+                            iconColor: contactIDToColor[contactID],
+                            contact: allContacts[contactID],
                             isFirst: index == 0,
                             isLast:
                                 index == (matchingNameContactIDs.length - 1),
@@ -409,8 +423,8 @@ class ResultsBody extends StatelessWidget {
                               //return contact ID
                               Navigator.of(context).pop(contactID);
                             },
-                            iconColor: contactIDToColorLocal[contactID],
-                            contact: allContactsLocal.value[contactID],
+                            iconColor: contactIDToColor[contactID],
+                            contact: allContacts[contactID],
                             isFirst: index == 0,
                             isLast:
                                 index == (matchingNumberContactIDs.length - 1),
@@ -447,8 +461,8 @@ class ResultsBody extends StatelessWidget {
                               //return contact ID
                               Navigator.of(context).pop(contactID);
                             },
-                            iconColor: contactIDToColorLocal[contactID],
-                            contact: allContactsLocal.value[contactID],
+                            iconColor: contactIDToColor[contactID],
+                            contact: allContacts[contactID],
                             isFirst: index == 0,
                             isLast:
                                 index == (matchingEmailContactIDs.length - 1),
@@ -493,9 +507,11 @@ class SearchBox extends StatelessWidget {
   const SearchBox({
     Key key,
     this.textEditingController,
+    this.onTap,
   }) : super(key: key);
 
   final TextEditingController textEditingController;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -539,30 +555,12 @@ class SearchBox extends StatelessWidget {
                         FocusScope.of(context).unfocus();
                       },
                     ),
-                    textEditingController != null
+                    textEditingController != null && onTap == null
                         ? SizedBox.shrink()
                         : Positioned.fill(
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onTap: () async {
-                                //creat the new contact
-                                var newContact = await Navigator.push(
-                                  context,
-                                  PageTransition(
-                                    type: PageTransitionType.bottomToTop,
-                                    child: Theme(
-                                      data: ThemeData.dark(),
-                                      child: SearchContactPage(),
-                                    ),
-                                  ),
-                                );
-
-                                //if the new contact is indeed created
-                                //save it
-                                if (newContact != null) {
-                                  Navigator.of(context).pop(newContact);
-                                }
-                              },
+                              onTap: onTap,
                               child: SizedBox.expand(
                                 child: Container(),
                               ),
