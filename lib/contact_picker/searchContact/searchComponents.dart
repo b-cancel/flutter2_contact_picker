@@ -220,14 +220,15 @@ class RecentSearchesSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          String searchTerm = SearchesData.searches.value[index];
+        (BuildContext context, int invertedIndex) {
           int lastIndex = (SearchesData.searches.value.length - 1);
+          int index = lastIndex - invertedIndex;
+          String searchTerm = SearchesData.searches.value[index];
           return RecentSearch(
             recentSearch: searchTerm,
             textEditingController: textEditingController,
-            isFirstIndex: index == 0,
-            isLastIndex: index == lastIndex,
+            isFirstIndex: invertedIndex == 0,
+            isLastIndex: invertedIndex == lastIndex,
           );
         },
         childCount: SearchesData.searches.value.length,

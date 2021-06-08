@@ -1,15 +1,16 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
 import 'package:flutter2_contact_picker/contact_picker/selectContact/recents.dart';
 import 'package:flutter2_contact_picker/contact_picker/selectContact/scrollToTop.dart';
+import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
+import 'header.dart';
 import 'scrollBar/scrollBar.dart';
 
 class SelectContactPage extends StatefulWidget {
@@ -48,17 +49,20 @@ class _SelectContactPageState extends State<SelectContactPage> {
     Map<String, List<String>> keyToContactIDsLocal = {};
 
     //create a reference to recents
-    keyToContactIDsLocal["*"] = RecentsData.recents.value;
+    List<String> recentContactIDs = RecentsData.recents.value;
+    if (recentContactIDs.length > 0) {
+      keyToContactIDsLocal["*"] = recentContactIDs;
+    }
 
     //go through all of our contacts and sort accordingly
     for (String contactID in allContacts.value.keys) {
       Contact thisContact = allContacts.value[contactID];
       String firstLetter = removeDiacritics(
-        thisContact.displayName.toLowerCase()[0],
+        thisContact.displayName.toUpperCase()[0],
       );
       int firstLetterAsciiCode = firstLetter.codeUnitAt(0);
       String contactIDKey;
-      if (97 <= firstLetterAsciiCode && firstLetterAsciiCode <= 122) {
+      if (65 <= firstLetterAsciiCode && firstLetterAsciiCode <= 90) {
         //add to normal letter section
         contactIDKey = firstLetter;
       } else {
@@ -71,6 +75,13 @@ class _SelectContactPageState extends State<SelectContactPage> {
         keyToContactIDsLocal[contactIDKey] = [];
       }
       keyToContactIDsLocal[contactIDKey].add(contactID);
+    }
+
+    //make sure all the #, are at the very end
+    if (keyToContactIDsLocal.containsKey("#")) {
+      List<String> specialContactIDs = keyToContactIDsLocal["#"];
+      keyToContactIDsLocal.remove("#");
+      keyToContactIDsLocal["#"] = specialContactIDs;
     }
 
     //update things globally to trigger a reload
@@ -145,7 +156,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
       MediaQuery.of(context).size.height,
     );
     double expandedBannerHeight = heightsBS[1] + toolbarHeight;
-    double bottomAppBarHeight = 48;
+    double bottomAppBarHeight = 56;
 
     //actually build
     return OrientationBuilder(
@@ -216,145 +227,80 @@ class _SelectContactPageState extends State<SelectContactPage> {
   }
 
   Widget createSectionForKey(String sectionKey) {
+    //! We know this list isn't empty
     List<String> contactIDsInSection = keyToContactIDs.value[sectionKey];
-    return Container();
-  }
-}
 
-class SliverPromptSearchHeader extends StatelessWidget {
-  const SliverPromptSearchHeader({
-    Key key,
-    @required this.allContacts,
-    @required this.contactIDToColor,
-    @required this.expandedBannerHeight,
-    @required this.bottomAppBarHeight,
-    @required this.toolbarHeight,
-    @required this.prompt,
-  }) : super(key: key);
+    //process key
+    String sectionTitle = sectionKey;
+    if (sectionKey == "*" || sectionKey == "#") {
+      if (sectionKey == "*") {
+        sectionTitle = "Recents";
+      } else {
+        sectionTitle = "Other";
+      }
+    }
 
-  final ValueNotifier<Map<String, Contact>> allContacts;
-  final ValueNotifier<Map<String, Color>> contactIDToColor;
-  final double expandedBannerHeight;
-  final double bottomAppBarHeight;
-  final double toolbarHeight;
-  final Widget prompt;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverAppBar(
-      //color
-      //brightness: Brightness.dark,
-      backgroundColor: Colors.black,
-      //default color of things within app bar
-      foregroundColor: Colors.white,
-      //everything else
-      automaticallyImplyLeading: false,
-      excludeHeaderSemantics: false,
-      //collapsedHeight: kToolbarHeight, //<- smallest possible value
-      //titleSpacing: 0,
-      //NOTE: leading to left of title
-      //NOTE: title in middle
-      //NOTE: action to right of title
-      //show extra top padding
-      leading: null,
-      title: null,
-      actions: null,
-      primary: true,
-      //only show shadow if content below
-      forceElevated: false,
-      //snapping is annoying and disorienting
-      //but the opposite is ugly
-      snap: false,
-      pinned: true, //so the [bottom] parameter allways shows
-      //might make it open in annoying times (so we turn it off)
-      floating: false,
-      //most of the screen
-      expandedHeight: expandedBannerHeight,
-      //better illustrates the overscroll
-      stretch: true,
-      //the map
-      flexibleSpace: FlexibleSpaceBar(
-        //parallax keeps the background centered within flexible space
-        //pin will essentially make it another sticky header
-        //but to give the top app bar a back ground all the time I need none
-        collapseMode: CollapseMode.none,
-        //this does work
-        stretchModes: [
-          //this plays well enough and gets the point accross
-          //StretchMode.blurBackground,
-
-          //we don't have one
-          //StretchMode.fadeTitle,
-
-          //zooming doesn't play well the map
-          StretchMode.zoomBackground,
-        ],
-        background: Center(
-          child: Padding(
-            //+8 is a little extra for when things are tighter
-            padding: EdgeInsets.only(
-              //from the tool bar
-              top: toolbarHeight + 8.0,
-              //from the bottom bar
-              bottom: bottomAppBarHeight + 8.0,
-            ),
-            child: Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: prompt,
-                    ),
-                    Center(
-                      child: CollapsedNewContactButton(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+    //return section
+    return SliverStickyHeader(
+      header: ResultsHeader(
+        resultDescription: sectionTitle,
       ),
-      bottom: PreferredSize(
-        preferredSize: Size(
-          MediaQuery.of(context).size.width,
-          0,
-        ),
-        child: Container(
-          height: bottomAppBarHeight,
-          color: Colors.black,
-          child: Theme(
-            data: ThemeData.light(),
-            child: SearchBox(
-              onTap: () async {
-                //creat the new contact
-                var newContact = await Navigator.push(
-                  context,
-                  PageTransition(
-                    type: PageTransitionType.bottomToTop,
-                    child: Theme(
-                      data: ThemeData.dark(),
-                      child: SearchContactPage(
-                        allContacts: allContacts,
-                        contactIDToColor: contactIDToColor,
-                      ),
-                    ),
-                  ),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            String contactID = contactIDsInSection[index];
+            return ContactTile(
+              onTap: () {
+                //save as a successfull search term
+                RecentsData.addRecent(
+                  contactID,
                 );
 
-                //if the new contact is indeed created
-                //save it
-                if (newContact != null) {
-                  Navigator.of(context).pop(newContact);
-                }
+                //return contact ID
+                Navigator.of(context).pop(contactID);
               },
-            ),
-          ),
+              iconColor: contactIDToColor.value[contactID],
+              contact: allContacts.value[contactID],
+              isFirst: index == 0,
+              isLast: index == (contactIDsInSection.length - 1),
+              bottomBlack: sectionExistsUnderThisSection(
+                  sectionKey), //TODO: eventually edit this
+              //TODO: add on remove call back
+            );
+          },
+          childCount: contactIDsInSection.length,
         ),
       ),
     );
+  }
+
+  sectionExistsUnderThisSection(String sectionKey) {
+    if (sectionKey == "#") {
+      return false;
+    } else {
+      if (sectionKey == "*") {
+        if (keyToContactIDs.value.length > 1) {
+          //atleast 2 sections exist, one of which is us
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        if (sectionKey == "Z") {
+          if (sectionKey == "#") {
+            //an other section exists
+            return true;
+          } else {
+            //we are the last section since no other section exist
+            return false;
+          }
+        } else {
+          //Letters A -> Y... keep checking for if the next letter exist...
+          //if still can't even find Z... check for #
+          //TODO: combine with code above
+          return true; //TODO: good enough for now
+        }
+      }
+    }
   }
 }

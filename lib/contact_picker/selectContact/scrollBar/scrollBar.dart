@@ -89,7 +89,8 @@ class _ScrollBarState extends State<ScrollBar> {
     updateScrollBarHeight();
 
     //for scroll bar overall
-    double scrollBarTopPadding = 16;
+    //48 is sticky header
+    double scrollBarTopPadding = 48.0 + 16;
     double scrollBarBottomPadding = 16;
 
     //for alpha scroll bar
@@ -117,7 +118,7 @@ class _ScrollBarState extends State<ScrollBar> {
                 child: Container(
                   width: 24,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColorDark.withOpacity(0.5),
+                    color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.all(
                       Radius.circular(16.0),
                     ),

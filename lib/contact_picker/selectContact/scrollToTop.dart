@@ -27,7 +27,6 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
   }
 
   updateOnTop() {
-    print("offset: " + widget.scrollController.offset.toString());
     onTop.value = widget.scrollController.offset <= 0;
   }
 
@@ -68,8 +67,7 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
           ),
           child: FloatingActionButton(
             mini: true,
-            backgroundColor:
-                Theme.of(context).primaryColorDark.withOpacity(0.5),
+            backgroundColor: Colors.black.withOpacity(0.5),
             onPressed: () {
               vibrate();
               //scrollToIndex -> too slow to find index
@@ -89,14 +87,14 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
                       height: 12,
                       child: Icon(
                         Icons.minimize,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white,
                       ),
                     ),
                     Container(
                       height: 12,
                       child: Icon(
                         Icons.keyboard_arrow_up,
-                        color: Colors.white.withOpacity(0.5),
+                        color: Colors.white,
                         size: 28,
                       ),
                     ),

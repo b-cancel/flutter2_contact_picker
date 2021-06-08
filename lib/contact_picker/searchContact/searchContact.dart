@@ -315,7 +315,7 @@ class SearchBox extends StatelessWidget {
     return Hero(
       tag: 'search box',
       child: SizedBox(
-        height: 48,
+        height: 56,
         child: Material(
           borderRadius: BorderRadius.circular(16),
           color: Colors.white,

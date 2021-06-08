@@ -188,7 +188,7 @@ class AlphaScrollBarOverlay extends StatelessWidget {
               child: Text(
                 letterCodes[i],
                 style: TextStyle(
-                  color: Colors.blue,
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),

@@ -67,6 +67,7 @@ class ContactTile extends StatelessWidget {
                       contact.displayName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                   ),
