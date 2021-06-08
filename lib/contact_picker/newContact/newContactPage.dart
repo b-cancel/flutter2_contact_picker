@@ -533,89 +533,95 @@ class _NewContactPageState extends State<NewContactPage> {
     }
 
     //build
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          AppBarButton(
-            onTapPassContext: (context) {
-              Navigator.of(context).pop();
-            },
-            centerTitle: false,
-            toolTip: 'Cancel',
-            noBackButton: true,
-            title: Text(
-              'Cancel',
-              overflow: TextOverflow.visible,
-            ),
-            actions: <Widget>[
-              Center(
-                child: Hero(
-                  tag: 'new contact',
-                  child: SizedBox(
-                    height: 42,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.blue,
+    return OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+      bool isPortrait = orientation == Orientation.portrait;
+      //build
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            AppBarButton(
+              onTapPassContext: (context) {
+                Navigator.of(context).pop();
+              },
+              centerTitle: false,
+              toolTip: 'Cancel',
+              noBackButton: true,
+              title: Text(
+                'Cancel',
+                overflow: TextOverflow.visible,
+              ),
+              actions: <Widget>[
+                Center(
+                  child: Hero(
+                    tag: 'new contact',
+                    child: SizedBox(
+                      height: 42,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                            Colors.blue,
+                          ),
                         ),
-                      ),
-                      onPressed: () => createContact(),
-                      child: Text(
-                        "Save & Select",
+                        onPressed: () => createContact(),
+                        child: Text(
+                          "Save & Select",
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Theme(
-              data: ThemeData.light(),
-              child: ScrollableEditor(
-                //basics
-                imageLocation: imageLocation,
+              ],
+            ),
+            Expanded(
+              child: Theme(
+                data: ThemeData.light(),
+                child: ScrollableEditor(
+                  portraitMode: isPortrait,
+                  //basics
+                  imageLocation: imageLocation,
 
-                //names stuff
-                namesSpread: namesSpread,
-                nameField: nameField,
-                nameFields: nameFields,
-                nameLabels: nameLabels,
+                  //names stuff
+                  namesSpread: namesSpread,
+                  nameField: nameField,
+                  nameFields: nameFields,
+                  nameLabels: nameLabels,
 
-                //phones
-                addPhone: addPhone,
-                removePhone: removePhone,
-                phoneFields: phoneValueFields,
-                phoneLabels: phoneLabelStrings,
+                  //phones
+                  addPhone: addPhone,
+                  removePhone: removePhone,
+                  phoneFields: phoneValueFields,
+                  phoneLabels: phoneLabelStrings,
 
-                //emails
-                addEmail: addEmail,
-                removeEmail: removeEmail,
-                emailFields: emailValueFields,
-                emailLabels: emailLabelStrings,
+                  //emails
+                  addEmail: addEmail,
+                  removeEmail: removeEmail,
+                  emailFields: emailValueFields,
+                  emailLabels: emailLabelStrings,
 
-                //work stuff
-                jobTitleField: jobTitleField,
-                companyField: companyField,
-                workOpen: workOpen,
+                  //work stuff
+                  jobTitleField: jobTitleField,
+                  companyField: companyField,
+                  workOpen: workOpen,
 
-                //address
-                addAddress: addPostalAddress,
-                removeAddress: removalPostalAddress,
-                addressStreetFields: addressStreetFields,
-                addressCityFields: addressCityFields,
-                addressPostcodeFields: addressPostcodeFields,
-                addressRegionFields: addressRegionFields,
-                addressCountryFields: addressCountryFields,
-                addressLabels: addressLabelStrings,
+                  //address
+                  addAddress: addPostalAddress,
+                  removeAddress: removalPostalAddress,
+                  addressStreetFields: addressStreetFields,
+                  addressCityFields: addressCityFields,
+                  addressPostcodeFields: addressPostcodeFields,
+                  addressRegionFields: addressRegionFields,
+                  addressCountryFields: addressCountryFields,
+                  addressLabels: addressLabelStrings,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   //--------------------------------------------------

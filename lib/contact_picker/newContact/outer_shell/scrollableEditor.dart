@@ -9,6 +9,7 @@ import 'editorHelpers.dart';
 
 class ScrollableEditor extends StatelessWidget {
   ScrollableEditor({
+    @required this.portraitMode,
     @required this.imageLocation,
     //handle names
     @required this.nameField,
@@ -39,6 +40,8 @@ class ScrollableEditor extends StatelessWidget {
     @required this.addressCountryFields,
     @required this.addressLabels,
   });
+
+  final bool portraitMode;
 
   final ValueNotifier<String> imageLocation;
 
@@ -126,11 +129,15 @@ class ScrollableEditor extends StatelessWidget {
             ],
           ),
         ),
+        SliverToBoxAdapter(
+          child: portraitMode
+              ? Container()
+              : PhoneNumbersHeader(phoneFields: phoneFields),
+        ),
         SliverStickyHeader(
-          header: SectionTitle(
-            rightIcon: Icons.phone,
-            name: "Phone Number" + (phoneFields.length == 1 ? "" : "s"),
-          ),
+          header: portraitMode
+              ? PhoneNumbersHeader(phoneFields: phoneFields)
+              : Container(),
           sliver: SliverToBoxAdapter(
             child: PhoneNumbersEditor(
               addPhone: addPhone,
@@ -140,11 +147,15 @@ class ScrollableEditor extends StatelessWidget {
             ),
           ),
         ),
+        SliverToBoxAdapter(
+          child: portraitMode
+              ? Container()
+              : EmailsHeader(emailFields: emailFields),
+        ),
         SliverStickyHeader(
-          header: SectionTitle(
-            rightIcon: Icons.email,
-            name: "Email" + (emailFields.length == 1 ? "" : "s"),
-          ),
+          header: portraitMode
+              ? EmailsHeader(emailFields: emailFields)
+              : Container(),
           sliver: SliverToBoxAdapter(
             child: EmailsEditor(
               addEmail: addEmail,
@@ -154,11 +165,11 @@ class ScrollableEditor extends StatelessWidget {
             ),
           ),
         ),
+        SliverToBoxAdapter(
+          child: portraitMode ? Container() : WorkHeader(),
+        ),
         SliverStickyHeader(
-          header: SectionTitle(
-            rightIcon: Icons.work,
-            name: "Work",
-          ),
+          header: portraitMode ? WorkHeader() : Container(),
           sliver: SliverToBoxAdapter(
             child: WorkEditor(
               jobTitleField: jobTitleField,
@@ -166,11 +177,15 @@ class ScrollableEditor extends StatelessWidget {
             ),
           ),
         ),
+        SliverToBoxAdapter(
+          child: portraitMode
+              ? Container()
+              : AddressHeader(addressStreetFields: addressStreetFields),
+        ),
         SliverStickyHeader(
-          header: SectionTitle(
-            rightIcon: Icons.location_on,
-            name: "Address" + (addressStreetFields.length == 1 ? "" : "es"),
-          ),
+          header: portraitMode
+              ? AddressHeader(addressStreetFields: addressStreetFields)
+              : Container(),
           sliver: SliverToBoxAdapter(
             child: AddressesEditor(
               addAddress: addAddress,
@@ -184,13 +199,6 @@ class ScrollableEditor extends StatelessWidget {
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Container(
-            height: 56,
-            width: MediaQuery.of(context).size.width,
-            color: ThemeData.dark().primaryColor,
-          ),
-        ),
         SliverFillRemaining(
           hasScrollBody: false,
           fillOverscroll: true,
@@ -199,6 +207,71 @@ class ScrollableEditor extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class AddressHeader extends StatelessWidget {
+  const AddressHeader({
+    Key key,
+    @required this.addressStreetFields,
+  }) : super(key: key);
+
+  final List<FieldData> addressStreetFields;
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionTitle(
+      rightIcon: Icons.location_on,
+      name: "Address" + (addressStreetFields.length == 1 ? "" : "es"),
+    );
+  }
+}
+
+class WorkHeader extends StatelessWidget {
+  const WorkHeader({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionTitle(
+      rightIcon: Icons.work,
+      name: "Work",
+    );
+  }
+}
+
+class EmailsHeader extends StatelessWidget {
+  const EmailsHeader({
+    Key key,
+    @required this.emailFields,
+  }) : super(key: key);
+
+  final List<FieldData> emailFields;
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionTitle(
+      rightIcon: Icons.email,
+      name: "Email" + (emailFields.length == 1 ? "" : "s"),
+    );
+  }
+}
+
+class PhoneNumbersHeader extends StatelessWidget {
+  const PhoneNumbersHeader({
+    Key key,
+    @required this.phoneFields,
+  }) : super(key: key);
+
+  final List<FieldData> phoneFields;
+
+  @override
+  Widget build(BuildContext context) {
+    return SectionTitle(
+      rightIcon: Icons.phone,
+      name: "Phone Number" + (phoneFields.length == 1 ? "" : "s"),
     );
   }
 }
