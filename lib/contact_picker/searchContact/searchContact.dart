@@ -2,6 +2,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
+import 'package:flutter2_contact_picker/contact_picker/selectContact/selectContact.dart';
 import 'dart:math' as math;
 
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
@@ -283,15 +284,17 @@ class ResultsBody extends StatelessWidget {
         matchingNumberContactIDs +
         matchingEmailContactIDs;
 
-    if (allMatches.length == 0) {
+    Widget results;
+
+    if (textEditingController.text.length == 0) {
       if (SearchesData.searches.value.length == 0) {
         //show that a recent searches functionality exists
-        return Center(
+        results = Center(
           child: Text("No Recent Searches"),
         );
       } else {
         //show recents searches
-        return CustomScrollView(
+        results = CustomScrollView(
           physics: BouncingScrollPhysics(),
           slivers: [
             SliverStickyHeader(
@@ -325,141 +328,164 @@ class ResultsBody extends StatelessWidget {
         );
       }
     } else {
-      //names (bottom grey IF phones OR emails exists)
-      //phones (bottom grey IF email exists)
-      //emails (bottom allways grey)
-      bool nameMatchesExist = matchingNameContactIDs.length > 0;
-      bool phoneMatchesExist = matchingNumberContactIDs.length > 0;
-      bool emailMatchesExist = matchingEmailContactIDs.length > 0;
+      if (allMatches.length == 0) {
+        results = Center(
+          child: Text("No Results Found"),
+        );
+      } else {
+        //names (bottom grey IF phones OR emails exists)
+        //phones (bottom grey IF email exists)
+        //emails (bottom allways grey)
+        bool nameMatchesExist = matchingNameContactIDs.length > 0;
+        bool phoneMatchesExist = matchingNumberContactIDs.length > 0;
+        bool emailMatchesExist = matchingEmailContactIDs.length > 0;
 
-      bool namesBottomBlack = phoneMatchesExist || emailMatchesExist;
-      bool phonesBottomBlack = emailMatchesExist;
+        bool namesBottomBlack = phoneMatchesExist || emailMatchesExist;
+        bool phonesBottomBlack = emailMatchesExist;
 
-      //show the results of the search
-      return CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          SliverStickyHeader(
-            header: nameMatchesExist == false
-                ? Container()
-                : ResultsHeader(
-                    resultCount: matchingNameContactIDs.length,
-                    resultDescription: "Matching Name",
-                  ),
-            sliver: nameMatchesExist == false
-                ? SliverToBoxAdapter(
-                    child: Container(),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        String contactID = matchingNameContactIDs[index];
-                        return ContactTile(
-                          onTap: () {
-                            //save as a successfull search term
-                            SearchesData.addSearches(
-                                textEditingController.text);
-
-                            //return contact ID
-                            Navigator.of(context).pop(contactID);
-                          },
-                          iconColor: contactIDToColorLocal[contactID],
-                          contact: allContactsLocal.value[contactID],
-                          isFirst: index == 0,
-                          isLast: index == (matchingNameContactIDs.length - 1),
-                          highlightPhone: false,
-                          highlightEmail: false,
-                          bottomBlack: namesBottomBlack,
-                        );
-                      },
-                      childCount: matchingNameContactIDs.length,
+        //show the results of the search
+        results = CustomScrollView(
+          physics: BouncingScrollPhysics(),
+          slivers: [
+            SliverStickyHeader(
+              header: nameMatchesExist == false
+                  ? Container()
+                  : ResultsHeader(
+                      resultCount: matchingNameContactIDs.length,
+                      resultDescription: "Matching Name",
                     ),
-                  ),
-          ),
-          SliverStickyHeader(
-            header: phoneMatchesExist == false
-                ? Container()
-                : ResultsHeader(
-                    resultCount: matchingNumberContactIDs.length,
-                    resultDescription: "Matching Phone Number",
-                  ),
-            sliver: phoneMatchesExist == false
-                ? SliverToBoxAdapter(
-                    child: Container(),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        String contactID = matchingNumberContactIDs[index];
-                        return ContactTile(
-                          onTap: () {
-                            //save as a successfull search term
-                            SearchesData.addSearches(
-                                textEditingController.text);
+              sliver: nameMatchesExist == false
+                  ? SliverToBoxAdapter(
+                      child: Container(),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          String contactID = matchingNameContactIDs[index];
+                          return ContactTile(
+                            onTap: () {
+                              //save as a successfull search term
+                              SearchesData.addSearches(
+                                  textEditingController.text);
 
-                            //return contact ID
-                            Navigator.of(context).pop(contactID);
-                          },
-                          iconColor: contactIDToColorLocal[contactID],
-                          contact: allContactsLocal.value[contactID],
-                          isFirst: index == 0,
-                          isLast:
-                              index == (matchingNumberContactIDs.length - 1),
-                          highlightPhone: true,
-                          highlightEmail: false,
-                          bottomBlack: phonesBottomBlack,
-                        );
-                      },
-                      childCount: matchingNumberContactIDs.length,
+                              //return contact ID
+                              Navigator.of(context).pop(contactID);
+                            },
+                            iconColor: contactIDToColorLocal[contactID],
+                            contact: allContactsLocal.value[contactID],
+                            isFirst: index == 0,
+                            isLast:
+                                index == (matchingNameContactIDs.length - 1),
+                            highlightPhone: false,
+                            highlightEmail: false,
+                            bottomBlack: namesBottomBlack,
+                          );
+                        },
+                        childCount: matchingNameContactIDs.length,
+                      ),
                     ),
-                  ),
-          ),
-          SliverStickyHeader(
-            header: emailMatchesExist == false
-                ? Container()
-                : ResultsHeader(
-                    resultCount: matchingEmailContactIDs.length,
-                    resultDescription: "Matching Email",
-                  ),
-            sliver: emailMatchesExist == false
-                ? SliverToBoxAdapter(
-                    child: Container(),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        String contactID = matchingEmailContactIDs[index];
-                        return ContactTile(
-                          onTap: () {
-                            //save as a successfull search term
-                            SearchesData.addSearches(
-                                textEditingController.text);
-
-                            //return contact ID
-                            Navigator.of(context).pop(contactID);
-                          },
-                          iconColor: contactIDToColorLocal[contactID],
-                          contact: allContactsLocal.value[contactID],
-                          isFirst: index == 0,
-                          isLast: index == (matchingEmailContactIDs.length - 1),
-                          highlightPhone: false,
-                          highlightEmail: true,
-                        );
-                      },
-                      childCount: matchingEmailContactIDs.length,
-                    ),
-                  ),
-          ),
-          SliverFillRemaining(
-            hasScrollBody: false,
-            fillOverscroll: true,
-            child: Container(
-              color: ThemeData.dark().primaryColor,
             ),
-          ),
-        ],
-      );
+            SliverStickyHeader(
+              header: phoneMatchesExist == false
+                  ? Container()
+                  : ResultsHeader(
+                      resultCount: matchingNumberContactIDs.length,
+                      resultDescription: "Matching Phone Number",
+                    ),
+              sliver: phoneMatchesExist == false
+                  ? SliverToBoxAdapter(
+                      child: Container(),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          String contactID = matchingNumberContactIDs[index];
+                          return ContactTile(
+                            onTap: () {
+                              //save as a successfull search term
+                              SearchesData.addSearches(
+                                  textEditingController.text);
+
+                              //return contact ID
+                              Navigator.of(context).pop(contactID);
+                            },
+                            iconColor: contactIDToColorLocal[contactID],
+                            contact: allContactsLocal.value[contactID],
+                            isFirst: index == 0,
+                            isLast:
+                                index == (matchingNumberContactIDs.length - 1),
+                            highlightPhone: true,
+                            highlightEmail: false,
+                            bottomBlack: phonesBottomBlack,
+                          );
+                        },
+                        childCount: matchingNumberContactIDs.length,
+                      ),
+                    ),
+            ),
+            SliverStickyHeader(
+              header: emailMatchesExist == false
+                  ? Container()
+                  : ResultsHeader(
+                      resultCount: matchingEmailContactIDs.length,
+                      resultDescription: "Matching Email",
+                    ),
+              sliver: emailMatchesExist == false
+                  ? SliverToBoxAdapter(
+                      child: Container(),
+                    )
+                  : SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          String contactID = matchingEmailContactIDs[index];
+                          return ContactTile(
+                            onTap: () {
+                              //save as a successfull search term
+                              SearchesData.addSearches(
+                                  textEditingController.text);
+
+                              //return contact ID
+                              Navigator.of(context).pop(contactID);
+                            },
+                            iconColor: contactIDToColorLocal[contactID],
+                            contact: allContactsLocal.value[contactID],
+                            isFirst: index == 0,
+                            isLast:
+                                index == (matchingEmailContactIDs.length - 1),
+                            highlightPhone: false,
+                            highlightEmail: true,
+                          );
+                        },
+                        childCount: matchingEmailContactIDs.length,
+                      ),
+                    ),
+            ),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: true,
+              child: Container(
+                color: ThemeData.dark().primaryColor,
+              ),
+            ),
+          ],
+        );
+      }
     }
+
+    return Column(
+      children: [
+        Expanded(
+          child: results,
+        ),
+        Container(
+          color: ThemeData.dark().primaryColor,
+          padding: EdgeInsets.symmetric(
+            vertical: 8,
+          ),
+          child: FullWidthNewContactButton(),
+        ),
+      ],
+    );
   }
 }
 
