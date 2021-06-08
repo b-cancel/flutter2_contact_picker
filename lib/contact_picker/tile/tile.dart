@@ -4,6 +4,7 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 
+//these tiles are a height of 56
 class ContactTile extends StatelessWidget {
   const ContactTile({
     @required this.contact,
@@ -39,27 +40,29 @@ class ContactTile extends StatelessWidget {
       color: isLast && bottomBlack == false
           ? ThemeData.dark().primaryColor
           : Colors.transparent,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(isFirst ? 16 : 0),
               bottom: Radius.circular(isLast ? 16 : 0),
             ),
-            child: Material(
-              color: Colors.white,
-              child: ListTile(
-                onTap: onTap,
-                leading: TileImage(
-                  contact: contact,
-                  color: iconColor,
-                ),
-                title: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: 4,
+            child: SizedBox(
+              height: 56,
+              child: Material(
+                color: Colors.white,
+                child: ListTile(
+                  visualDensity: VisualDensity.compact,
+                  onTap: onTap,
+                  leading: Transform.translate(
+                    offset: Offset(0, -4),
+                    child: TileImage(
+                      contact: contact,
+                      color: iconColor,
+                    ),
                   ),
-                  child: Container(
+                  title: Transform.translate(
+                    offset: Offset(0, -8),
                     child: Text(
                       contact.displayName,
                       style: TextStyle(
@@ -67,41 +70,45 @@ class ContactTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                ),
-                subtitle: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: 0,
-                  ),
-                  child: Row(
-                    children: [
-                      ContactChip(
-                        iconData: Icons.phone,
-                        dataCount: numbers,
-                        errorLabel: "No Phone Numbers",
-                        highlight: highlightPhone,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: 8.0,
+                  subtitle: Transform.translate(
+                    offset: Offset(0, -8),
+                    child: Row(
+                      children: [
+                        ContactChip(
+                          iconData: Icons.phone,
+                          dataCount: numbers,
+                          errorLabel: "No Phone Numbers",
+                          highlight: highlightPhone,
                         ),
-                        child: ContactChip(
-                          iconData: Icons.email,
-                          dataCount: emails,
-                          highlight: highlightEmail,
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: 8.0,
+                          ),
+                          child: ContactChip(
+                            iconData: Icons.email,
+                            dataCount: emails,
+                            highlight: highlightEmail,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                trailing: Icon(
-                  Icons.chevron_right,
+                  trailing: Icon(
+                    Icons.chevron_right,
+                  ),
                 ),
               ),
             ),
           ),
-          Container(
-            color: Colors.grey,
-            height: isLast == false ? .5 : 0,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              color: Colors.grey,
+              height: isLast == false ? 1 : 0,
+              width: MediaQuery.of(context).size.width,
+            ),
           ),
         ],
       ),
@@ -155,20 +162,15 @@ class TileImage extends StatelessWidget {
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.only(
-        top: 4,
+    return Container(
+      //56 is max size for this kind of thing
+      width: 45,
+      height: 45,
+      decoration: BoxDecoration(
+        color: color ?? getRandomDarkBlueOrGreyColor(),
+        shape: BoxShape.circle,
       ),
-      child: Container(
-        //56 is max size for this kind of thing
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: color ?? getRandomDarkBlueOrGreyColor(),
-          shape: BoxShape.circle,
-        ),
-        child: child,
-      ),
+      child: child,
     );
   }
 }
@@ -191,13 +193,20 @@ class ContactChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Visibility(
       visible: dataCount > 0 || (dataCount == 0 && errorLabel != null),
-      child: Chip(
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        backgroundColor: (dataCount == 0 && errorLabel != null)
-            ? Colors.red
-            : (highlight ? Colors.blue : null),
-        padding: EdgeInsets.all(0),
-        label: dataCount == 0
+      child: Container(
+        margin: EdgeInsets.all(0),
+        height: 24,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: (dataCount == 0 && errorLabel != null)
+              ? Colors.red
+              : (highlight ? Colors.blue : Colors.black),
+        ),
+        padding: EdgeInsets.symmetric(
+          vertical: 4,
+          horizontal: 8,
+        ),
+        child: dataCount == 0
             ? Text(
                 errorLabel ?? "",
                 style: TextStyle(
@@ -218,14 +227,14 @@ class ContactChip extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: highlight ? Colors.white : null,
+                              color: Colors.white,
                             ),
                           ),
                         ),
                   Icon(
                     iconData,
                     size: 16,
-                    color: highlight ? Colors.white : null,
+                    color: Colors.white,
                   ),
                 ],
               ),

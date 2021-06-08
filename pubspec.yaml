@@ -53,11 +53,13 @@ dependencies:
   #SCROLL RELATED
   scroll_to_index: ^2.0.0
 
-  # potential plugins for same functionality (preferred to least preferred)
-  # https://pub.dev/packages/scrollable_positioned_list
-  # https://pub.dev/packages/scroll_to_index
+  # seemingly no sliver support
+  # https://pub.dev/packages/scrollable_positioned_list 
   # https://pub.dev/packages/scroll_snap_list
   # https://pub.dev/packages/indexed_list_view
+
+  # these works with slivers, but seemed to complicated for my application
+  # https://pub.dev/packages/scroll_to_index
   # https://pub.dev/packages/sticky_and_expandable_list
   # https://pub.dev/packages/sticky_infinite_list
 
