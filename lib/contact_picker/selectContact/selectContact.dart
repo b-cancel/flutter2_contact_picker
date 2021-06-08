@@ -8,6 +8,8 @@ import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:page_transition/page_transition.dart';
 
+import 'scrollBar/scrollBar.dart';
+
 class SelectContactPage extends StatefulWidget {
   const SelectContactPage({
     @required this.verticalPrompt,
@@ -96,6 +98,10 @@ class _SelectContactPageState extends State<SelectContactPage> {
     List<double> heightsBS = measurementToGoldenRatioBS(
       MediaQuery.of(context).size.height,
     );
+    double expandedBannerHeight = heightsBS[1] + toolbarHeight;
+    double bottomAppBarHeight = 48;
+
+    //actually build
     return OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
       return Scaffold(
@@ -106,7 +112,8 @@ class _SelectContactPageState extends State<SelectContactPage> {
               physics: BouncingScrollPhysics(),
               slivers: [
                 SliverPromptSearchHeader(
-                  heightsBS: heightsBS,
+                  expandedBannerHeight: expandedBannerHeight,
+                  bottomAppBarHeight: bottomAppBarHeight,
                   toolbarHeight: toolbarHeight,
                   prompt: orientation == Orientation.portrait
                       ? widget.verticalPrompt
@@ -129,6 +136,13 @@ class _SelectContactPageState extends State<SelectContactPage> {
                 ),
               ],
             ),
+            ScrollBar(
+              scrollController: scrollController,
+              expandedBannerHeight: expandedBannerHeight,
+              //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
+              bottomAppBarHeight: 56,
+              toolbarHeight: toolbarHeight,
+            ),
             ScrollToTopButton(
               scrollController: scrollController,
             ),
@@ -142,16 +156,18 @@ class _SelectContactPageState extends State<SelectContactPage> {
 class SliverPromptSearchHeader extends StatelessWidget {
   const SliverPromptSearchHeader({
     Key key,
-    @required this.heightsBS,
-    @required this.toolbarHeight,
-    @required this.prompt,
     @required this.allContacts,
     @required this.contactIDToColor,
+    @required this.expandedBannerHeight,
+    @required this.bottomAppBarHeight,
+    @required this.toolbarHeight,
+    @required this.prompt,
   }) : super(key: key);
 
   final ValueNotifier<Map<String, Contact>> allContacts;
   final ValueNotifier<Map<String, Color>> contactIDToColor;
-  final List<double> heightsBS;
+  final double expandedBannerHeight;
+  final double bottomAppBarHeight;
   final double toolbarHeight;
   final Widget prompt;
 
@@ -172,6 +188,9 @@ class SliverPromptSearchHeader extends StatelessWidget {
       //NOTE: title in middle
       //NOTE: action to right of title
       //show extra top padding
+      leading: null,
+      title: null,
+      actions: null,
       primary: true,
       //only show shadow if content below
       forceElevated: false,
@@ -180,9 +199,9 @@ class SliverPromptSearchHeader extends StatelessWidget {
       snap: false,
       pinned: true, //so the [bottom] parameter allways shows
       //might make it open in annoying times (so we turn it off)
-      floating: true,
+      floating: false,
       //most of the screen
-      expandedHeight: heightsBS[1] + toolbarHeight,
+      expandedHeight: expandedBannerHeight,
       //better illustrates the overscroll
       stretch: true,
       //the map
@@ -209,7 +228,7 @@ class SliverPromptSearchHeader extends StatelessWidget {
               //from the tool bar
               top: toolbarHeight + 8.0,
               //from the bottom bar
-              bottom: 48 + 8.0,
+              bottom: bottomAppBarHeight + 8.0,
             ),
             child: Center(
               child: FittedBox(
@@ -234,10 +253,10 @@ class SliverPromptSearchHeader extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: Size(
           MediaQuery.of(context).size.width,
-          48,
+          0,
         ),
         child: Container(
-          height: 48,
+          height: bottomAppBarHeight,
           color: Colors.black,
           child: Theme(
             data: ThemeData.light(),

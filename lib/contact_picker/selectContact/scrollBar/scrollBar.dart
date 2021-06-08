@@ -1,0 +1,206 @@
+//only use to debug
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import 'alphaScrollBarOverlay.dart';
+
+bool scrollBarColors = true;
+
+//scroll bar widgets
+class ScrollBar extends StatefulWidget {
+  ScrollBar({
+    @required this.scrollController,
+    @required this.expandedBannerHeight,
+    //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
+    this.bottomAppBarHeight: 56,
+    @required this.toolbarHeight,
+  });
+
+  final ScrollController scrollController;
+  final double expandedBannerHeight;
+  final double bottomAppBarHeight;
+  final double toolbarHeight;
+
+  @override
+  _ScrollBarState createState() => _ScrollBarState();
+}
+
+class _ScrollBarState extends State<ScrollBar> {
+  //with absolutely no padding
+  ValueNotifier<double> maxScrollBarHeight = ValueNotifier(0);
+
+  updateScrollBarHeight() {
+    if (widget.scrollController.hasClients == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        updateScrollBarHeight();
+      });
+    } else {
+      bool attached = widget.scrollController.hasClients;
+      double currentOffset = attached ? widget.scrollController.offset : 0;
+
+      //overscrolling from the top
+      double bannerSize = widget.expandedBannerHeight;
+      //overscrolling handled here as well
+      if (currentOffset != 0) {
+        bannerSize -= currentOffset;
+      }
+      //banner also technically includes the bottom bar, but shouldn't
+      bannerSize += widget.toolbarHeight;
+
+      //make sure the scroll bar doesn't get too big
+      double screenHeight = MediaQuery.of(context).size.height;
+      double potentialScrollBarHeight = screenHeight - bannerSize;
+      double absoluteMaxScrollBarHeight =
+          screenHeight - widget.toolbarHeight - 56;
+      if (potentialScrollBarHeight > absoluteMaxScrollBarHeight) {
+        potentialScrollBarHeight = absoluteMaxScrollBarHeight;
+      }
+      maxScrollBarHeight.value = potentialScrollBarHeight;
+    }
+  }
+
+  updateState() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    maxScrollBarHeight.addListener(updateState);
+    widget.scrollController.addListener(updateState);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.addListener(updateState);
+    maxScrollBarHeight.addListener(updateState);
+    super.dispose();
+  }
+
+  //build
+  @override
+  Widget build(BuildContext context) {
+    //by placing it here we cover
+    //1. update to the height
+    //2. orientation changes
+    //3. initialization
+    updateScrollBarHeight();
+
+    //for scroll bar overall
+    double scrollBarTopPadding = 16;
+    double scrollBarBottomPadding = 16;
+
+    //for alpha scroll bar
+    double itemHeight = 14;
+    double spacingVertical = 0;
+    double alphaSpacing = 16;
+
+    //actually build
+    return Positioned(
+      right: 0,
+      bottom: 0,
+      child: Stack(
+        children: [
+          Center(
+            child: Container(
+              height: maxScrollBarHeight.value,
+              padding: EdgeInsets.symmetric(
+                horizontal: 16,
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: scrollBarTopPadding,
+                  bottom: scrollBarBottomPadding,
+                ),
+                child: Container(
+                  width: 24,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColorDark.withOpacity(0.5),
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(16.0),
+                    ),
+                  ),
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+          /*
+          //-----Scroll Bar Function
+          DraggableScrollBar(
+            autoScrollController: widget.autoScrollController,
+            //set once and done
+            visualScrollBarHeight: scrollBarVisualHeight,
+            programaticScrollBarHeight: scrollBarAreaHeight,
+            alphaOverlayHeight: alphaOverlayHeight,
+            scrollThumbHeight: 4 * itemHeight,
+            paddingAll: paddingAll,
+            thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+            expandedBannerHeight: widget.expandedBannerHeight,
+            //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
+            sortedLetterCodes: widget.sortedLetterCodes.value,
+            letterToListItems: widget.letterToListItems.value,
+            showSlider: showSlider,
+          ),
+          */
+          Positioned(
+            right: 0,
+            child: IgnorePointer(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: scrollBarTopPadding + alphaSpacing,
+                    bottom: scrollBarBottomPadding + alphaSpacing,
+                  ),
+                  child: AlphaScrollBarOverlay(
+                    scrollBarHeight: maxScrollBarHeight.value -
+                        scrollBarTopPadding -
+                        scrollBarBottomPadding -
+                        (alphaSpacing * 2),
+                    itemHeight: itemHeight,
+                    spacingVertical: spacingVertical,
+                    letterCodes: [
+                      "*", //favorites
+                      "A",
+                      "B",
+                      "C",
+                      "D",
+                      "E",
+                      "F",
+                      "G",
+                      "H",
+                      "I",
+                      "J",
+                      "K",
+                      "L",
+                      "M",
+                      "N",
+                      "O",
+                      "P",
+                      "Q",
+                      "R",
+                      "S",
+                      "T",
+                      "U",
+                      "V",
+                      "W",
+                      "X",
+                      "Y",
+                      "Z",
+                      "#", //every thing else
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
