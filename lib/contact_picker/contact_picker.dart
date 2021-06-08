@@ -108,7 +108,38 @@ class ContactPicker extends StatelessWidget {
                       type: PageTransitionType.topToBottom,
                       child: Theme(
                         data: ThemeData.dark(),
-                        child: SelectContactPage(),
+                        child: SelectContactPage(
+                          prompt: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 56,
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: 16,
+                                bottom: 12,
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "Who's In Charge",
+                                    style: TextStyle(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    "of the territory?",
+                                    style: TextStyle(
+                                      fontSize: 48,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   );

@@ -552,16 +552,19 @@ class _NewContactPageState extends State<NewContactPage> {
             actions: <Widget>[
               Center(
                 child: Hero(
-                  tag: 'contacts',
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                        Colors.blue,
+                  tag: 'new contact',
+                  child: SizedBox(
+                    height: 42,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          Colors.blue,
+                        ),
                       ),
-                    ),
-                    onPressed: () => createContact(),
-                    child: Text(
-                      "Save & Select",
+                      onPressed: () => createContact(),
+                      child: Text(
+                        "Save & Select",
+                      ),
                     ),
                   ),
                 ),
