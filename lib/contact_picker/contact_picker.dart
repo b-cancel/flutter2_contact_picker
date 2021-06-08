@@ -109,7 +109,7 @@ class ContactPicker extends StatelessWidget {
                       child: Theme(
                         data: ThemeData.dark(),
                         child: SelectContactPage(
-                          prompt: Padding(
+                          verticalPrompt: Padding(
                             padding: EdgeInsets.symmetric(
                               horizontal: 56,
                             ),
@@ -132,6 +132,37 @@ class ContactPicker extends StatelessWidget {
                                     "of the territory?",
                                     style: TextStyle(
                                       fontSize: 48,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          horizontalPrompt: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                bottom: 4,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Who's In Charge",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  Text(
+                                    " of the territory?",
+                                    style: TextStyle(
+                                      fontSize: 24,
                                       color: Colors.white,
                                     ),
                                   ),

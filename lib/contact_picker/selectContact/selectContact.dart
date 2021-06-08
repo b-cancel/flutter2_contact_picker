@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
+import 'package:flutter2_contact_picker/contact_picker/selectContact/scrollToTop.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:page_transition/page_transition.dart';
 
 class SelectContactPage extends StatefulWidget {
   const SelectContactPage({
-    @required this.prompt,
+    @required this.verticalPrompt,
+    @required this.horizontalPrompt,
     Key key,
   }) : super(key: key);
 
-  final Widget prompt;
+  final Widget verticalPrompt;
+  final Widget horizontalPrompt;
 
   @override
   _SelectContactPageState createState() => _SelectContactPageState();
@@ -27,6 +30,8 @@ class _SelectContactPageState extends State<SelectContactPage> {
   ValueNotifier<Map<String, Contact>> allContacts = ValueNotifier({});
   //this only changes if allContacts Changes first (DOES NOT trigger reload)
   ValueNotifier<Map<String, Color>> contactIDToColor = ValueNotifier({});
+
+  ScrollController scrollController = ScrollController();
 
   readInContacts() async {
     //grab the basic info first
@@ -91,34 +96,46 @@ class _SelectContactPageState extends State<SelectContactPage> {
     List<double> heightsBS = measurementToGoldenRatioBS(
       MediaQuery.of(context).size.height,
     );
-
-    return Scaffold(
-      body: CustomScrollView(
-        physics: BouncingScrollPhysics(),
-        slivers: [
-          SliverPromptSearchHeader(
-            heightsBS: heightsBS,
-            toolbarHeight: toolbarHeight,
-            prompt: widget.prompt,
-            allContacts: allContacts,
-            contactIDToColor: contactIDToColor,
-          ),
-          SliverToBoxAdapter(
-            child: Text(
-              "fsfsdf\n\n\nn\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsdfdsf",
+    return OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+      return Scaffold(
+        body: Stack(
+          children: [
+            CustomScrollView(
+              controller: scrollController,
+              physics: BouncingScrollPhysics(),
+              slivers: [
+                SliverPromptSearchHeader(
+                  heightsBS: heightsBS,
+                  toolbarHeight: toolbarHeight,
+                  prompt: orientation == Orientation.portrait
+                      ? widget.verticalPrompt
+                      : widget.horizontalPrompt,
+                  allContacts: allContacts,
+                  contactIDToColor: contactIDToColor,
+                ),
+                SliverToBoxAdapter(
+                  child: Text(
+                    "fsfsdf\n\n\nn\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nsdfdsf",
+                  ),
+                ),
+                SliverFillRemaining(
+                  child: Container(
+                    color: Colors.red,
+                    child: Center(
+                      child: Text("hi"),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          SliverFillRemaining(
-            child: Container(
-              color: Colors.red,
-              child: Center(
-                child: Text("hi"),
-              ),
+            ScrollToTopButton(
+              scrollController: scrollController,
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -187,24 +204,28 @@ class SliverPromptSearchHeader extends StatelessWidget {
         ],
         background: Center(
           child: Padding(
+            //+8 is a little extra for when things are tighter
             padding: EdgeInsets.only(
               //from the tool bar
-              top: toolbarHeight,
+              top: toolbarHeight + 8.0,
               //from the bottom bar
-              bottom: 48,
+              bottom: 48 + 8.0,
             ),
             child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: prompt,
-                  ),
-                  Center(
-                    child: CollapsedNewContactButton(),
-                  ),
-                ],
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: prompt,
+                    ),
+                    Center(
+                      child: CollapsedNewContactButton(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

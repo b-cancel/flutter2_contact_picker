@@ -9,6 +9,8 @@ import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
+import 'searchBody.dart';
+
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
 class SearchContactPage extends StatefulWidget {
@@ -237,269 +239,64 @@ class _SearchContactPageState extends State<SearchContactPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Theme(
-          data: ThemeData.light(),
-          child: Container(
-            color: Colors.black,
-            child: Column(
-              children: <Widget>[
-                SearchBox(
-                  textEditingController: textEditingController,
-                ),
-                Expanded(
-                  child: ResultsBody(
+    return OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+      Widget body;
+      if (orientation == Orientation.portrait) {
+        print(".\nportrait\n.");
+        body = ResultsBodyPortraitMode(
+          textEditingController: textEditingController,
+          allContacts: allContactsLocal.value,
+          contactIDToColor: contactIDToColorLocal.value,
+          //first > first names,
+          //then > any name with a space in front of it
+          //then > any match regardless of spaces
+          matchingNameContactIDs: contactIDsWithMatchingFirstNames +
+              contactIDsWithMatchingOtherNames +
+              contactIDsWithMatchingNames,
+          matchingNumberContactIDs: contactIDsWithMatchingNumber,
+          matchingEmailContactIDs: contactIDsWithMatchingEmail,
+        );
+      } else {
+        print(".\nlandscape\n.");
+        body = ResultsBodyLandscapeMode(
+          textEditingController: textEditingController,
+          allContacts: allContactsLocal.value,
+          contactIDToColor: contactIDToColorLocal.value,
+          //first > first names,
+          //then > any name with a space in front of it
+          //then > any match regardless of spaces
+          matchingNameContactIDs: contactIDsWithMatchingFirstNames +
+              contactIDsWithMatchingOtherNames +
+              contactIDsWithMatchingNames,
+          matchingNumberContactIDs: contactIDsWithMatchingNumber,
+          matchingEmailContactIDs: contactIDsWithMatchingEmail,
+        );
+      }
+
+      //build
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Theme(
+            data: ThemeData.light(),
+            child: Container(
+              color: Colors.black,
+              child: Column(
+                children: <Widget>[
+                  SearchBox(
                     textEditingController: textEditingController,
-                    allContacts: allContactsLocal.value,
-                    contactIDToColor: contactIDToColorLocal.value,
-                    //first > first names,
-                    //then > any name with a space in front of it
-                    //then > any match regardless of spaces
-                    matchingNameContactIDs: contactIDsWithMatchingFirstNames +
-                        contactIDsWithMatchingOtherNames +
-                        contactIDsWithMatchingNames,
-                    matchingNumberContactIDs: contactIDsWithMatchingNumber,
-                    matchingEmailContactIDs: contactIDsWithMatchingEmail,
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: body,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ResultsBody extends StatelessWidget {
-  const ResultsBody({
-    Key key,
-    @required this.textEditingController,
-    @required this.allContacts,
-    @required this.contactIDToColor,
-    @required this.matchingNameContactIDs,
-    @required this.matchingNumberContactIDs,
-    @required this.matchingEmailContactIDs,
-  }) : super(key: key);
-
-  final TextEditingController textEditingController;
-  final Map<String, Contact> allContacts;
-  final Map<String, Color> contactIDToColor;
-  final List<String> matchingNameContactIDs;
-  final List<String> matchingNumberContactIDs;
-  final List<String> matchingEmailContactIDs;
-
-  @override
-  Widget build(BuildContext context) {
-    List<String> allMatches = matchingNameContactIDs +
-        matchingNumberContactIDs +
-        matchingEmailContactIDs;
-
-    Widget results;
-
-    if (textEditingController.text.length == 0) {
-      if (SearchesData.searches.value.length == 0) {
-        //show that a recent searches functionality exists
-        results = Center(
-          child: Text("No Recent Searches"),
-        );
-      } else {
-        //show recents searches
-        results = CustomScrollView(
-          physics: BouncingScrollPhysics(),
-          slivers: [
-            SliverStickyHeader(
-              header: ResultsHeader(
-                resultDescription: "Recent Searches",
-              ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  String searchTerm = SearchesData.searches.value[index];
-                  int lastIndex = (SearchesData.searches.value.length - 1);
-                  return RecentSearch(
-                    recentSearch: searchTerm,
-                    textEditingController: textEditingController,
-                    isFirstIndex: index == 0,
-                    isLastIndex: index == lastIndex,
-                  );
-                },
-                childCount: SearchesData.searches.value.length,
-              ),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: Container(
-                color: ThemeData.dark().primaryColor,
-              ),
-            ),
-          ],
-        );
-      }
-    } else {
-      if (allMatches.length == 0) {
-        results = Center(
-          child: Text("No Results Found"),
-        );
-      } else {
-        //names (bottom grey IF phones OR emails exists)
-        //phones (bottom grey IF email exists)
-        //emails (bottom allways grey)
-        bool nameMatchesExist = matchingNameContactIDs.length > 0;
-        bool phoneMatchesExist = matchingNumberContactIDs.length > 0;
-        bool emailMatchesExist = matchingEmailContactIDs.length > 0;
-
-        bool namesBottomBlack = phoneMatchesExist || emailMatchesExist;
-        bool phonesBottomBlack = emailMatchesExist;
-
-        //show the results of the search
-        results = CustomScrollView(
-          physics: BouncingScrollPhysics(),
-          slivers: [
-            SliverStickyHeader(
-              header: nameMatchesExist == false
-                  ? Container()
-                  : ResultsHeader(
-                      resultCount: matchingNameContactIDs.length,
-                      resultDescription: "Matching Name",
-                    ),
-              sliver: nameMatchesExist == false
-                  ? SliverToBoxAdapter(
-                      child: Container(),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          String contactID = matchingNameContactIDs[index];
-                          return ContactTile(
-                            onTap: () {
-                              //save as a successfull search term
-                              SearchesData.addSearches(
-                                textEditingController.text,
-                              );
-
-                              //return contact ID
-                              Navigator.of(context).pop(contactID);
-                            },
-                            iconColor: contactIDToColor[contactID],
-                            contact: allContacts[contactID],
-                            isFirst: index == 0,
-                            isLast:
-                                index == (matchingNameContactIDs.length - 1),
-                            highlightPhone: false,
-                            highlightEmail: false,
-                            bottomBlack: namesBottomBlack,
-                          );
-                        },
-                        childCount: matchingNameContactIDs.length,
-                      ),
-                    ),
-            ),
-            SliverStickyHeader(
-              header: phoneMatchesExist == false
-                  ? Container()
-                  : ResultsHeader(
-                      resultCount: matchingNumberContactIDs.length,
-                      resultDescription: "Matching Phone Number",
-                    ),
-              sliver: phoneMatchesExist == false
-                  ? SliverToBoxAdapter(
-                      child: Container(),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          String contactID = matchingNumberContactIDs[index];
-                          return ContactTile(
-                            onTap: () {
-                              //save as a successfull search term
-                              SearchesData.addSearches(
-                                  textEditingController.text);
-
-                              //return contact ID
-                              Navigator.of(context).pop(contactID);
-                            },
-                            iconColor: contactIDToColor[contactID],
-                            contact: allContacts[contactID],
-                            isFirst: index == 0,
-                            isLast:
-                                index == (matchingNumberContactIDs.length - 1),
-                            highlightPhone: true,
-                            highlightEmail: false,
-                            bottomBlack: phonesBottomBlack,
-                          );
-                        },
-                        childCount: matchingNumberContactIDs.length,
-                      ),
-                    ),
-            ),
-            SliverStickyHeader(
-              header: emailMatchesExist == false
-                  ? Container()
-                  : ResultsHeader(
-                      resultCount: matchingEmailContactIDs.length,
-                      resultDescription: "Matching Email",
-                    ),
-              sliver: emailMatchesExist == false
-                  ? SliverToBoxAdapter(
-                      child: Container(),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
-                          String contactID = matchingEmailContactIDs[index];
-                          return ContactTile(
-                            onTap: () {
-                              //save as a successfull search term
-                              SearchesData.addSearches(
-                                  textEditingController.text);
-
-                              //return contact ID
-                              Navigator.of(context).pop(contactID);
-                            },
-                            iconColor: contactIDToColor[contactID],
-                            contact: allContacts[contactID],
-                            isFirst: index == 0,
-                            isLast:
-                                index == (matchingEmailContactIDs.length - 1),
-                            highlightPhone: false,
-                            highlightEmail: true,
-                          );
-                        },
-                        childCount: matchingEmailContactIDs.length,
-                      ),
-                    ),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: false,
-              fillOverscroll: true,
-              child: Container(
-                color: ThemeData.dark().primaryColor,
-              ),
-            ),
-          ],
-        );
-      }
-    }
-
-    return Column(
-      children: [
-        Expanded(
-          child: results,
-        ),
-        Container(
-          color: ThemeData.dark().primaryColor,
-          padding: EdgeInsets.symmetric(
-            vertical: 8,
-          ),
-          child: FullWidthNewContactButton(),
-        ),
-      ],
-    );
+      );
+    });
   }
 }
 
