@@ -67,6 +67,7 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
           ),
           child: FloatingActionButton(
             mini: true,
+            elevation: 0,
             backgroundColor: Colors.black.withOpacity(0.5),
             onPressed: () {
               vibrate();

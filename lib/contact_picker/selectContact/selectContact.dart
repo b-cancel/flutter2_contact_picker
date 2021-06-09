@@ -138,6 +138,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
     contactsRead.addListener(updateState);
     allContacts.addListener(updateState);
     keyToContactIDs.addListener(updateState);
+    RecentsData.recents.addListener(updateState);
     super.initState();
   }
 
@@ -146,11 +147,14 @@ class _SelectContactPageState extends State<SelectContactPage> {
     contactsRead.removeListener(updateState);
     allContacts.removeListener(updateState);
     keyToContactIDs.removeListener(updateState);
+    RecentsData.recents.removeListener(updateState);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    generateSections();
+
     double toolbarHeight = MediaQuery.of(context).padding.top;
     List<double> heightsBS = measurementToGoldenRatioBS(
       MediaQuery.of(context).size.height,
@@ -159,8 +163,10 @@ class _SelectContactPageState extends State<SelectContactPage> {
     double bottomAppBarHeight = 56;
 
     //actually build
-    return OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
+    return OrientationBuilder(builder: (
+      BuildContext context,
+      Orientation orientation,
+    ) {
       double scrollToTopButtonPadding = 8;
 
       //add first sliver
@@ -178,30 +184,52 @@ class _SelectContactPageState extends State<SelectContactPage> {
         ),
       );
 
-      //compile all the slivers based on our section information
-      for (String sectionKey in keyToContactIDs.value.keys) {
-        //create the section
-        Widget section = createSectionForKey(sectionKey);
+      bool sectionsExist = keyToContactIDs.value.length > 0;
+      if (sectionsExist) {
+        //compile all the slivers based on our section information
+        for (String sectionKey in keyToContactIDs.value.keys) {
+          slivers.add(
+            KeySection(
+              sectionKey: sectionKey,
+              allContacts: allContacts,
+              contactIDToColor: contactIDToColor,
+              keyToContactIDs: keyToContactIDs,
+            ),
+          );
+        }
 
-        //add the section
+        //add last sliver
         slivers.add(
-          section,
+          SliverFillRemaining(
+            hasScrollBody: false,
+            fillOverscroll: true,
+            child: Container(
+              //48 for mini FAB
+              //atleast this size
+              height: 48 + (scrollToTopButtonPadding * 2),
+            ),
+          ),
+        );
+      } else {
+        //show different empty states
+        Widget explainWhyEmpty =
+            contactsRead.value ? Text("No Contacts Found") : Text("Loading...");
+
+        //nothing else to show, fill remaining
+        slivers.add(
+          SliverFillRemaining(
+            hasScrollBody: false,
+            fillOverscroll: true,
+            child: Center(
+              child: explainWhyEmpty,
+            ),
+          ),
         );
       }
 
-      //add last sliver
-      slivers.add(
-        SliverFillRemaining(
-          child: Container(
-            color: ThemeData.dark().primaryColor,
-            //48 for mini FAB
-            height: 48 + (scrollToTopButtonPadding * 2),
-          ),
-        ),
-      );
-
       //build everything
       return Scaffold(
+        backgroundColor: ThemeData.dark().primaryColor,
         body: Stack(
           children: [
             CustomScrollView(
@@ -209,24 +237,46 @@ class _SelectContactPageState extends State<SelectContactPage> {
               physics: BouncingScrollPhysics(),
               slivers: slivers,
             ),
-            ScrollBar(
-              scrollController: scrollController,
-              expandedBannerHeight: expandedBannerHeight,
-              //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
-              bottomAppBarHeight: 56,
-              toolbarHeight: toolbarHeight,
+            Visibility(
+              visible: sectionsExist,
+              child: ScrollBar(
+                scrollController: scrollController,
+                expandedBannerHeight: expandedBannerHeight,
+                //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
+                bottomAppBarHeight: 56,
+                toolbarHeight: toolbarHeight,
+              ),
             ),
-            ScrollToTopButton(
-              scrollController: scrollController,
-              padding: scrollToTopButtonPadding,
+            Visibility(
+              visible: sectionsExist,
+              child: ScrollToTopButton(
+                scrollController: scrollController,
+                padding: scrollToTopButtonPadding,
+              ),
             ),
           ],
         ),
       );
     });
   }
+}
 
-  Widget createSectionForKey(String sectionKey) {
+class KeySection extends StatelessWidget {
+  const KeySection({
+    Key key,
+    @required this.sectionKey,
+    @required this.allContacts,
+    @required this.contactIDToColor,
+    @required this.keyToContactIDs,
+  }) : super(key: key);
+
+  final String sectionKey;
+  final ValueNotifier<Map<String, Contact>> allContacts;
+  final ValueNotifier<Map<String, Color>> contactIDToColor;
+  final ValueNotifier<Map<String, List<String>>> keyToContactIDs;
+
+  @override
+  Widget build(BuildContext context) {
     //! We know this list isn't empty
     List<String> contactIDsInSection = keyToContactIDs.value[sectionKey];
 
@@ -247,8 +297,22 @@ class _SelectContactPageState extends State<SelectContactPage> {
       ),
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int index) {
+          (BuildContext context, int rawIndex) {
+            int index = rawIndex;
+
+            //invert the indices for the recents section
+            //most recently added stuff on top
+            if (sectionKey == "*") {
+              index = (contactIDsInSection.length - 1) - rawIndex;
+            }
+
+            //gather the information
             String contactID = contactIDsInSection[index];
+            bool sectionBottomIsBlack = sectionExistsUnderThisSection(
+              sectionKey,
+            );
+
+            //build
             return ContactTile(
               onTap: () {
                 //save as a successfull search term
@@ -261,11 +325,22 @@ class _SelectContactPageState extends State<SelectContactPage> {
               },
               iconColor: contactIDToColor.value[contactID],
               contact: allContacts.value[contactID],
-              isFirst: index == 0,
-              isLast: index == (contactIDsInSection.length - 1),
-              bottomBlack: sectionExistsUnderThisSection(
-                  sectionKey), //TODO: eventually edit this
-              //TODO: add on remove call back
+              isFirst: rawIndex == 0,
+              isLast: rawIndex == (contactIDsInSection.length - 1),
+              bottomBlack: sectionBottomIsBlack,
+              //extra spacing on icons given scroll bar
+              inContactSelector: true,
+              onRemove: sectionKey != "*"
+                  ? null
+                  : () {
+                      //remove the recent
+                      RecentsData.removeRecent(
+                        contactID,
+                      );
+
+                      //this will trigger a reload
+                      //and remove it visually
+                    },
             );
           },
           childCount: contactIDsInSection.length,
@@ -274,32 +349,49 @@ class _SelectContactPageState extends State<SelectContactPage> {
     );
   }
 
-  sectionExistsUnderThisSection(String sectionKey) {
+  bool sectionExistsUnderThisLetterSection(String letterSectionKey) {
+    if (letterSectionKey == "Z") {
+      if (keyToContactIDs.value.containsKey("#")) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      //we are any letter A through Y
+
+      //EX: we are section a... looking for the next section
+      //section b doesn't exist... so move onto the next letter
+      int nextSectionKeyCode = letterSectionKey.codeUnitAt(0);
+      String nextSectionKey = String.fromCharCode(nextSectionKeyCode + 1);
+
+      //if our next section exist horray... else recurse
+      if (keyToContactIDs.value.containsKey(nextSectionKey)) {
+        return true;
+      } else {
+        return sectionExistsUnderThisLetterSection(nextSectionKey);
+      }
+    }
+  }
+
+  bool sectionExistsUnderThisSection(String sectionKey) {
+    //nothing is under this section
     if (sectionKey == "#") {
       return false;
     } else {
+      //its very likely things are under this section
       if (sectionKey == "*") {
+        //only 2 sections have to exist...
+        //the * section... and another other section
         if (keyToContactIDs.value.length > 1) {
-          //atleast 2 sections exist, one of which is us
           return true;
         } else {
           return false;
         }
       } else {
-        if (sectionKey == "Z") {
-          if (sectionKey == "#") {
-            //an other section exists
-            return true;
-          } else {
-            //we are the last section since no other section exist
-            return false;
-          }
-        } else {
-          //Letters A -> Y... keep checking for if the next letter exist...
-          //if still can't even find Z... check for #
-          //TODO: combine with code above
-          return true; //TODO: good enough for now
-        }
+        //we are starting for a letter,
+        //check if the next letter section exists
+        //or keep moving to the next letter
+        return sectionExistsUnderThisLetterSection(sectionKey);
       }
     }
   }

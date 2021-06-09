@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/selectContact/recents.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/appBarButton.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
@@ -758,6 +759,11 @@ class _NewContactPageState extends State<NewContactPage> {
         break;
       }
     }
+
+    //add to recents
+    RecentsData.addRecent(
+      newContactIdentifier,
+    );
 
     //pop and pass true (to indivate we made a new contact)
     Navigator.of(context).pop(newContactIdentifier);

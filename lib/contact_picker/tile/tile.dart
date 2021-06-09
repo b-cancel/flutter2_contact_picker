@@ -15,6 +15,8 @@ class ContactTile extends StatelessWidget {
     this.highlightEmail: false,
     this.iconColor,
     this.bottomBlack: false,
+    this.inContactSelector,
+    this.onRemove,
     Key key,
   }) : super(key: key);
 
@@ -26,20 +28,26 @@ class ContactTile extends StatelessWidget {
   final bool highlightEmail;
   final Color iconColor;
   final bool bottomBlack;
+  final bool inContactSelector;
+  final Function onRemove;
 
   @override
   Widget build(BuildContext context) {
     //handle numbers
-    int numbers = contact.phones?.length ?? 0;
+    int numbers = contact?.phones?.length ?? 0;
 
     //handle emails
-    int emails = contact.emails?.length ?? 0;
+    int emails = contact?.emails?.length ?? 0;
+
+    if (contact == null) {
+      return Container();
+    }
 
     //build
     return Material(
       color: isLast && bottomBlack == false
           ? ThemeData.dark().primaryColor
-          : Colors.transparent,
+          : Colors.black,
       child: Stack(
         children: [
           ClipRRect(
@@ -59,12 +67,13 @@ class ContactTile extends StatelessWidget {
                     child: TileImage(
                       contact: contact,
                       color: iconColor,
+                      onRemove: onRemove,
                     ),
                   ),
                   title: Transform.translate(
                     offset: Offset(0, -8),
                     child: Text(
-                      contact.displayName,
+                      contact?.displayName ?? "",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
@@ -73,29 +82,40 @@ class ContactTile extends StatelessWidget {
                   ),
                   subtitle: Transform.translate(
                     offset: Offset(0, -8),
-                    child: Row(
-                      children: [
-                        ContactChip(
-                          iconData: Icons.phone,
-                          dataCount: numbers,
-                          errorLabel: "No Phone Numbers",
-                          highlight: highlightPhone,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 8.0,
+                    child: numbers == 0 && emails == 0
+                        ? Row(
+                            children: [
+                              ContactChip(
+                                errorLabel: "No Contact Information",
+                              ),
+                            ],
+                          )
+                        : Row(
+                            children: [
+                              ContactChip(
+                                iconData: Icons.phone,
+                                rawDataCount: numbers,
+                                highlight: highlightPhone,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: 8.0,
+                                ),
+                                child: ContactChip(
+                                  iconData: Icons.email,
+                                  rawDataCount: emails,
+                                  highlight: highlightEmail,
+                                ),
+                              ),
+                            ],
                           ),
-                          child: ContactChip(
-                            iconData: Icons.email,
-                            dataCount: emails,
-                            highlight: highlightEmail,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
-                  trailing: Icon(
-                    Icons.chevron_right,
+                  trailing: Visibility(
+                    visible: inContactSelector == false,
+                    child: Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -120,47 +140,77 @@ class ContactTile extends StatelessWidget {
 class TileImage extends StatelessWidget {
   TileImage({
     @required this.contact,
+    this.onRemove,
     this.color,
   });
 
   final Contact contact;
+  final Function onRemove;
   final Color color;
 
   Widget build(BuildContext context) {
     Widget child;
-    if (contact.avatar.length <= 0) {
-      String letters = contact.givenName;
-      Widget center;
 
-      //if possible have a letter
-      if (letters.length == 0) {
-        center = Icon(
-          Icons.person,
-          color: Colors.black,
-        );
-      } else {
-        center = Text(
-          letters[0].toUpperCase(),
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white,
-          ),
-        );
-      }
-
-      child = Center(
-        child: center,
-      );
-    } else {
-      child = ClipOval(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          child: Image.memory(
-            contact.avatar,
-          ),
+    //use the avatar if we have it
+    if (contact.avatar.length > 0) {
+      child = FittedBox(
+        fit: BoxFit.cover,
+        child: Image.memory(
+          contact.avatar,
         ),
       );
+    }
+
+    //what are we layering on top?
+    if (onRemove != null) {
+      //we can remove
+      //so layer the button with a faded black background
+      //1. on the avatar
+      //2. or the selected solid color
+      child = Stack(
+        children: [
+          child ?? Container(),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: IconButton(
+                  onPressed: () => onRemove(),
+                  icon: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      if (contact.avatar.length <= 0) {
+        String letters = contact.givenName;
+
+        //if possible have a letter
+        if (letters.length == 0) {
+          child = Icon(
+            Icons.person,
+            color: Colors.black,
+          );
+        } else {
+          child = Text(
+            letters[0].toUpperCase(),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              color: Colors.white,
+            ),
+          );
+        }
+      }
     }
 
     return Container(
@@ -171,7 +221,11 @@ class TileImage extends StatelessWidget {
         color: color ?? getRandomDarkBlueOrGreyColor(),
         shape: BoxShape.circle,
       ),
-      child: child,
+      child: ClipOval(
+        child: Center(
+          child: child,
+        ),
+      ),
     );
   }
 }
@@ -179,19 +233,20 @@ class TileImage extends StatelessWidget {
 class ContactChip extends StatelessWidget {
   const ContactChip({
     Key key,
-    @required this.iconData,
-    @required this.dataCount,
+    this.iconData,
+    this.rawDataCount,
     this.errorLabel,
     this.highlight: false,
   }) : super(key: key);
 
   final IconData iconData;
-  final int dataCount;
+  final int rawDataCount;
   final String errorLabel;
   final bool highlight;
 
   @override
   Widget build(BuildContext context) {
+    int dataCount = rawDataCount ?? 0;
     return Visibility(
       visible: dataCount > 0 || (dataCount == 0 && errorLabel != null),
       child: Container(
@@ -201,7 +256,7 @@ class ContactChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           color: (dataCount == 0 && errorLabel != null)
               ? Colors.red
-              : (highlight ? Colors.blue : Colors.black),
+              : (highlight ? Colors.blue : Colors.black.withOpacity(0.5)),
         ),
         padding: EdgeInsets.symmetric(
           vertical: 4,
@@ -233,7 +288,8 @@ class ContactChip extends StatelessWidget {
                           ),
                         ),
                   Icon(
-                    iconData,
+                    //add is throw away
+                    iconData ?? Icons.add,
                     size: 16,
                     color: Colors.white,
                   ),
