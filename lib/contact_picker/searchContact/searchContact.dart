@@ -1,15 +1,12 @@
+import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
-import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
 import 'dart:math' as math;
-
-import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
-import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-
 import 'searchBody.dart';
+
+//TODO: when tapping a suggestion -> scroll to top of list after build completes
 
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
@@ -495,7 +492,25 @@ class RecentSearch extends StatelessWidget {
             child: ListTile(
               visualDensity: VisualDensity.compact,
               onTap: () {
+                //change the text
                 textEditingController.text = recentSearch;
+
+                //adjust the selection
+                //since setting the value of the text editing controller didn't work
+                //and setting the text and then the selection is not good
+                //I just wait and then do exactly that to skip whatever makes it not good practice
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  textEditingController.selection = TextSelection.fromPosition(
+                    TextPosition(
+                      offset: textEditingController.text.length,
+                    ),
+                  );
+                });
+
+                //add to recents
+                SearchesData.addSearches(
+                  recentSearch,
+                );
               },
               title: Text(recentSearch),
               contentPadding: EdgeInsets.symmetric(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/curvedCorner.dart';
 
 class SectionTitle extends StatelessWidget {
   final IconData rightIcon;
