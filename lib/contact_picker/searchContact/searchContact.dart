@@ -234,44 +234,13 @@ class _SearchContactPageState extends State<SearchContactPage> {
     super.dispose();
   }
 
+  ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-      Widget body;
-      if (orientation == Orientation.portrait) {
-        print(".\nportrait\n.");
-        body = ResultsBodyPortraitMode(
-          textEditingController: textEditingController,
-          allContacts: allContactsLocal.value,
-          contactIDToColor: contactIDToColorLocal.value,
-          //first > first names,
-          //then > any name with a space in front of it
-          //then > any match regardless of spaces
-          matchingNameContactIDs: contactIDsWithMatchingFirstNames +
-              contactIDsWithMatchingOtherNames +
-              contactIDsWithMatchingNames,
-          matchingNumberContactIDs: contactIDsWithMatchingNumber,
-          matchingEmailContactIDs: contactIDsWithMatchingEmail,
-        );
-      } else {
-        print(".\nlandscape\n.");
-        body = ResultsBodyLandscapeMode(
-          textEditingController: textEditingController,
-          allContacts: allContactsLocal.value,
-          contactIDToColor: contactIDToColorLocal.value,
-          //first > first names,
-          //then > any name with a space in front of it
-          //then > any match regardless of spaces
-          matchingNameContactIDs: contactIDsWithMatchingFirstNames +
-              contactIDsWithMatchingOtherNames +
-              contactIDsWithMatchingNames,
-          matchingNumberContactIDs: contactIDsWithMatchingNumber,
-          matchingEmailContactIDs: contactIDsWithMatchingEmail,
-        );
-      }
-
-      //build
+      bool isPortrait = orientation == Orientation.portrait;
       return Scaffold(
         backgroundColor: Colors.black,
         body: SafeArea(
@@ -285,7 +254,22 @@ class _SearchContactPageState extends State<SearchContactPage> {
                     textEditingController: textEditingController,
                   ),
                   Expanded(
-                    child: body,
+                    child: ResultsBody(
+                      textEditingController: textEditingController,
+                      allContacts: allContactsLocal.value,
+                      contactIDToColor: contactIDToColorLocal.value,
+                      //first > first names,
+                      //then > any name with a space in front of it
+                      //then > any match regardless of spaces
+                      matchingNameContactIDs: contactIDsWithMatchingFirstNames +
+                          contactIDsWithMatchingOtherNames +
+                          contactIDsWithMatchingNames,
+                      matchingNumberContactIDs: contactIDsWithMatchingNumber,
+                      matchingEmailContactIDs: contactIDsWithMatchingEmail,
+                      //other
+                      portraitMode: isPortrait,
+                      scrollController: scrollController,
+                    ),
                   ),
                 ],
               ),
@@ -469,7 +453,9 @@ class RecentSearch extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: Container(color: ThemeData.dark().primaryColor),
+                child: Container(
+                  color: ThemeData.dark().primaryColor,
+                ),
               ),
             ],
           ),
