@@ -119,8 +119,6 @@ class _SelectContactPageState extends State<SelectContactPage> {
     //now that we have BOTH color and contact data, trigger a reload
     allContacts.value = allContactsMap;
 
-    await generateSections();
-
     //mark the contacts as read,
     //so that we can distinguish when there are no contacts
     //VS when we just haven't read them yet
@@ -156,27 +154,28 @@ class _SelectContactPageState extends State<SelectContactPage> {
 
   @override
   void initState() {
-    readInContacts();
-    contactsRead.addListener(updateState);
-    allContacts.addListener(updateState);
-    keyToContactIDs.addListener(updateState);
-    RecentsData.recents.addListener(updateState);
     super.initState();
+    //kicking things off
+    readInContacts();
+    //generate different section depending on contacts and recents
+    allContacts.addListener(generateSections);
+    RecentsData.recents.addListener(generateSections);
+    //for showing properly empty states
+    contactsRead.addListener(updateState);
+    keyToContactIDs.addListener(updateState);
   }
 
   @override
   void dispose() {
     contactsRead.removeListener(updateState);
-    allContacts.removeListener(updateState);
     keyToContactIDs.removeListener(updateState);
-    RecentsData.recents.removeListener(updateState);
+    allContacts.removeListener(generateSections);
+    RecentsData.recents.removeListener(generateSections);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    generateSections();
-
     double toolbarHeight = MediaQuery.of(context).padding.top;
     List<double> heightsBS = measurementToGoldenRatioBS(
       MediaQuery.of(context).size.height,
@@ -249,6 +248,14 @@ class _SelectContactPageState extends State<SelectContactPage> {
         );
       }
 
+      Map<String, int> sectionKeyToContactCount = {};
+      if (sectionsExist) {
+        for (String sectionKey in keyToContactIDs.value.keys) {
+          List<String> theseContactIDs = keyToContactIDs.value[sectionKey];
+          sectionKeyToContactCount[sectionKey] = theseContactIDs.length;
+        }
+      }
+
       //build everything
       return Scaffold(
         backgroundColor: ThemeData.dark().primaryColor,
@@ -263,6 +270,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
               visible: sectionsExist,
               child: ScrollBar(
                 scrollController: scrollController,
+                sectionKeyToContactCount: sectionKeyToContactCount,
                 expandedBannerHeight: expandedBannerHeight,
                 //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
                 bottomAppBarHeight: 56,

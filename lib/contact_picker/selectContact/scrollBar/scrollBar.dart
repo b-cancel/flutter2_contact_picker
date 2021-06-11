@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'alphaScrollBarOverlay.dart';
+import 'scroller.dart';
 
 bool scrollBarColors = true;
 
 //scroll bar widgets
 class ScrollBar extends StatefulWidget {
   ScrollBar({
+    @required this.sectionKeyToContactCount,
     @required this.scrollController,
     @required this.expandedBannerHeight,
     //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
@@ -16,6 +18,7 @@ class ScrollBar extends StatefulWidget {
     @required this.toolbarHeight,
   });
 
+  final Map<String, int> sectionKeyToContactCount;
   final ScrollController scrollController;
   final double expandedBannerHeight;
   final double bottomAppBarHeight;
@@ -28,6 +31,10 @@ class ScrollBar extends StatefulWidget {
 class _ScrollBarState extends State<ScrollBar> {
   //with absolutely no padding
   ValueNotifier<double> maxScrollBarHeight = ValueNotifier(0);
+
+  //when the user is using the scroll bar, don't allow it to resize
+  //if its does at the begining the behavior will be wack
+  ValueNotifier<bool> retainScrollBarSize = ValueNotifier(false);
 
   updateScrollBarHeight() {
     if (widget.scrollController.hasClients == false) {
@@ -59,23 +66,27 @@ class _ScrollBarState extends State<ScrollBar> {
     }
   }
 
-  updateState() {
-    if (mounted) {
-      setState(() {});
+  updateStateOnManualScroll() {
+    if (retainScrollBarSize.value == false) {
+      if (mounted) {
+        setState(() {});
+      }
     }
   }
 
   @override
   void initState() {
     super.initState();
-    maxScrollBarHeight.addListener(updateState);
-    widget.scrollController.addListener(updateState);
+    //if we are scroll manually, update the scroll bar
+    widget.scrollController.addListener(updateStateOnManualScroll);
+    //if we finish automatic scrolling, update the scroll bar
+    retainScrollBarSize.addListener(updateStateOnManualScroll);
   }
 
   @override
   void dispose() {
-    widget.scrollController.addListener(updateState);
-    maxScrollBarHeight.addListener(updateState);
+    retainScrollBarSize.removeListener(updateStateOnManualScroll);
+    widget.scrollController.addListener(updateStateOnManualScroll);
     super.dispose();
   }
 
@@ -128,10 +139,14 @@ class _ScrollBarState extends State<ScrollBar> {
               ),
             ),
           ),
-          /*
-          //-----Scroll Bar Function
+          //----Scroll Bar Function
           DraggableScrollBar(
-            autoScrollController: widget.autoScrollController,
+            scrollController: widget.scrollController,
+            sectionKeyToContactCount: widget.sectionKeyToContactCount,
+            retainScrollBarSize: retainScrollBarSize,
+
+            /*
+            scrollController: widget.autoScrollController,
             //set once and done
             visualScrollBarHeight: scrollBarVisualHeight,
             programaticScrollBarHeight: scrollBarAreaHeight,
@@ -144,8 +159,8 @@ class _ScrollBarState extends State<ScrollBar> {
             sortedLetterCodes: widget.sortedLetterCodes.value,
             letterToListItems: widget.letterToListItems.value,
             showSlider: showSlider,
+            */
           ),
-          */
           Positioned(
             right: 0,
             child: IgnorePointer(

@@ -1,3 +1,129 @@
+//TODO: modify
+
+import 'package:flutter/material.dart';
+
+class DraggableScrollBar extends StatelessWidget {
+  const DraggableScrollBar({
+    @required this.scrollController,
+    @required this.retainScrollBarSize,
+    @required this.sectionKeyToContactCount,
+    Key key,
+  }) : super(key: key);
+
+  final ScrollController scrollController;
+  final ValueNotifier<bool> retainScrollBarSize;
+  final Map<String, int> sectionKeyToContactCount;
+
+  @override
+  Widget build(BuildContext context) {
+    doMath();
+
+    double circleSize = 75;
+    String thumbTackChar;
+    else thumbTackChar = String.fromCharCode(widget.sortedLetterCodes[index]);
+
+    //build
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            //NOT true on dragDown or dragStart
+            onVerticalDragUpdate: _onVerticalDragUpdate,
+            onVerticalDragCancel: (){
+              widget.showSlider.value = false;
+            },
+            onVerticalDragEnd: (dragEndDetails){
+              widget.showSlider.value = false;
+            },
+            child: Opacity(
+              opacity: (widget.showSlider.value) ? 1 : 0,
+              child: Container(
+                color: Colors.transparent,
+                height: widget.programaticScrollBarHeight,
+                child: Container(
+                  color: Colors.transparent,
+                  alignment: Alignment.topCenter,
+                  margin: EdgeInsets.only(top: barOffset),
+                  child: Container(),
+                ),
+              ),
+            ),
+          ),
+        ),
+        /*
+        IgnorePointer(
+          child: Center(
+            child: Container(
+              height: widget.visualScrollBarHeight,
+              width: 24,
+              padding: EdgeInsets.only(top: thumbOffset),
+              color: Colors.transparent,
+              //the stack is needed to allow height to actual take effect
+              child: Stack(
+                children: <Widget>[
+                  Stack(
+                    children: <Widget>[
+                      Opacity(
+                        opacity: (widget.showSlider.value) ? 1 : 0,
+                        child: Container(
+                          width: 24,
+                          height: widget.scrollThumbHeight,
+                          decoration: new BoxDecoration(
+                            color: widget.thumbColor,
+                            borderRadius: new BorderRadius.all(
+                              Radius.circular(25.0),
+                            ),
+                          ),
+                          child: Transform.translate(
+                            offset: Offset(
+                              //the last one is extra
+                              -(circleSize/2) - (24/2) - 16, 
+                              0,
+                            ),
+                            child: Center(
+                              child: Container(
+                                child: OverflowBox(
+                                  minWidth: circleSize,
+                                  maxWidth: circleSize,
+                                  maxHeight: circleSize,
+                                  minHeight: circleSize,
+                                  child: Container(
+                                    decoration: new BoxDecoration(
+                                      color: widget.thumbColor,
+                                      borderRadius: new BorderRadius.all(
+                                        Radius.circular(circleSize / 2),
+                                      ),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        thumbTackChar,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: circleSize/2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        */
+      ],
+    );
+  }
+}
+
 /*
 import 'package:flutter/material.dart';
 import 'package:not_at_home/selectContact/scrollBar.dart';
