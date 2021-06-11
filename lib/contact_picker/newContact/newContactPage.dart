@@ -751,22 +751,27 @@ class _NewContactPageState extends State<NewContactPage> {
     );
 
     //find the new contact
-    String newContactIdentifier = "";
+    String newContactIdentifier;
+    Contact newRetreivedContact;
     for (Contact contact in afterAddList) {
       String thisID = contact.identifier;
       if (beforeAddMap.containsKey(thisID) == false) {
+        newRetreivedContact = contact;
         newContactIdentifier = thisID;
         break;
       }
     }
 
-    //add to recents
-    RecentsData.addRecent(
-      newContactIdentifier,
-    );
+    //last check
+    if (newContactIdentifier != null && newRetreivedContact != null) {
+      //add to recents
+      RecentsData.addRecent(
+        newContactIdentifier,
+      );
 
-    //pop and pass true (to indivate we made a new contact)
-    Navigator.of(context).pop(newContactIdentifier);
+      //pop and pass true (to indivate we made a new contact)
+      Navigator.of(context).pop(newRetreivedContact);
+    }
   }
 
   Future<Uint8List> getAvatar() async {

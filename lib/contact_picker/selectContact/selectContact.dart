@@ -89,6 +89,8 @@ class _SelectContactPageState extends State<SelectContactPage> {
   }
 
   readInContacts() async {
+    //TODO: check perm
+
     //grab the basic info first
     Map<String, Contact> allContactsMap = contactListToMap(
       await ContactsService.getContacts(
@@ -308,6 +310,7 @@ class KeySection extends StatelessWidget {
 
             //gather the information
             String contactID = contactIDsInSection[index];
+            Contact thisContact = allContacts.value[contactID];
             bool sectionBottomIsBlack = sectionExistsUnderThisSection(
               sectionKey,
             );
@@ -321,10 +324,10 @@ class KeySection extends StatelessWidget {
                 );
 
                 //return contact ID
-                Navigator.of(context).pop(contactID);
+                Navigator.of(context).pop(thisContact);
               },
               iconColor: contactIDToColor.value[contactID],
-              contact: allContacts.value[contactID],
+              contact: thisContact,
               isFirst: rawIndex == 0,
               isLast: rawIndex == (contactIDsInSection.length - 1),
               bottomBlack: sectionBottomIsBlack,

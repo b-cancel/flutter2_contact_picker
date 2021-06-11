@@ -1,12 +1,11 @@
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
-import 'package:contacts_service/contacts_service.dart';
+
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'searchBody.dart';
-
-//TODO: when tapping a suggestion -> scroll to top of list after build completes
 
 //No Recent Searches -> IF no results & no recents
 //results -> Name match is default -> X Matching Phone Number(s) -> Y Matching Email(s)
@@ -147,6 +146,8 @@ class _SearchContactPageState extends State<SearchContactPage> {
       //reuse the passed contact ID to Color List
       contactIDToColorLocal.value = widget.contactIDToColor.value;
     } else {
+      //TODO: CHECK IF HAVE PERM HERE
+
       //grab the basic info first
       Map<String, Contact> allContactsMap = contactListToMap(
         await ContactsService.getContacts(

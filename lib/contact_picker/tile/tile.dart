@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';

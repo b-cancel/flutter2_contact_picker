@@ -26,6 +26,7 @@ class MatchingEmailsSliver extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           String contactID = matchingEmailContactIDs[index];
+          Contact thisContact = allContacts[contactID];
           return ContactTile(
             onTap: () {
               //save as a successfull search term
@@ -39,10 +40,10 @@ class MatchingEmailsSliver extends StatelessWidget {
               );
 
               //return contact ID
-              Navigator.of(context).pop(contactID);
+              Navigator.of(context).pop(thisContact);
             },
             iconColor: contactIDToColor[contactID],
-            contact: allContacts[contactID],
+            contact: thisContact,
             isFirst: index == 0,
             isLast: index == (matchingEmailContactIDs.length - 1),
             highlightPhone: false,
@@ -94,6 +95,7 @@ class MatchingPhonesSliver extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           String contactID = matchingNumberContactIDs[index];
+          Contact thisContact = allContacts[contactID];
           return ContactTile(
             onTap: () {
               //save as a successfull search term
@@ -107,10 +109,10 @@ class MatchingPhonesSliver extends StatelessWidget {
               );
 
               //return contact ID
-              Navigator.of(context).pop(contactID);
+              Navigator.of(context).pop(thisContact);
             },
             iconColor: contactIDToColor[contactID],
-            contact: allContacts[contactID],
+            contact: thisContact,
             isFirst: index == 0,
             isLast: index == (matchingNumberContactIDs.length - 1),
             highlightPhone: true,
@@ -163,6 +165,7 @@ class MatchingNamesSliver extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
           String contactID = matchingNameContactIDs[index];
+          Contact thisContact = allContacts[contactID];
           return ContactTile(
             onTap: () {
               //save as a successfull search term
@@ -176,10 +179,10 @@ class MatchingNamesSliver extends StatelessWidget {
               );
 
               //return contact ID
-              Navigator.of(context).pop(contactID);
+              Navigator.of(context).pop(thisContact);
             },
             iconColor: contactIDToColor[contactID],
-            contact: allContacts[contactID],
+            contact: thisContact,
             isFirst: index == 0,
             isLast: index == (matchingNameContactIDs.length - 1),
             highlightPhone: false,
