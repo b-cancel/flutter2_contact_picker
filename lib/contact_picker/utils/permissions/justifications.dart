@@ -204,20 +204,20 @@ class ToAppSettingsPopUp extends StatelessWidget {
 
 class JustificationDialog extends StatelessWidget {
   const JustificationDialog({
-    @required this.requestedAutomatically,
+    @required this.dontTellThemIfRestricted,
     @required this.permissionName,
     @required this.permissionJustification,
     Key key,
   }) : super(key: key);
 
-  final bool requestedAutomatically;
+  final bool dontTellThemIfRestricted;
   final String permissionName;
   final Widget permissionJustification;
 
   @override
   Widget build(BuildContext context) {
     return StandardHeroDialog(
-      tag: requestedAutomatically == false ? permissionName : null,
+      tag: dontTellThemIfRestricted == false ? permissionName : null,
       onPop: () {
         Navigator.of(context).pop(false);
       },

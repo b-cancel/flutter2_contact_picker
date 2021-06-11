@@ -8,7 +8,9 @@ import 'package:flutter2_contact_picker/contact_picker/selectContact/scrollToTop
 import 'package:flutter2_contact_picker/contact_picker/tile/tile.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/goldenRatio.dart';
 import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'header.dart';
 import 'scrollBar/scrollBar.dart';
@@ -89,7 +91,15 @@ class _SelectContactPageState extends State<SelectContactPage> {
   }
 
   readInContacts() async {
-    //TODO: check perm
+    //double check before using the service
+    if (await doubleCheckPermission(
+          context,
+          permission: Permission.contacts,
+          permissionName: 'contacts',
+        ) ==
+        false) {
+      Navigator.of(context).pop();
+    }
 
     //grab the basic info first
     Map<String, Contact> allContactsMap = contactListToMap(
@@ -118,6 +128,16 @@ class _SelectContactPageState extends State<SelectContactPage> {
 
     //get all the recent searches here (now that we have the essential contact info)
     await SearchesData.initSearches();
+
+    //double check before using the service
+    if (await doubleCheckPermission(
+          context,
+          permission: Permission.contacts,
+          permissionName: 'contacts',
+        ) ==
+        false) {
+      Navigator.of(context).pop();
+    }
 
     //grab a little more than the basic info (thumbnails)
     allContacts.value = contactListToMap(

@@ -127,7 +127,7 @@ Future<bool> requestPermission(
   BuildContext context, {
   PermissionStatus passedStatus,
   @required Permission permission,
-  bool requestedAutomatically: false,
+  bool dontTellThemIfRestricted: false,
   @required String permissionName,
   Widget permissionJustification,
 }) async {
@@ -135,7 +135,7 @@ Future<bool> requestPermission(
   PermissionStatus status = passedStatus ?? await permission.status;
 
   //if the status is retricted by the OS -AND- we made this request automatically
-  if (status.isRestricted && requestedAutomatically) {
+  if (status.isRestricted && dontTellThemIfRestricted) {
     return false; //don't even bother telling them
   } else {
     //! We don't care about the status being restricted here becuase I don't trust it
@@ -156,7 +156,7 @@ Future<bool> requestPermission(
           //show the pop up
           builder: (BuildContext context) {
             return JustificationDialog(
-              requestedAutomatically: requestedAutomatically,
+              dontTellThemIfRestricted: dontTellThemIfRestricted,
               permissionName: permissionName,
               permissionJustification: permissionJustification,
             );
@@ -221,4 +221,23 @@ Future<bool> requestPermission(
       }
     }
   }
+}
+
+Future<bool> doubleCheckPermission(
+  BuildContext context, {
+  @required Permission permission,
+  @required String permissionName,
+}) async {
+  return await requestPermission(
+    context,
+    //some basics
+    permission: permission,
+    permissionName: permissionName,
+    //if they granted us permissions (known cuz we are just double checking)
+    //and all of a sudden we don't have it cuz of a restriction, tell them
+    dontTellThemIfRestricted: false,
+    //we are double checking here
+    //we already explained why the first time
+    permissionJustification: null,
+  );
 }

@@ -4,6 +4,8 @@ import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
 
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:math' as math;
 import 'searchBody.dart';
 
@@ -146,7 +148,15 @@ class _SearchContactPageState extends State<SearchContactPage> {
       //reuse the passed contact ID to Color List
       contactIDToColorLocal.value = widget.contactIDToColor.value;
     } else {
-      //TODO: CHECK IF HAVE PERM HERE
+      //double check before using the service
+      if (await doubleCheckPermission(
+            context,
+            permission: Permission.contacts,
+            permissionName: 'contacts',
+          ) ==
+          false) {
+        Navigator.of(context).pop();
+      }
 
       //grab the basic info first
       Map<String, Contact> allContactsMap = contactListToMap(
@@ -168,6 +178,16 @@ class _SearchContactPageState extends State<SearchContactPage> {
 
       //get all the recent searches here (now that we have the essential contact info)
       await SearchesData.initSearches();
+
+      //double check before using the service
+      if (await doubleCheckPermission(
+            context,
+            permission: Permission.contacts,
+            permissionName: 'contacts',
+          ) ==
+          false) {
+        Navigator.of(context).pop();
+      }
 
       //grab a little more than the basic info (thumbnails)
       allContactsLocal.value = contactListToMap(

@@ -689,7 +689,7 @@ class _NewContactPageState extends State<NewContactPage> {
     } else {
       return await requestPermission(
         context,
-        requestedAutomatically: false,
+        dontTellThemIfRestricted: false,
         permission: Permission.contacts,
         permissionName: "contacts",
         permissionJustification: JustifyContactsPermissionToSaveContact(),
