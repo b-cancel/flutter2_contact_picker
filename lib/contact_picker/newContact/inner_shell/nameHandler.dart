@@ -30,8 +30,6 @@ List<String> nameToNames(String name) {
     //NOTE: now first name is at 0
 
     if (namesFound.length > 0) {
-      print("names left: " + namesFound.length.toString());
-
       //NOTE: below we could implement more complex logic like samsung does
       //but this is realistically never going to be used
 

@@ -4,11 +4,13 @@ import '../../contact_picker/utils/read_write/list.dart';
 //literally a clone of searches with swapped names
 class RecentsData {
   static String recentsID = "recents";
+  static bool _initComplete = false;
   static ValueNotifier<List<String>> recents = ValueNotifier([]);
 
   //won't allow double initializations
   static Future initRecents() async {
-    if (recents.value.length == 0) {
+    if (_initComplete == false) {
+      _initComplete = true;
       //grab everything that is stored
       recents.value = await loadRecents();
       //listen to changes and automatically update things

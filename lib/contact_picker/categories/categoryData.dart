@@ -3,8 +3,6 @@ import '../utils/read_write/list.dart';
 
 enum LabelType { phone, email, address }
 
-//TODO: eventually one could allow saving of custom labels
-
 //default match those on an iPhone 12 on June 4th 2021
 class CategoryData {
   static List<String> defaultPhoneLabels = [
@@ -61,6 +59,7 @@ class CategoryData {
   //--------------------------------------------------
   //--------------------------------------------------
 
+  static bool _initComplete = false;
   static ValueNotifier<List<String>> customPhoneLabels = ValueNotifier(
     [],
   );
@@ -72,27 +71,37 @@ class CategoryData {
   );
 
   static initCustomLabels() async {
-    //grab everything that is stored
-    customPhoneLabels.value = await loadCustomLabels(
-      LabelType.phone,
-    );
-    customEmailLabels.value = await loadCustomLabels(
-      LabelType.email,
-    );
-    customAddressLabels.value = await loadCustomLabels(
-      LabelType.address,
-    );
+    if (_initComplete == false) {
+      _initComplete = true;
 
-    //listen to changes and automatically update things
-    customPhoneLabels.addListener(() => saveCustomLabels(
+      //grab everything that is stored
+      customPhoneLabels.value = await loadCustomLabels(
+        LabelType.phone,
+      );
+      customEmailLabels.value = await loadCustomLabels(
+        LabelType.email,
+      );
+      customAddressLabels.value = await loadCustomLabels(
+        LabelType.address,
+      );
+
+      //listen to changes and automatically update things
+      customPhoneLabels.addListener(
+        () => saveCustomLabels(
           LabelType.phone,
-        ));
-    customEmailLabels.addListener(() => saveCustomLabels(
+        ),
+      );
+      customEmailLabels.addListener(
+        () => saveCustomLabels(
           LabelType.email,
-        ));
-    customAddressLabels.addListener(() => saveCustomLabels(
+        ),
+      );
+      customAddressLabels.addListener(
+        () => saveCustomLabels(
           LabelType.address,
-        ));
+        ),
+      );
+    }
   }
 
   static containsCustomLabel(LabelType labelType, String labelToFind) {
@@ -136,7 +145,9 @@ class CategoryData {
   ) async {
     String identifier = labelType.toString();
     return saveList(
-        identifier, labelTypeToCustomLabelNotifiers[labelType].value);
+      identifier,
+      labelTypeToCustomLabelNotifiers[labelType].value,
+    );
   }
 
   static Future<List<String>> loadCustomLabels(

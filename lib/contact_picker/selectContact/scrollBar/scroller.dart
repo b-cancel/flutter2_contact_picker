@@ -97,8 +97,6 @@ class _DraggableScrollBarState extends State<DraggableScrollBar> {
       }
     }
 
-    print("closest to: " + closestTo.value.toString());
-
     //now that we know what character they want to go to
     //so if there is a section for that
     if (widget.sectionKeyToContactCount.containsKey(closestTo.value)) {

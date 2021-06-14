@@ -2,7 +2,6 @@ import 'package:contacts_service/contacts_service.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import '../../contact_picker/searchContact/searchContact.dart';
-import '../../contact_picker/searchContact/searches.dart';
 import '../../contact_picker/selectContact/recents.dart';
 import '../../contact_picker/selectContact/scrollToTop.dart';
 import '../../contact_picker/tile/tile.dart';
@@ -157,7 +156,6 @@ class _SelectContactPageState extends State<SelectContactPage> {
     readInContacts();
     //generate different section depending on contacts and recents
     allContacts.addListener(generateSections);
-    RecentsData.recents.addListener(generateSections);
     //for showing properly empty states
     contactsRead.addListener(updateState);
     keyToContactIDs.addListener(updateState);
@@ -168,7 +166,6 @@ class _SelectContactPageState extends State<SelectContactPage> {
     contactsRead.removeListener(updateState);
     keyToContactIDs.removeListener(updateState);
     allContacts.removeListener(generateSections);
-    RecentsData.recents.removeListener(generateSections);
     super.dispose();
   }
 
