@@ -148,59 +148,68 @@ class TileImage extends StatelessWidget {
   final Color color;
 
   Widget build(BuildContext context) {
-    Widget child;
+    //used throughout
+    double size = 44;
+
+    //show on top of whatever the background is
+    //if onRemove != null
+    Widget removeButton = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.5),
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: IconButton(
+          onPressed: () => onRemove(),
+          icon: Icon(
+            Icons.close,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
 
     //use the avatar if we have it
     if (contact.avatar.length > 0) {
-      child = FittedBox(
-        fit: BoxFit.cover,
-        child: Image.memory(
-          contact.avatar,
-        ),
-      );
-    }
-
-    //what are we layering on top?
-    if (onRemove != null) {
-      //we can remove
-      //so layer the button with a faded black background
-      //1. on the avatar
-      //2. or the selected solid color
-      child = Stack(
-        children: [
-          child ?? Container(),
-          FittedBox(
-            fit: BoxFit.contain,
-            child: Container(
+      return Container(
+        width: size,
+        height: size,
+        child: Stack(
+          children: [
+            Container(
+              width: size,
+              height: size,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
+                color: color ?? getRandomDarkBlueOrGreyColor(),
                 shape: BoxShape.circle,
               ),
-              child: Center(
-                child: IconButton(
-                  onPressed: () => onRemove(),
-                  icon: Icon(
-                    Icons.close,
-                    color: Colors.white,
+              child: ClipOval(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: Image.memory(
+                    contact.avatar,
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+            onRemove != null ? removeButton : Container(),
+          ],
+        ),
       );
     } else {
-      if (contact.avatar.length <= 0) {
+      if (onRemove == null) {
+        Widget inCenter;
         String letters = contact.givenName;
-
         //if possible have a letter
         if (letters.length == 0) {
-          child = Icon(
+          inCenter = Icon(
             Icons.person,
             color: Colors.black,
           );
         } else {
-          child = Text(
+          inCenter = Text(
             letters[0].toUpperCase(),
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -209,23 +218,32 @@ class TileImage extends StatelessWidget {
             ),
           );
         }
+
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: color ?? getRandomDarkBlueOrGreyColor(),
+            shape: BoxShape.circle,
+          ),
+          child: ClipOval(
+            child: Center(
+              child: inCenter,
+            ),
+          ),
+        );
+      } else {
+        return Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: color ?? getRandomDarkBlueOrGreyColor(),
+            shape: BoxShape.circle,
+          ),
+          child: removeButton,
+        );
       }
     }
-
-    return Container(
-      //56 is max size for this kind of thing
-      width: 45,
-      height: 45,
-      decoration: BoxDecoration(
-        color: color ?? getRandomDarkBlueOrGreyColor(),
-        shape: BoxShape.circle,
-      ),
-      child: ClipOval(
-        child: Center(
-          child: child,
-        ),
-      ),
-    );
   }
 }
 

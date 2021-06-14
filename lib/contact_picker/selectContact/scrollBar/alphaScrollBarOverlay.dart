@@ -185,13 +185,15 @@ class AlphaScrollBarOverlay extends StatelessWidget {
             width: MediaQuery.of(context).size.width,
             child: FittedBox(
               fit: BoxFit.contain,
-              child: Text(
-                letterCodes[i],
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              child: letterCodes[i] == "*"
+                  ? Icon(Icons.star)
+                  : Text(
+                      letterCodes[i],
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         );

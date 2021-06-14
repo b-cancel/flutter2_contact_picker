@@ -302,12 +302,63 @@ class KeySection extends StatelessWidget {
     @required this.allContacts,
     @required this.contactIDToColor,
     @required this.keyToContactIDs,
+    this.buildAllAtOnce: true,
   }) : super(key: key);
 
   final String sectionKey;
   final ValueNotifier<Map<String, Contact>> allContacts;
   final ValueNotifier<Map<String, Color>> contactIDToColor;
   final ValueNotifier<Map<String, List<String>>> keyToContactIDs;
+  final bool buildAllAtOnce;
+
+  indexToContactTile(BuildContext context,
+      {@required List<String> contactIDsInSection, @required int rawIndex}) {
+    int index = rawIndex;
+
+    //invert the indices for the recents section
+    //most recently added stuff on top
+    if (sectionKey == "*") {
+      index = (contactIDsInSection.length - 1) - rawIndex;
+    }
+
+    //gather the information
+    String contactID = contactIDsInSection[index];
+    Contact thisContact = allContacts.value[contactID];
+    bool sectionBottomIsBlack = sectionExistsUnderThisSection(
+      sectionKey,
+    );
+
+    //build
+    return ContactTile(
+      onTap: () {
+        //save as a successfull search term
+        RecentsData.addRecent(
+          contactID,
+        );
+
+        //return contact ID
+        Navigator.of(context).pop(thisContact);
+      },
+      iconColor: contactIDToColor.value[contactID],
+      contact: thisContact,
+      isFirst: rawIndex == 0,
+      isLast: rawIndex == (contactIDsInSection.length - 1),
+      bottomBlack: sectionBottomIsBlack,
+      //extra spacing on icons given scroll bar
+      inContactSelector: true,
+      onRemove: sectionKey != "*"
+          ? null
+          : () {
+              //remove the recent
+              RecentsData.removeRecent(
+                contactID,
+              );
+
+              //this will trigger a reload
+              //and remove it visually
+            },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -324,64 +375,46 @@ class KeySection extends StatelessWidget {
       }
     }
 
-    //return section
-    return SliverStickyHeader(
-      header: ResultsHeader(
-        resultDescription: sectionTitle,
-      ),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (BuildContext context, int rawIndex) {
-            int index = rawIndex;
-
-            //invert the indices for the recents section
-            //most recently added stuff on top
-            if (sectionKey == "*") {
-              index = (contactIDsInSection.length - 1) - rawIndex;
-            }
-
-            //gather the information
-            String contactID = contactIDsInSection[index];
-            Contact thisContact = allContacts.value[contactID];
-            bool sectionBottomIsBlack = sectionExistsUnderThisSection(
-              sectionKey,
-            );
-
-            //build
-            return ContactTile(
-              onTap: () {
-                //save as a successfull search term
-                RecentsData.addRecent(
-                  contactID,
-                );
-
-                //return contact ID
-                Navigator.of(context).pop(thisContact);
-              },
-              iconColor: contactIDToColor.value[contactID],
-              contact: thisContact,
-              isFirst: rawIndex == 0,
-              isLast: rawIndex == (contactIDsInSection.length - 1),
-              bottomBlack: sectionBottomIsBlack,
-              //extra spacing on icons given scroll bar
-              inContactSelector: true,
-              onRemove: sectionKey != "*"
-                  ? null
-                  : () {
-                      //remove the recent
-                      RecentsData.removeRecent(
-                        contactID,
-                      );
-
-                      //this will trigger a reload
-                      //and remove it visually
-                    },
-            );
-          },
-          childCount: contactIDsInSection.length,
+    if (buildAllAtOnce) {
+      return SliverStickyHeader(
+        header: ResultsHeader(
+          resultDescription: sectionTitle,
         ),
-      ),
-    );
+        sliver: SliverToBoxAdapter(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(
+              contactIDsInSection.length,
+              (rawIndex) {
+                return indexToContactTile(
+                  context,
+                  contactIDsInSection: contactIDsInSection,
+                  rawIndex: rawIndex,
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    } else {
+      return SliverStickyHeader(
+        header: ResultsHeader(
+          resultDescription: sectionTitle,
+        ),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int rawIndex) {
+              return indexToContactTile(
+                context,
+                contactIDsInSection: contactIDsInSection,
+                rawIndex: rawIndex,
+              );
+            },
+            childCount: contactIDsInSection.length,
+          ),
+        ),
+      );
+    }
   }
 
   bool sectionExistsUnderThisLetterSection(String letterSectionKey) {
