@@ -5,12 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'alphaScrollBarOverlay.dart';
 import 'scroller.dart';
 
-bool scrollBarColors = true;
-
 //scroll bar widgets
 class ScrollBar extends StatefulWidget {
   ScrollBar({
-    @required this.sectionKeyToContactCount,
+    @required this.sectionKeyToScrollPosition,
     @required this.scrollController,
     @required this.expandedBannerHeight,
     //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
@@ -18,7 +16,7 @@ class ScrollBar extends StatefulWidget {
     @required this.toolbarHeight,
   });
 
-  final Map<String, int> sectionKeyToContactCount;
+  final Map<String, double> sectionKeyToScrollPosition;
   final ScrollController scrollController;
   final double expandedBannerHeight;
   final double bottomAppBarHeight;
@@ -145,29 +143,14 @@ class _ScrollBarState extends State<ScrollBar> {
             //----Scroll Bar Function
             DraggableScrollBar(
               scrollController: widget.scrollController,
-              sectionKeyToContactCount: widget.sectionKeyToContactCount,
+              sectionKeyToContactCount: widget.sectionKeyToScrollPosition,
               retainScrollBarSize: retainScrollBarSize,
               //---other
+              bannerHeight: widget.expandedBannerHeight,
               stickyHeaderHeight: stickyHeaderHeight,
               maxScrollBarHeight: maxScrollBarHeight,
               visualScrollBarPadding: visualScrollBarPadding,
               alphaScrollBarPadding: alphaScrollBarPadding,
-
-              /*
-              scrollController: widget.autoScrollController,
-              //set once and done
-              visualScrollBarHeight: scrollBarVisualHeight,
-              programaticScrollBarHeight: scrollBarAreaHeight,
-              alphaOverlayHeight: alphaOverlayHeight,
-              scrollThumbHeight: 4 * itemHeight,
-              paddingAll: paddingAll,
-              thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
-              expandedBannerHeight: widget.expandedBannerHeight,
-              //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
-              sortedLetterCodes: widget.sortedLetterCodes.value,
-              letterToListItems: widget.letterToListItems.value,
-              showSlider: showSlider,
-              */
             ),
             Positioned(
               right: 0,

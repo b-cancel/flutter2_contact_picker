@@ -11,6 +11,7 @@ class ScrollToTopButton extends StatefulWidget {
   }) : super(key: key);
 
   final ScrollController scrollController;
+
   final double padding;
 
   @override
@@ -18,7 +19,8 @@ class ScrollToTopButton extends StatefulWidget {
 }
 
 class _ScrollToTopButtonState extends State<ScrollToTopButton> {
-  ValueNotifier onTop = new ValueNotifier(true);
+  ValueNotifier onTop = ValueNotifier(true);
+  ValueNotifier<double> overScroll = ValueNotifier(0);
 
   updateState() {
     if (mounted) {
@@ -27,27 +29,36 @@ class _ScrollToTopButtonState extends State<ScrollToTopButton> {
   }
 
   updateOnTop() {
-    onTop.value = widget.scrollController.offset <= 0;
+    ScrollPosition position = widget.scrollController.position;
+    double curr = position.pixels;
+    double max = position.maxScrollExtent;
+    overScroll.value = (curr < max) ? 0 : curr - max;
+
+    onTop.value = widget.scrollController.offset <= position.minScrollExtent;
   }
 
   @override
   void initState() {
     super.initState();
-    onTop.addListener(updateState);
     widget.scrollController.addListener(updateOnTop);
+    //hide if needed
+    onTop.addListener(updateState);
+    //extra spacing if needed
+    overScroll.addListener(updateState);
   }
 
   @override
   void dispose() {
-    onTop.removeListener(updateState);
     widget.scrollController.removeListener(updateOnTop);
+    onTop.removeListener(updateState);
+    overScroll.removeListener(updateState);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 0,
+      bottom: (overScroll.value / 2),
       left: 0,
       right: 0,
       child: Container(

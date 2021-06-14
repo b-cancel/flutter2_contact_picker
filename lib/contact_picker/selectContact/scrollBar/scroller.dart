@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter2_contact_picker/contact_picker/utils/vibration.dart';
 
 class DraggableScrollBar extends StatelessWidget {
   const DraggableScrollBar({
@@ -6,6 +7,7 @@ class DraggableScrollBar extends StatelessWidget {
     @required this.retainScrollBarSize,
     @required this.sectionKeyToContactCount,
     //other
+    @required this.bannerHeight,
     @required this.maxScrollBarHeight,
     @required this.stickyHeaderHeight,
     @required this.visualScrollBarPadding,
@@ -15,15 +17,16 @@ class DraggableScrollBar extends StatelessWidget {
 
   final ScrollController scrollController;
   final ValueNotifier<bool> retainScrollBarSize;
-  final Map<String, int> sectionKeyToContactCount;
+  final Map<String, double> sectionKeyToContactCount;
   //other
+  final double bannerHeight;
   final ValueNotifier<double> maxScrollBarHeight;
   final double stickyHeaderHeight;
   final double visualScrollBarPadding;
   final double alphaScrollBarPadding;
 
   void onVerticalDragUpdate(DragUpdateDetails details) {
-    retainScrollBarSize.value = false;
+    retainScrollBarSize.value = true;
 
     //travel to our fingers position (for the most part)
     double scrollValue = details.localPosition.dy;
@@ -83,7 +86,27 @@ class DraggableScrollBar extends StatelessWidget {
         characterClosestTo = String.fromCharCode(asciiCodeForA + slotNumber);
       }
     }
-    print("closest to: " + characterClosestTo);
+
+    //now that we know what character they want to go to
+    //so if there is a section for that
+    if (sectionKeyToContactCount.containsKey(characterClosestTo)) {
+      double current = scrollController.offset;
+      double jumpTo = sectionKeyToContactCount[characterClosestTo];
+      jumpTo += (bannerHeight - 56);
+      print("from " + current.toString() + " to " + jumpTo.toString());
+
+      //if we aren't there already, go there
+      if (current != jumpTo) {
+        ScrollPosition position = scrollController.position;
+        double curr = position.pixels + jumpTo;
+        double max = position.maxScrollExtent;
+        double overscrollAmmount = (curr < max) ? 0 : curr - max;
+        if (overscrollAmmount == 0) {
+          scrollController.jumpTo(jumpTo);
+        }
+        vibrate();
+      }
+    }
   }
 
   @override
@@ -105,7 +128,7 @@ class DraggableScrollBar extends StatelessWidget {
             retainScrollBarSize.value = false;
           },
           child: Container(
-            color: Colors.red.withOpacity(0.5),
+            color: Colors.red.withOpacity(0),
           ),
         ),
       ),

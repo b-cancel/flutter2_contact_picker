@@ -88,6 +88,10 @@ class _SelectContactPageState extends State<SelectContactPage> {
 
     //update things globally to trigger a reload
     keyToContactIDs.value = keyToContactIDsLocal;
+
+    //we have the contact sections
+    //so emptyness now means we simply have no contacts
+    contactsRead.value = true;
   }
 
   readInContacts() async {
@@ -109,7 +113,9 @@ class _SelectContactPageState extends State<SelectContactPage> {
       ),
     );
 
-    //generate the colors
+    //generate the colors (before setting the contacts)
+    //since once we set the contacts are set they will generate the sections
+    //which require these colors
     Map<String, Color> contactIDToColorMap = {};
     for (String contactID in allContactsMap.keys) {
       contactIDToColorMap[contactID] = getRandomDarkBlueOrGreyColor();
@@ -118,14 +124,6 @@ class _SelectContactPageState extends State<SelectContactPage> {
 
     //now that we have BOTH color and contact data, trigger a reload
     allContacts.value = allContactsMap;
-
-    //mark the contacts as read,
-    //so that we can distinguish when there are no contacts
-    //VS when we just haven't read them yet
-    contactsRead.value = true;
-
-    //get all the recent searches here (now that we have the essential contact info)
-    await SearchesData.initSearches();
 
     //double check before using the service
     if (await doubleCheckPermission(
@@ -248,11 +246,17 @@ class _SelectContactPageState extends State<SelectContactPage> {
         );
       }
 
-      Map<String, int> sectionKeyToContactCount = {};
+      Map<String, double> sectionKeyToScrollPosition = {};
+      double scrollPosition = 0;
       if (sectionsExist) {
         for (String sectionKey in keyToContactIDs.value.keys) {
+          //go to top of this section
+          sectionKeyToScrollPosition[sectionKey] = scrollPosition;
+          //to the math for what is the bottom of this section
+          //A.K.A. the top of the next section
           List<String> theseContactIDs = keyToContactIDs.value[sectionKey];
-          sectionKeyToContactCount[sectionKey] = theseContactIDs.length;
+          int sectionLength = theseContactIDs.length;
+          scrollPosition += (48 + (56.0 * sectionLength));
         }
       }
 
@@ -270,7 +274,7 @@ class _SelectContactPageState extends State<SelectContactPage> {
               visible: sectionsExist,
               child: ScrollBar(
                 scrollController: scrollController,
-                sectionKeyToContactCount: sectionKeyToContactCount,
+                sectionKeyToScrollPosition: sectionKeyToScrollPosition,
                 expandedBannerHeight: expandedBannerHeight,
                 //56 REGARDLESS OF SIZE OF ACTUAL BOTTOM APP BAR
                 bottomAppBarHeight: 56,
