@@ -1,5 +1,5 @@
-import 'package:flutter2_contact_picker/contact_picker/utils/read_write/read.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/read_write/write.dart';
+import '../../../contact_picker/utils/read_write/read.dart';
+import '../../../contact_picker/utils/read_write/write.dart';
 
 Future saveList(String identifier, List list) async {
   Map labelsMap = {identifier: list};

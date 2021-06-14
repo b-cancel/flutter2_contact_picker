@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
-import 'package:flutter2_contact_picker/contact_picker/selectContact/selectContact.dart';
+import '../contact_picker/searchContact/searchContact.dart';
+import '../contact_picker/selectContact/selectContact.dart';
 import 'package:page_transition/page_transition.dart';
 
 import 'newContact/newContactPage.dart';

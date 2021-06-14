@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/customField.dart';
+import '../../../contact_picker/utils/customField.dart';
 
 class TheField extends StatelessWidget {
   const TheField({

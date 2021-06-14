@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/vibration.dart';
+import '../../../contact_picker/utils/vibration.dart';
 
 class DraggableScrollBar extends StatefulWidget {
   const DraggableScrollBar({

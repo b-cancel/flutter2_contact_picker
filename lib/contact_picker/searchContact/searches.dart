@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/read_write/list.dart';
+import '../../contact_picker/utils/read_write/list.dart';
 
 //literally a clone of recents with swapped names
 class SearchesData {

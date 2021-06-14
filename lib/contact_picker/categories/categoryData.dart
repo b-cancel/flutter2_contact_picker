@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/read_write/list.dart';
+import '../utils/read_write/list.dart';
 
 enum LabelType { phone, email, address }
 

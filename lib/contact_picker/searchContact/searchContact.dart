@@ -1,10 +1,10 @@
 import 'package:contacts_service/contacts_service.dart';
-import 'package:flutter2_contact_picker/contact_picker/searchContact/searches.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+import '../../contact_picker/searchContact/searches.dart';
+import '../../contact_picker/utils/helper.dart';
 
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
+import '../../contact_picker/utils/permissions/ask.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math' as math;
 import 'searchBody.dart';

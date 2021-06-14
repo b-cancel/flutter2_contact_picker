@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/permissions/ask.dart';
+import '../../../contact_picker/utils/permissions/ask.dart';
 
 //plugins
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

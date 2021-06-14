@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/addressEditor.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/otherEditors.dart';
+import '../../../contact_picker/newContact/inner_shell/addressEditor.dart';
+import '../../../contact_picker/newContact/inner_shell/otherEditors.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 
 import '../newContactPage.dart';

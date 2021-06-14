@@ -1,5 +1,5 @@
-import 'package:flutter2_contact_picker/contact_picker/newContact/outer_shell/editorHelpers.dart';
-import 'package:flutter2_contact_picker/contact_picker/utils/customField.dart';
+import '../../../contact_picker/newContact/outer_shell/editorHelpers.dart';
+import '../../../contact_picker/utils/customField.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:flutter/material.dart';

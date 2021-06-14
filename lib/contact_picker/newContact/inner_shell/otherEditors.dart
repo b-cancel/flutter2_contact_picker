@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/categories/categoryData.dart';
-import 'package:flutter2_contact_picker/contact_picker/categories/categoryUI.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/inner_shell/specialField.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/outer_shell/editorHelpers.dart';
+import '../../../contact_picker/categories/categoryData.dart';
+import '../../../contact_picker/categories/categoryUI.dart';
+import '../../../contact_picker/newContact/inner_shell/specialField.dart';
+import '../../../contact_picker/newContact/outer_shell/editorHelpers.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../newContactPage.dart';

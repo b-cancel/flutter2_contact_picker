@@ -1,7 +1,7 @@
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter2_contact_picker/contact_picker/newContact/newContactButton.dart';
-import 'package:flutter2_contact_picker/contact_picker/searchContact/searchContact.dart';
+import '../../contact_picker/newContact/newContactButton.dart';
+import '../../contact_picker/searchContact/searchContact.dart';
 import 'package:page_transition/page_transition.dart';
 
 class SliverPromptSearchHeader extends StatelessWidget {

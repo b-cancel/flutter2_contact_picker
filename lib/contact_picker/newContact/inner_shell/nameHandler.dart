@@ -1,4 +1,4 @@
-import 'package:flutter2_contact_picker/contact_picker/utils/helper.dart';
+import '../../../contact_picker/utils/helper.dart';
 import '../newContactPage.dart';
 
 List<String> nameToNames(String name) {
