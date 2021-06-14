@@ -101,22 +101,26 @@ class _ScrollBarState extends State<ScrollBar> {
 
     //for scroll bar overall
     //48 is sticky header
-    double scrollBarTopPadding = 48.0 + 16;
-    double scrollBarBottomPadding = 16;
+    double visualScrollBarPadding = 16;
+    double stickyHeaderHeight = 48;
+    double scrollBarTopPadding = stickyHeaderHeight + visualScrollBarPadding;
+    double scrollBarBottomPadding = visualScrollBarPadding;
 
     //for alpha scroll bar
     double itemHeight = 14;
     double spacingVertical = 0;
-    double alphaSpacing = 16;
+    double alphaScrollBarPadding = 16;
 
     //actually build
     return Positioned(
       right: 0,
       bottom: 0,
-      child: Stack(
-        children: [
-          Center(
-            child: Container(
+      child: Container(
+        height: maxScrollBarHeight.value,
+        width: 24.0 + (16 * 2),
+        child: Stack(
+          children: [
+            Container(
               height: maxScrollBarHeight.value,
               padding: EdgeInsets.symmetric(
                 horizontal: 16,
@@ -138,84 +142,89 @@ class _ScrollBarState extends State<ScrollBar> {
                 ),
               ),
             ),
-          ),
-          //----Scroll Bar Function
-          DraggableScrollBar(
-            scrollController: widget.scrollController,
-            sectionKeyToContactCount: widget.sectionKeyToContactCount,
-            retainScrollBarSize: retainScrollBarSize,
+            //----Scroll Bar Function
+            DraggableScrollBar(
+              scrollController: widget.scrollController,
+              sectionKeyToContactCount: widget.sectionKeyToContactCount,
+              retainScrollBarSize: retainScrollBarSize,
+              //---other
+              stickyHeaderHeight: stickyHeaderHeight,
+              maxScrollBarHeight: maxScrollBarHeight,
+              visualScrollBarPadding: visualScrollBarPadding,
+              alphaScrollBarPadding: alphaScrollBarPadding,
 
-            /*
-            scrollController: widget.autoScrollController,
-            //set once and done
-            visualScrollBarHeight: scrollBarVisualHeight,
-            programaticScrollBarHeight: scrollBarAreaHeight,
-            alphaOverlayHeight: alphaOverlayHeight,
-            scrollThumbHeight: 4 * itemHeight,
-            paddingAll: paddingAll,
-            thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
-            expandedBannerHeight: widget.expandedBannerHeight,
-            //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
-            sortedLetterCodes: widget.sortedLetterCodes.value,
-            letterToListItems: widget.letterToListItems.value,
-            showSlider: showSlider,
-            */
-          ),
-          Positioned(
-            right: 0,
-            child: IgnorePointer(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
+              /*
+              scrollController: widget.autoScrollController,
+              //set once and done
+              visualScrollBarHeight: scrollBarVisualHeight,
+              programaticScrollBarHeight: scrollBarAreaHeight,
+              alphaOverlayHeight: alphaOverlayHeight,
+              scrollThumbHeight: 4 * itemHeight,
+              paddingAll: paddingAll,
+              thumbColor: Theme.of(context).accentColor.withOpacity(0.25),
+              expandedBannerHeight: widget.expandedBannerHeight,
+              //value notifiers, don't need to notify since we KNOW when we pass these they will already not be empty
+              sortedLetterCodes: widget.sortedLetterCodes.value,
+              letterToListItems: widget.letterToListItems.value,
+              showSlider: showSlider,
+              */
+            ),
+            Positioned(
+              right: 0,
+              child: IgnorePointer(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    top: scrollBarTopPadding + alphaSpacing,
-                    bottom: scrollBarBottomPadding + alphaSpacing,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16,
                   ),
-                  child: AlphaScrollBarOverlay(
-                    scrollBarHeight: maxScrollBarHeight.value -
-                        scrollBarTopPadding -
-                        scrollBarBottomPadding -
-                        (alphaSpacing * 2),
-                    itemHeight: itemHeight,
-                    spacingVertical: spacingVertical,
-                    letterCodes: [
-                      "*", //favorites
-                      "A",
-                      "B",
-                      "C",
-                      "D",
-                      "E",
-                      "F",
-                      "G",
-                      "H",
-                      "I",
-                      "J",
-                      "K",
-                      "L",
-                      "M",
-                      "N",
-                      "O",
-                      "P",
-                      "Q",
-                      "R",
-                      "S",
-                      "T",
-                      "U",
-                      "V",
-                      "W",
-                      "X",
-                      "Y",
-                      "Z",
-                      "#", //every thing else
-                    ],
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      top: scrollBarTopPadding + alphaScrollBarPadding,
+                      bottom: scrollBarBottomPadding + alphaScrollBarPadding,
+                    ),
+                    child: AlphaScrollBarOverlay(
+                      scrollBarHeight: maxScrollBarHeight.value -
+                          scrollBarTopPadding -
+                          scrollBarBottomPadding -
+                          (alphaScrollBarPadding * 2),
+                      itemHeight: itemHeight,
+                      spacingVertical: spacingVertical,
+                      letterCodes: [
+                        "*", //favorites
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                        "G",
+                        "H",
+                        "I",
+                        "J",
+                        "K",
+                        "L",
+                        "M",
+                        "N",
+                        "O",
+                        "P",
+                        "Q",
+                        "R",
+                        "S",
+                        "T",
+                        "U",
+                        "V",
+                        "W",
+                        "X",
+                        "Y",
+                        "Z",
+                        "#", //every thing else
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

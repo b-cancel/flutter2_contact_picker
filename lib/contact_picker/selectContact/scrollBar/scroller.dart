@@ -1,5 +1,3 @@
-//TODO: modify
-
 import 'package:flutter/material.dart';
 
 class DraggableScrollBar extends StatelessWidget {
@@ -7,119 +5,110 @@ class DraggableScrollBar extends StatelessWidget {
     @required this.scrollController,
     @required this.retainScrollBarSize,
     @required this.sectionKeyToContactCount,
+    //other
+    @required this.maxScrollBarHeight,
+    @required this.stickyHeaderHeight,
+    @required this.visualScrollBarPadding,
+    @required this.alphaScrollBarPadding,
     Key key,
   }) : super(key: key);
 
   final ScrollController scrollController;
   final ValueNotifier<bool> retainScrollBarSize;
   final Map<String, int> sectionKeyToContactCount;
+  //other
+  final ValueNotifier<double> maxScrollBarHeight;
+  final double stickyHeaderHeight;
+  final double visualScrollBarPadding;
+  final double alphaScrollBarPadding;
+
+  void onVerticalDragUpdate(DragUpdateDetails details) {
+    retainScrollBarSize.value = false;
+
+    //travel to our fingers position (for the most part)
+    double scrollValue = details.localPosition.dy;
+    double absoluteUpperBound = (maxScrollBarHeight.value - 48);
+    //[                                            ]
+    double scrollBarPadding = visualScrollBarPadding + alphaScrollBarPadding;
+    //[ 48 [                                       ]
+    double adjustedUpperBound = absoluteUpperBound - (scrollBarPadding * 2);
+    //[ 48 [ visual ( alpha * ... # alpha ) visual ]
+    double slotSize = adjustedUpperBound / 27;
+    //0 to actual upper bound is the middle of * to the middle of #...
+    //so 27 spaces although there are 28 characters
+
+    //ensure the value is within bounds
+    if (scrollValue < 0) {
+      scrollValue = 0;
+    } else if (scrollValue > absoluteUpperBound) {
+      scrollValue = absoluteUpperBound;
+    }
+
+    //most of the top and bottom of the scroll bar
+    //is the top or the bottom value
+    //since the scroll bar area is bigger than it looks
+    //so that its easy to use
+
+    //do math to determine what letter is closer
+    String characterClosestTo;
+    if (scrollValue < scrollBarPadding) {
+      characterClosestTo = "*";
+    } else if (scrollValue > (absoluteUpperBound - scrollBarPadding)) {
+      characterClosestTo = "#";
+    } else {
+      //we are within the alpha scroll bar
+      //  [ recents | 26 letters | other ]
+      //28 characters in totaly except only 27 spaces
+      //because we start midway through * and end midway through #
+
+      double adjustedScrollValue = scrollValue - scrollBarPadding;
+      //I'll handle those two halves first
+      if (adjustedScrollValue < (slotSize / 2)) {
+        characterClosestTo = "*";
+      } else if (adjustedScrollValue > (adjustedUpperBound - (slotSize / 2))) {
+        characterClosestTo = "#";
+      } else {
+        //remove the halves (or 1 slot)
+        adjustedScrollValue = adjustedScrollValue - (slotSize / 2);
+        adjustedUpperBound = adjustedUpperBound - slotSize;
+
+        //given that there are 26 slots to land in
+        //anything below (slotSize) is "A"
+        //anything below (slotSize * 2) is "B" (as long as its not "A")
+        //and so on
+
+        //a is slot 0
+        int slotNumber = (adjustedScrollValue / slotSize).ceil() - 1;
+        int asciiCodeForA = 65;
+        characterClosestTo = String.fromCharCode(asciiCodeForA + slotNumber);
+      }
+    }
+    print("closest to: " + characterClosestTo);
+  }
 
   @override
   Widget build(BuildContext context) {
-    doMath();
-
-    double circleSize = 75;
-    String thumbTackChar;
-    else thumbTackChar = String.fromCharCode(widget.sortedLetterCodes[index]);
-
-    //build
-    return Stack(
-      children: <Widget>[
-        Center(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            //NOT true on dragDown or dragStart
-            onVerticalDragUpdate: _onVerticalDragUpdate,
-            onVerticalDragCancel: (){
-              widget.showSlider.value = false;
-            },
-            onVerticalDragEnd: (dragEndDetails){
-              widget.showSlider.value = false;
-            },
-            child: Opacity(
-              opacity: (widget.showSlider.value) ? 1 : 0,
-              child: Container(
-                color: Colors.transparent,
-                height: widget.programaticScrollBarHeight,
-                child: Container(
-                  color: Colors.transparent,
-                  alignment: Alignment.topCenter,
-                  margin: EdgeInsets.only(top: barOffset),
-                  child: Container(),
-                ),
-              ),
-            ),
+    return Padding(
+      padding: EdgeInsets.only(
+        top: stickyHeaderHeight,
+      ),
+      child: Container(
+        height: (maxScrollBarHeight.value - 48),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          //NOT true on dragDown or dragStart
+          onVerticalDragUpdate: onVerticalDragUpdate,
+          onVerticalDragCancel: () {
+            retainScrollBarSize.value = false;
+          },
+          onVerticalDragEnd: (dragEndDetails) {
+            retainScrollBarSize.value = false;
+          },
+          child: Container(
+            color: Colors.red.withOpacity(0.5),
           ),
         ),
-        /*
-        IgnorePointer(
-          child: Center(
-            child: Container(
-              height: widget.visualScrollBarHeight,
-              width: 24,
-              padding: EdgeInsets.only(top: thumbOffset),
-              color: Colors.transparent,
-              //the stack is needed to allow height to actual take effect
-              child: Stack(
-                children: <Widget>[
-                  Stack(
-                    children: <Widget>[
-                      Opacity(
-                        opacity: (widget.showSlider.value) ? 1 : 0,
-                        child: Container(
-                          width: 24,
-                          height: widget.scrollThumbHeight,
-                          decoration: new BoxDecoration(
-                            color: widget.thumbColor,
-                            borderRadius: new BorderRadius.all(
-                              Radius.circular(25.0),
-                            ),
-                          ),
-                          child: Transform.translate(
-                            offset: Offset(
-                              //the last one is extra
-                              -(circleSize/2) - (24/2) - 16, 
-                              0,
-                            ),
-                            child: Center(
-                              child: Container(
-                                child: OverflowBox(
-                                  minWidth: circleSize,
-                                  maxWidth: circleSize,
-                                  maxHeight: circleSize,
-                                  minHeight: circleSize,
-                                  child: Container(
-                                    decoration: new BoxDecoration(
-                                      color: widget.thumbColor,
-                                      borderRadius: new BorderRadius.all(
-                                        Radius.circular(circleSize / 2),
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        thumbTackChar,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: circleSize/2,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        */
-      ],
+      ),
     );
   }
 }
